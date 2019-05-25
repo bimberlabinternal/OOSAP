@@ -2,21 +2,36 @@
 % Please edit documentation in R/Seurat_III_functions.R
 \name{AddModuleScore_SERIII}
 \alias{AddModuleScore_SERIII}
-\title{FunctionName.}
+\title{AddModuleScore_SERIII}
 \usage{
 AddModuleScore_SERIII(object, genes.list = NULL, genes.pool = NULL,
   n.bin = 25, seed.use = 1, ctrl.size = 100, use.k = FALSE,
   enrich.name = "Cluster", random.seed = 1)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{object, }{A Seurat object.}
+
+\item{genes.list, }{Gene list to obtain a score for}
+
+\item{genes.pool, }{Gene list to base as the pool; NULL = all.}
+
+\item{n.bin, }{number of bins to evaluate score across; default 25.}
+
+\item{seed.use, }{seed use.}
+
+\item{ctrl.size, }{control gene set size.}
+
+\item{use.k, }{use k ... decap}
+
+\item{enrich.name, }{A name for the assesment}
+
+\item{random.seed, }{random seed}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-FunctionName.
+Using Seurat v2, AddModuleScore and converting to v3.
+    this worked in v2 but their new version 3 breaks so this replaces it
 }
-\examples{
-MyFxName_SER(SeurObj=SO)
-}
+\keyword{SerIII_AddModuleScore}

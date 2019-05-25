@@ -857,15 +857,24 @@ CellCycleScoring_SERIII <- function (object, s.features, g2m.features, set.ident
   return(object)
 }
 
-#' FunctionName.
+#' @title AddModuleScore_SERIII
 #'
-#' @param SeurObj, A Seurat object.
+#' @description Using Seurat v2, AddModuleScore and converting to v3.
+#'     this worked in v2 but their new version 3 breaks so this replaces it
+#' @param object, A Seurat object.
+#' @param genes.list, Gene list to obtain a score for
+#' @param genes.pool, Gene list to base as the pool; NULL = all.
+#' @param n.bin, number of bins to evaluate score across; default 25.
+#' @param seed.use, seed use.
+#' @param ctrl.size, control gene set size.
+#' @param use.k, use k ... decap
+#' @param enrich.name, A name for the assesment
+#' @param random.seed, random seed
 #' @return A modified Seurat object.
+#' @keywords SerIII_AddModuleScore
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 AddModuleScore_SERIII <- function(
-  #using Seurat v2, AddModuleScore and converting to v3
-  #this worked in v2 but their new version 3 breaks so this replaces it
 
   object,
   genes.list = NULL,
