@@ -2,18 +2,26 @@
 % Please edit documentation in R/Seurat_III.R
 \name{CellCycleScoring_SERIII}
 \alias{CellCycleScoring_SERIII}
-\title{A Title}
+\title{Cell Cycle Scoring function.}
 \usage{
-CellCycleScoring_SERIII(object, s.features, g2m.features,
+CellCycleScoring_SERIII(SeurObj, s.features, g2m.features,
   set.ident = FALSE)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}
+
+\item{s.features, }{A vector of genes associated to S-phase.}
+
+\item{g2m.features, }{A vector of genes associated to G2M-phases.}
+
+\item{set.ident, }{Boolean, if T sets cell cycle as identity.}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-A description
+Old name: CellCycleScoring.
 }
-\keyword{SerIII_template}
+\keyword{AddModuleScore}
+\keyword{SerIII,}
+\keyword{cellcycle,}

@@ -76,14 +76,14 @@ SaveDimRedux_SERIII <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
 #' @export
 #' @examples
 AddModuleScore_SERIII <- function(
-  #March-2019 version
+  #May-2019 version
 
   #this is a modified version of the AddModuleScore
   #returnScore = F/T controls the output.
   #if T, just the scores are returned,
-  #if F, the scores are put in the Seurat obj and the Seurat object is returned.
+  #if F, the scores are put in the Seurat obj and the Seurat SeurObj is returned.
   #Also this FX is modified to work for Seurat V3
-  object,
+  SeurObj,
   genes.list = NULL,
   genes.pool = NULL,
   n.bin = 25,
@@ -104,7 +104,7 @@ AddModuleScore_SERIII <- function(
   genes.list <- lapply(
     X = genes.list,
     FUN = function(x) {
-      return(intersect(x = x, y = rownames(object)))
+      return(intersect(x = x, y = rownames(SeurObj)))
     }
   )
 
@@ -112,28 +112,28 @@ AddModuleScore_SERIII <- function(
 
   if (!all(Seurat:::LengthCheck(values = genes.list))) {
     warning(paste(
-      'Could not find enough genes in the object from the following gene lists:',
+      'Could not find enough genes in the SeurObj from the following gene lists:',
       paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
       'Attempting to match case...'
     ))
 
     genes.list <- lapply(
       X = genes.old,
-      FUN = CaseMatch, match = rownames(object)
+      FUN = CaseMatch, match = rownames(SeurObj)
     )
   }
 
   if (!all(Seurat:::LengthCheck(values = genes.list))) {
     stop(paste(
-      'The following gene lists do not have enough genes present in the object:',
+      'The following gene lists do not have enough genes present in the SeurObj:',
       paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
       'exiting...'
     ))
   }
   if (is.null(x = genes.pool)) {
-    genes.pool = rownames(object)
+    genes.pool = rownames(SeurObj)
   }
-  data.avg <- Matrix::rowMeans(object@assays$RNA@data[genes.pool, ])
+  data.avg <- Matrix::rowMeans(SeurObj@assays$RNA@data[genes.pool, ])
   data.avg <- data.avg[order(data.avg)]
   data.cut <- as.numeric(x = Hmisc::cut2(
     x = data.avg,
@@ -159,42 +159,42 @@ AddModuleScore_SERIII <- function(
   ctrl.scores <- matrix(
     data = numeric(length = 1L),
     nrow = length(x = ctrl.use),
-    ncol = ncol(x = object@assays$RNA@data)
+    ncol = ncol(x = SeurObj@assays$RNA@data)
   )
 
   for (i in 1:length(ctrl.use)) {
     genes.use <- ctrl.use[[i]]
-    ctrl.scores[i, ] <- Matrix::colMeans(x = object@assays$RNA@data[genes.use, ])
+    ctrl.scores[i, ] <- Matrix::colMeans(x = SeurObj@assays$RNA@data[genes.use, ])
   }
   genes.scores <- matrix(
     data = numeric(length = 1L),
     nrow = cluster.length,
-    ncol = ncol(x = object@assays$RNA@data)
+    ncol = ncol(x = SeurObj@assays$RNA@data)
   )
   for (i in 1:cluster.length) {
     genes.use <- genes.list[[i]]
-    data.use <- object@assays$RNA@data[genes.use, , drop = FALSE]
+    data.use <- SeurObj@assays$RNA@data[genes.use, , drop = FALSE]
     genes.scores[i, ] <- Matrix::colMeans(x = data.use)
   }
   genes.scores.use <- genes.scores - ctrl.scores
   rownames(x = genes.scores.use) <- paste0(enrich.name, 1:cluster.length)
   genes.scores.use <- as.data.frame(x = t(x = genes.scores.use))
-  rownames(x = genes.scores.use) <- colnames(x = object@assays$RNA@data)
+  rownames(x = genes.scores.use) <- colnames(x = SeurObj@assays$RNA@data)
 
   for (colName in colnames(genes.scores.use)) {
-    object[[colName]] <- genes.scores.use[colnames(object), colName]
+    SeurObj[[colName]] <- genes.scores.use[colnames(SeurObj), colName]
   }
 
   gc(verbose = FALSE)
 
   if(!returnScore){
 
-    return(object)
+    return(SeurObj)
 
   } else {
-    object@meta.data$cID <- rownames(object@meta.data)
+    SeurObj@meta.data$cID <- rownames(SeurObj@meta.data)
 
-    return(object@meta.data[, c("cID", colnames(genes.scores.use))] )
+    return(SeurObj@meta.data[, c("cID", colnames(genes.scores.use))] )
   }
 
 
@@ -379,7 +379,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(length(ModuleScoreGeneLists[[GeneList]])>0){
 
-            MS.temp <-  try(AddModuleScore_SERIII(object=tempSER,
+            MS.temp <-  try(AddModuleScore_SERIII(SeurObj=tempSER,
                                                   genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                   genes.pool = NULL,
                                                   n.bin = 25,
@@ -393,7 +393,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
               #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
               print("bin size 25 was problematic... trying 30")
-              MS.temp <-  try(AddModuleScore_SERIII(object=tempSER,
+              MS.temp <-  try(AddModuleScore_SERIII(SeurObj=tempSER,
                                                     genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                     genes.pool = NULL,
                                                     n.bin = 30,
@@ -407,7 +407,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
                 #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
                 print("bin size 30 was problematic... trying 50")
-                MS.temp <-  try(AddModuleScore_SERIII(object=tempSER,
+                MS.temp <-  try(AddModuleScore_SERIII(SeurObj =tempSER,
                                                       genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                       genes.pool = NULL,
                                                       n.bin = 50,

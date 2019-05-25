@@ -688,7 +688,7 @@ removeCellCycle_SERIII <- function(seuratObj) {
   SeuratObjsCCPCA <- as.data.frame(seuratObj@reductions$pca@cell.embeddings)
   colnames(SeuratObjsCCPCA) <- paste(colnames(SeuratObjsCCPCA), "CellCycle", sep="_")
 
-  seuratObj <- CellCycleScoring_SERIII(object = seuratObj,
+  seuratObj <- CellCycleScoring_SERIII(SeurObj = seuratObj,
                                        s.features = s.genes,
                                        g2m.features = g2m.genes,
                                        set.ident = TRUE)
@@ -889,25 +889,32 @@ createExampleData <- function(nRow = 100, nCol = 10){
   return(tmpdir)
 }
 
-#' @title A Title
+#' @title Cell Cycle Scoring function.
 #'
-#' @description A description
+#' @description Old name: CellCycleScoring.
 #' @param SeurObj, A Seurat object.
+#' @param s.features, A vector of genes associated to S-phase.
+#' @param g2m.features, A vector of genes associated to G2M-phases.
+#' @param set.ident, Boolean, if T sets cell cycle as identity.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @keywords SerIII, cellcycle, AddModuleScore
 #' @export
 #' @examples
-CellCycleScoring_SERIII <- function (object, s.features, g2m.features, set.ident = FALSE) {
+CellCycleScoring_SERIII <- function (SeurObj,
+                                     s.features,
+                                     g2m.features,
+                                     set.ident = FALSE) {
   enrich.name <- 'Cell Cycle'
   genes.list <- list('S.Score' = s.features, 'G2M.Score' = g2m.features)
-  object <- AddModuleScore_SERIII(
-    object = object,
+  SeurObj <- AddModuleScore_SERIII(
+    SeurObj = SeurObj,
     genes.list = genes.list,
     enrich.name = enrich.name,
     ctrl.size = min(vapply(X = genes.list, FUN = length, FUN.VALUE = numeric(1)))
   )
-  cc.columns <- grep(pattern = enrich.name, x = colnames(x = object@meta.data))
-  cc.scores <- object@meta.data[, cc.columns]
+
+  cc.columns <- grep(pattern = enrich.name, x = colnames(x = SeurObj@meta.data))
+  cc.scores <- SeurObj@meta.data[, cc.columns]
 
   gc(verbose = FALSE)
   assignments <- apply(
@@ -926,15 +933,15 @@ CellCycleScoring_SERIII <- function (object, s.features, g2m.features, set.ident
   rownames(x = cc.scores) <- cc.scores$rownames
   cc.scores <- cc.scores[, c('S.Score', 'G2M.Score', 'Phase')]
 
-  object$S.Score <- cc.scores$S.Score
-  object$G2M.Score <- cc.scores$G2M.Score
-  object$Phase <- cc.scores$Phase
+  SeurObj$S.Score <- cc.scores$S.Score
+  SeurObj$G2M.Score <- cc.scores$G2M.Score
+  SeurObj$Phase <- cc.scores$Phase
 
   if (set.ident) {
-    object$old.or.idents <- Idents(object = object)
-    Idents(object = object) <- cc.scores$Phase
+    SeurObj$old.or.idents <- Idents(SeurObj = SeurObj)
+    Idents(SeurObj = SeurObj) <- cc.scores$Phase
   }
-  return(object)
+  return(SeurObj)
 }
 
 

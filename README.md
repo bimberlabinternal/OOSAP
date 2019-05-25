@@ -29,4 +29,4 @@ TODO:
 
 Latest Updates:
 
-    May/25/2019 All functions in current pipeline moved to 
+    May/25/2019 All functions in current pipeline moved to this package.

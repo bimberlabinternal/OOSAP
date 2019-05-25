@@ -4,13 +4,11 @@
 \alias{AddModuleScore_SERIII}
 \title{AddModuleScore_SERIII}
 \usage{
-AddModuleScore_SERIII(object, genes.list = NULL, genes.pool = NULL,
+AddModuleScore_SERIII(SeurObj, genes.list = NULL, genes.pool = NULL,
   n.bin = 25, seed.use = 1, ctrl.size = 100,
   enrich.name = "Cluster", random.seed = 1, returnScore = F)
 }
 \arguments{
-\item{object, }{A Seurat object.}
-
 \item{genes.list, }{Gene list to obtain a score for}
 
 \item{genes.pool, }{Gene list to base as the pool; NULL = all.}
@@ -24,6 +22,8 @@ AddModuleScore_SERIII(object, genes.list = NULL, genes.pool = NULL,
 \item{enrich.name, }{A name for the assesment}
 
 \item{random.seed, }{random seed}
+
+\item{object, }{A Seurat object.}
 
 \item{use.k, }{use k ... decap}
 }
