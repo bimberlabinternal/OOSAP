@@ -6,7 +6,7 @@ Here, we house individual R files that contain the functions in this package. Th
 
 ### Functions and objects
 
-A function needs to have documentation, and we use two packages Roxygen 2 and Devtools,
+A function needs to have documentation, and we use two packages Roxygen 2 and Devtools. For version control and maintaining, between local and Github, whenever a function is changed with a brief summary. 
 
 ```{r }
 library(devtools)
@@ -29,16 +29,19 @@ Seurat functions are functions that input a Seurat object, and returns an append
 ```{r }
 
 
-#' Function Name.
+#' FunctionName.
 #' 
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @examples
 #' MyFxName_SER(SeurObj=SO)
-
 MyFxName_SERIII <- function(SeurObj, ...){
-  #Laste change date: 01/01/2019
-
+  #Laste changes: 
+  #03/01/2019: changed SeurObj$ExampleInput from NULL to "NA" :: EM
+  #01/01/2019: added retrun() :: EM
+  
+  SeurObj$ExampleInput <- "NA"
+  
   return(SeurObj)
 }
 
