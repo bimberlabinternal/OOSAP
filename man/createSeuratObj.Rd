@@ -2,20 +2,24 @@
 % Please edit documentation in R/Seurat_III_functions.R
 \name{createSeuratObj}
 \alias{createSeuratObj}
-\title{FunctionName.}
+\title{Create a Seurat object}
 \usage{
 createSeuratObj(seuratData = NA, project = NA, minFeatures = 25,
-  minCells = 0)
+  minCells = 0, MitoGenesPattern = "^MT-")
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratData, }{A Seurat input data from Read10X().}
+
+\item{project, }{Sets the project name for the Seurat object.}
+
+\item{minFeatures, }{Include cells where at least this many features are detected.}
+
+\item{minCells, }{Include features detected in at least this many cells.}
 }
 \value{
-A modified Seurat object.
+A Seurat object with p.mito calculated.
 }
 \description{
-FunctionName.
+Create Seurat Object from Read10X().
 }
-\examples{
-MyFxName_SER(SeurObj=SO)
-}
+\keyword{CreateSeuratObject}

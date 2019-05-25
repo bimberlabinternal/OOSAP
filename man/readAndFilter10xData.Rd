@@ -13,7 +13,7 @@ readAndFilter10xData(dataDir, datasetName)
 A modified Seurat object.
 }
 \description{
-Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object
+Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object.
 }
 \examples{
 readAndFilter10xData(dataDir="./10Xdata", datasetName = "my10X")

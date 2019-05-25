@@ -4,7 +4,7 @@ Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 #' @title Read and Filter 10X files
 #'
-#' @description Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object
+#' @description Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object.
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords ReadAndFilter10X
@@ -23,16 +23,21 @@ readAndFilter10xData <- function(dataDir, datasetName) {
 
 
 
-#' FunctionName.
+#' @title Create a Seurat object
 #'
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
+#' @description Create Seurat Object from Read10X().
+#' @param seuratData, A Seurat input data from Read10X().
+#' @param project, Sets the project name for the Seurat object.
+#' @param minFeatures, Include cells where at least this many features are detected.
+#' @param minCells, Include features detected in at least this many cells.
+#' @return A Seurat object with p.mito calculated.
+#' @keywords CreateSeuratObject
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0){
+createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
   seuratObj <- CreateSeuratObject(counts = seuratData, min.cells = minCells, min.features = minFeatures, project = project)
 
-  mito.features <- grep(pattern = "^MT-", x = rownames(x = seuratObj), value = TRUE)
+  mito.features <- grep(pattern = MitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
   p.mito <- Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts'))
   seuratObj[['p.mito']] <- p.mito
 
