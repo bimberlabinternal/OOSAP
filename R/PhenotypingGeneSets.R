@@ -1,7 +1,14 @@
 
 
-
-CTL_Immune_GeneList <- function(){
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+CTL_Immune_GeneList <- function(QuickGO.path="./data/QuickGO"){
 
   #This Function is used to store lists of interesting gene sets. They can be useful for phenotyping various cell type and their states.
 
@@ -136,5 +143,65 @@ CTL_Immune_GeneList <- function(){
 
 
 
+  AnnotationFiles <- list.files(QuickGO.path, pattern = "QuickGO", full.names = T)
+  GeneLists <- list()
+
+  for(AnnFile in AnnotationFiles){
+    # AnnFile = AnnotationFiles[1]
+    tempName = gsub(".txt", "", gsub("_","",gsub("annotations-", "", gsub(".tsv","",gsub("-","",basename(AnnFile))))))
+    GeneLists$Extra[[tempName]] <-  read.table(
+      AnnFile,
+      sep="\t", header=TRUE, row.names = NULL, fill = TRUE )
+  }
+
+  SGS.LS$QuickGOgenes <- as.character(data.table::rbindlist(lapply(GeneLists$Extra, function(setX){
+    subset(setX, TAXON.ID == 9606)[,c("GO.NAME", "SYMBOL")] #10090 = mouse ; 9606 = human
+  }))$SYMBOL)
+
   return(SGS.LS)
+}
+
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+RhesusGeneDavidConv <- function(ColNames2Conv, RhesusConvDavid.path, ENSMB.tag = "ENSMM", returnFull=F){
+
+  #Seurat 3 cant update the gene names !!
+  # see https://github.com/satijalab/seurat/issues/1207
+
+  print("Reading in David Data...")
+  noGeneSYM <- ColNames2Conv[grepl(ENSMB.tag, ColNames2Conv)]
+
+
+  David6.8ConvTable <- data.frame(read.csv(RhesusConvDavid.path, sep = "\t", header = T))
+  rownames(David6.8ConvTable) <- David6.8ConvTable$From
+  David6.8ConvTable <- David6.8ConvTable[noGeneSYM, ]
+  length(unique(noGeneSYM)); length((noGeneSYM))
+  rownames(David6.8ConvTable) <- noGeneSYM
+
+  David6.8ConvTable$Final <- as.character(David6.8ConvTable$To)
+
+  David6.8ConvTable$Final[which(is.na(David6.8ConvTable$To))] <- rownames(David6.8ConvTable)[which(is.na(David6.8ConvTable$To))]
+
+  duplicatedGeneNames <- names(which(table(David6.8ConvTable$Final)>1))
+
+  #change the second duplace name to add a .2
+  #perhaps can avg the expr?
+  for(geneN in duplicatedGeneNames){
+
+    David6.8ConvTable$Final[grep(geneN , David6.8ConvTable$Final)][2] <- paste(geneN, ".2", sep="")
+
+  }
+
+
+  if(returnFull) return(David6.8ConvTable) else return(David6.8ConvTable$Final)
+
+
 }

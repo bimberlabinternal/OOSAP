@@ -17,7 +17,8 @@ Imports:
     DropletUtils,
     Matrix,
     ggplot2,
-    cowplot
+    cowplot,
+    dtplyr
 Suggests:
     ggplot2,
     ggvis

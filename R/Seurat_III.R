@@ -2,7 +2,7 @@
 Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 
-#' @title Read and Filter 10X files
+#' @title Read and Filter 10X files. old name readAndFilter10xData.
 #'
 #' @description Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object.
 #' @param SeurObj, A Seurat object.
@@ -10,12 +10,12 @@ Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 #' @keywords ReadAndFilter10X
 #' @export
 #' @examples
-#' readAndFilter10xData(dataDir="./10Xdata", datasetName = "my10X")
-readAndFilter10xData <- function(dataDir, datasetName) {
+#' readAndFilter10xData_SERIII(dataDir="./10Xdata", datasetName = "my10X")
+readAndFilter10xData_SERIII <- function(dataDir, datasetName) {
   seuratRawData <- Read10X(data.dir = dataDir)
-  seuratRawData <- performEmptyDropletFiltering(seuratRawData)
+  seuratRawData <- performEmptyDropletFiltering_SERIII(seuratRawData)
 
-  seuratObj <- createSeuratObj(seuratRawData, project = datasetName)
+  seuratObj <- createSeuratObj_SERIII(seuratRawData, project = datasetName)
   printQcPlots(seuratObj)
 
   return(seuratObj)
@@ -23,18 +23,18 @@ readAndFilter10xData <- function(dataDir, datasetName) {
 
 
 
-#' @title Create a Seurat object
+#' @title Create a Seurat 3 object
 #'
-#' @description Create Seurat Object from Read10X().
+#' @description Create Seurat Object from Read10X(). old name createSeuratObj.
 #' @param seuratData, A Seurat input data from Read10X().
 #' @param project, Sets the project name for the Seurat object.
 #' @param minFeatures, Include cells where at least this many features are detected.
 #' @param minCells, Include features detected in at least this many cells.
 #' @return A Seurat object with p.mito calculated.
-#' @keywords CreateSeuratObject
+#' @keywords createSeuratObj
 #' @export
 #' @examples
-createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
+createSeuratObj_SERIII <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
   seuratObj <- CreateSeuratObject(counts = seuratData, min.cells = minCells, min.features = minFeatures, project = project)
 
   mito.features <- grep(pattern = MitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
@@ -46,12 +46,14 @@ createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, min
 
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 printQcPlots <- function(seuratObj) {
   print(VlnPlot(object = seuratObj, features = c("nFeature_RNA", "nCount_RNA", "p.mito"), ncol = 3))
   print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito"))
@@ -72,13 +74,17 @@ printQcPlots <- function(seuratObj) {
 
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-performEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
+performEmptyDropletFiltering_SERIII <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
+  require(DropletUtils)
+
   br.out <- barcodeRanks(seuratRawData)
 
   # Making a plot.
@@ -91,7 +97,7 @@ performEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, empty
   legend("bottomleft", lty=2, col=c("dodgerblue", "forestgreen"),
          legend=c("knee", "inflection"))
 
-  e.out <- performEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold)
+  e.out <- performEmptyDrops_SERIII(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold)
 
   toPlot <- e.out[is.finite(e.out$LogProb),]
   if (nrow(toPlot) > 0) {
@@ -111,13 +117,15 @@ performEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, empty
 
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-performEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
+performEmptyDrops_SERIII <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
   print(paste0('Performing emptyDrops with ', emptyDropNIters, ' iterations'))
 
   e.out <- emptyDrops(seuratRawData, niters = emptyDropNIters)
@@ -134,29 +142,59 @@ performEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01)
   if (totalLimited == 0){
     return(e.out)
   } else {
-    return(performEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold))
+    return(performEmptyDrops_SERIII(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold))
   }
 }
 
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 hasStepRun <- function(seuratObj, name) {
   return(!is.null(seuratObj@misc[[paste0(name, 'Run')]]))
 }
 
-
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
+LengthCheck <- function(values, cutoff = 0) {
+  #Seurat v2 fx
+  # Check the length of components of a list
+  #
+  # @param values A list whose components should be checked
+  # @param cutoff A minimum value to check for
+  #
+  # @return a vector of logicals
+  #
+  return(vapply(
+    X = values,
+    FUN = function(x) {
+      return(length(x = x) > cutoff)
+    },
+    FUN.VALUE = logical(1)
+  ))
+}
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
 markStepRun <- function(seuratObj, name, saveFile = NULL) {
   seuratObj@misc[paste0(name, 'Run')] <- T
   if (!is.null(saveFile)){
@@ -169,12 +207,14 @@ markStepRun <- function(seuratObj, name, saveFile = NULL) {
 
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20){
   for (exptNum in names(data)) {
     print(paste0('adding expt: ', exptNum))
@@ -235,16 +275,19 @@ mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
+processSeurat1_SERIII <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
-                           variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst'){
+                           variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', DefaultPlots = T,
+                           npcs = 50){
 
   if (doCellFilter & (forceReCalc | !hasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
@@ -280,12 +323,12 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
       write.table(sort(vg), file = variableGeneTable, sep = '\t', row.names = F, quote = F, col.names = F)
     }
 
-    seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F)
+    seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- markStepRun(seuratObj, 'RunPCA')
   }
 
   if (doCellCycle & (forceReCalc | !hasStepRun(seuratObj, 'CellCycle'))) {
-    seuratObj <- removeCellCycle(seuratObj)
+    seuratObj <- removeCellCycle_SERIII(seuratObj)
     seuratObj <- markStepRun(seuratObj, 'CellCycle', saveFile)
   }
 
@@ -306,25 +349,30 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   print(paste0('Variable genes: ', length(x = VariableFeatures(object = seuratObj))))
 
-  print(VizDimLoadings(object = seuratObj, dims = 1:2))
-  print(DimPlot(object = seuratObj))
+  if(DefaultPlots){
+    print(VizDimLoadings(object = seuratObj, dims = 1:2))
+    print(DimPlot(object = seuratObj))
 
-  print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-  print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+    print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+    print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
 
-  print(JackStrawPlot(object = seuratObj, dims = 1:20))
-  print(ElbowPlot(object = seuratObj))
+    print(JackStrawPlot(object = seuratObj, dims = 1:20))
+    print(ElbowPlot(object = seuratObj))
+  }
+
 
   return(seuratObj)
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.'){
   if (is.null(seuratObject[['BarcodePrefix']])){
     stop('Seurat object lacks BarcodePrefix column')
@@ -351,12 +399,14 @@ downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.'){
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 appendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL){
   tcr <- processAndAggregateTcrClonotypes(clonotypeFile)
 
@@ -402,12 +452,14 @@ appendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   return(seuratObject)
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 findMatchedVloupe <- function(loupeDataId) {
   rows <- labkey.selectRows(
     baseUrl="https://prime-seq.ohsu.edu",
@@ -452,12 +504,14 @@ findMatchedVloupe <- function(loupeDataId) {
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 downloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
@@ -501,12 +555,15 @@ downloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
-#' @param clonotypeFile, Expects all_contig_annotations.csv from cellranger vdj
+#' @description A description
+#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
+#' @param clonotypeFile, Expects all_contig_annotations.csv from cellranger vdj
 processAndAggregateTcrClonotypes <- function(clonotypeFile){
   tcr <- read.table(clonotypeFile, header=T, sep = ',')
   tcr <- tcr[tcr$cdr3 != 'None',]
@@ -582,13 +639,15 @@ processAndAggregateTcrClonotypes <- function(clonotypeFile){
   return(tcr)
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-removeCellCycle <- function(seuratObj) {
+removeCellCycle_SERIII <- function(seuratObj) {
   print("Performing cell cycle cleaning ...")
 
   con <- url("https://raw.githubusercontent.com/bbimber/rnaseq/master/data/cellCycle/regev_lab_cell_cycle_genes.txt")
@@ -653,15 +712,17 @@ removeCellCycle <- function(seuratObj) {
   return(seuratObj)
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-findClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
+findClustersAndDimRedux_SERIII <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, doUMAP=T) {
   if (is.null(dimsToUse)) {
-    elbow <- findSeuratElbow(seuratObj)
+    elbow <- ElbowPlot_SERIII(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
 
     dimsToUse <- 1:elbow
@@ -697,17 +758,30 @@ findClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     seuratObj <- markStepRun(seuratObj, 'RunTSNE', saveFile)
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'RunUMAP')) {
-    seuratObj <- RunUMAP(seuratObj,
-                         dims = dimsToUse,
-                         n.neighbors = 40L,
-                         min.dist = 0.2,
-                         metric = "correlation",
-                         seed.use = 1234)
-    seuratObj <- markStepRun(seuratObj, 'RunUMAP', saveFile)
+  if(doUMAP){ #on some servers UMAP might not be installed/hard to install so skip and do UMAP locally later
+    if (forceReCalc | !hasStepRun(seuratObj, 'RunUMAP')) {
+      seuratObj <- RunUMAP(seuratObj,
+                           dims = dimsToUse,
+                           n.neighbors = 40L,
+                           min.dist = 0.2,
+                           metric = "correlation",
+                           seed.use = 1234)
+      seuratObj <- markStepRun(seuratObj, 'RunUMAP', saveFile)
+    }
+
+    for (reduction in c('umap')){
+      plot1 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.2", label = TRUE) + ggtitle('Resolution: 0.2')
+      plot2 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.4", label = TRUE) + ggtitle('Resolution: 0.4')
+      plot3 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.6", label = TRUE) + ggtitle('Resolution: 0.6')
+      plot4 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.8", label = TRUE) + ggtitle('Resolution: 0.8')
+      plot5 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_1.2", label = TRUE) + ggtitle('Resolution: 1.2')
+
+      print(CombinePlots(plots = list(plot1, plot2, plot3, plot4, plot5), legend = 'none'))
+    }
   }
 
-  for (reduction in c('tsne', 'umap')){
+
+  for (reduction in c('tsne')){
     plot1 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.2", label = TRUE) + ggtitle('Resolution: 0.2')
     plot2 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.4", label = TRUE) + ggtitle('Resolution: 0.4')
     plot3 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.6", label = TRUE) + ggtitle('Resolution: 0.6')
@@ -720,15 +794,17 @@ findClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   return(seuratObj)
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-findMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
+findMarkers_SERIII <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
                         testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
-                        numGenesToSave = 20) {
+                        numGenesToSave = 20, onlypos = F) {
 
   Idents(seuratObj) <- seuratObj[[paste0('ClusterNames_',resolutionToUse)]]
 
@@ -739,7 +815,7 @@ findMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = N
     seuratObj.markers <- NA
     for (test in testsToUse) {
       print(paste0('Running using test: ', test))
-      tMarkers <- FindAllMarkers(object = seuratObj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25, verbose = F, test.use = test)
+      tMarkers <- FindAllMarkers(object = seuratObj, only.pos = onlypos, min.pct = 0.25, logfc.threshold = 0.25, verbose = F, test.use = test)
       if (nrow(tMarkers) == 0) {
         print('No genes returned, skipping')
       } else {
@@ -789,12 +865,14 @@ findMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = N
   }
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 createExampleData <- function(nRow = 100, nCol = 10){
   my.counts <- matrix(rpois(1000, lambda=5), ncol=nCol, nrow=nRow)
   my.counts <- as(my.counts, "dgCMatrix")
@@ -811,12 +889,14 @@ createExampleData <- function(nRow = 100, nCol = 10){
   return(tmpdir)
 }
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 CellCycleScoring_SERIII <- function (object, s.features, g2m.features, set.ident = FALSE) {
   enrich.name <- 'Cell Cycle'
   genes.list <- list('S.Score' = s.features, 'G2M.Score' = g2m.features)
@@ -857,141 +937,22 @@ CellCycleScoring_SERIII <- function (object, s.features, g2m.features, set.ident
   return(object)
 }
 
-#' @title AddModuleScore_SERIII
+
+
+
+
+#' @title A Title
 #'
-#' @description Using Seurat v2, AddModuleScore and converting to v3.
-#'     this worked in v2 but their new version 3 breaks so this replaces it
-#' @param object, A Seurat object.
-#' @param genes.list, Gene list to obtain a score for
-#' @param genes.pool, Gene list to base as the pool; NULL = all.
-#' @param n.bin, number of bins to evaluate score across; default 25.
-#' @param seed.use, seed use.
-#' @param ctrl.size, control gene set size.
-#' @param use.k, use k ... decap
-#' @param enrich.name, A name for the assesment
-#' @param random.seed, random seed
-#' @return A modified Seurat object.
-#' @keywords SerIII_AddModuleScore
-#' @export
-#' @examples
-AddModuleScore_SERIII <- function(
-
-  object,
-  genes.list = NULL,
-  genes.pool = NULL,
-  n.bin = 25,
-  seed.use = 1,
-  ctrl.size = 100,
-  use.k = FALSE,
-  enrich.name = "Cluster",
-  random.seed = 1
-) {
-  set.seed(seed = random.seed)
-  genes.old <- genes.list
-  if (use.k) {
-    genes.list <- list()
-    for (i in as.numeric(x = names(x = table(object@kmeans.obj[[1]]$cluster)))) {
-      genes.list[[i]] <- names(x = which(x = object@kmeans.obj[[1]]$cluster == i))
-    }
-    cluster.length <- length(x = genes.list)
-  } else {
-    if (is.null(x = genes.list)) {
-      stop("Missing input gene list")
-    }
-    genes.list <- lapply(
-      X = genes.list,
-      FUN = function(x) {
-        return(intersect(x = x, y = rownames(object)))
-      }
-    )
-    cluster.length <- length(x = genes.list)
-  }
-  if (!all(Seurat:::LengthCheck(values = genes.list))) {
-    warning(paste(
-      'Could not find enough genes in the object from the following gene lists:',
-      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
-      'Attempting to match case...'
-    ))
-    genes.list <- lapply(
-      X = genes.old,
-      FUN = CaseMatch, match = rownames(x = object@data)
-    )
-  }
-  if (!all(Seurat:::LengthCheck(values = genes.list))) {
-    stop(paste(
-      'The following gene lists do not have enough genes present in the object:',
-      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
-      'exiting...'
-    ))
-  }
-  if (is.null(x = genes.pool)) {
-    genes.pool = rownames(object)
-  }
-  data.avg <- Matrix::rowMeans(object@assays[[DefaultAssay(object)]]@data[genes.pool, ])
-  data.avg <- data.avg[order(data.avg)]
-  data.cut <- as.numeric(x = Hmisc::cut2(
-    x = data.avg,
-    m = round(x = length(x = data.avg) / n.bin)
-  ))
-  names(x = data.cut) <- names(x = data.avg)
-  ctrl.use <- vector(mode = "list", length = cluster.length)
-  for (i in 1:cluster.length) {
-    genes.use <- genes.list[[i]]
-    for (j in 1:length(x = genes.use)) {
-      ctrl.use[[i]] <- c(
-        ctrl.use[[i]],
-        names(x = sample(
-          x = data.cut[which(x = data.cut == data.cut[genes.use[j]])],
-          size = ctrl.size,
-          replace = FALSE
-        ))
-      )
-    }
-  }
-  ctrl.use <- lapply(X = ctrl.use, FUN = unique)
-  ctrl.scores <- matrix(
-    data = numeric(length = 1L),
-    nrow = length(x = ctrl.use),
-    ncol = ncol(x = object@assays[[DefaultAssay(object)]]@data)
-  )
-
-  for (i in 1:length(ctrl.use)) {
-    genes.use <- ctrl.use[[i]]
-    ctrl.scores[i, ] <- Matrix::colMeans(x = object@assays[[DefaultAssay(object)]]@data[genes.use, ])
-  }
-  genes.scores <- matrix(
-    data = numeric(length = 1L),
-    nrow = cluster.length,
-    ncol = ncol(x = object@assays[[DefaultAssay(object)]]@data)
-  )
-  for (i in 1:cluster.length) {
-    genes.use <- genes.list[[i]]
-    data.use <- object@assays[[DefaultAssay(object)]]@data[genes.use, , drop = FALSE]
-    genes.scores[i, ] <- Matrix::colMeans(x = data.use)
-  }
-  genes.scores.use <- genes.scores - ctrl.scores
-  rownames(x = genes.scores.use) <- paste0(enrich.name, 1:cluster.length)
-  genes.scores.use <- as.data.frame(x = t(x = genes.scores.use))
-  rownames(x = genes.scores.use) <- colnames(x = object@assays[[DefaultAssay(object)]]@data)
-
-  for (colName in colnames(genes.scores.use)) {
-    object[[colName]] <- genes.scores.use[colnames(object),colName]
-  }
-
-  gc(verbose = FALSE)
-
-  return(object)
-}
-
-
-#' FunctionName.
-#'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-findSeuratElbow <- function(seuratObj, ndims = 25, reduction = "pca", print.plot = T){
-  data.use <- Stdev(object = seuratObj, reduction = reduction)
+ElbowPlot_SERIII <- function (object, ndims = 25, reduction = "pca", print.plot = T, return.elbow = T, min.y = 1.3)
+{
+  #object = SeuratObjs; ndims = 25; reduction = "pca"
+  data.use <- Stdev(object = object, reduction = reduction)
 
   if (length(data.use) == 0) {
     stop(paste("No standard deviation info stored for", reduction))
@@ -1002,22 +963,22 @@ findSeuratElbow <- function(seuratObj, ndims = 25, reduction = "pca", print.plot
     ndims <- length(x = data.use)
   }
 
-  #TODO: what if this cant infer the elbow?  I think it will return a data.frame.
   #1 sd = 1.3
-  #the findElbow should not fail, internally if it does it should return 2. But for whatever reason unpredicted it fails, this will capture it.
-  elbowX <- try(findElbow(data.use[1:ndims], plot = T, ignore.concavity = F, min.y = 1.3))
-  if (class(elbowX)=="try-error" || elbowX[1]==2) {
-    if (is.null(ndims)){
+  elbowX <- try(findElbow(data.use[1:ndims], plot = T, returnIndex = TRUE, ignore.concavity=F, min.y = min.y))
+
+  if(class(elbowX)=="try-error" || elbowX[1]==2) {
+    if(is.null(ndims)){
       elbowX = 2
-    } else {
-      elbowX = ndims
-    }
-  }
+    } else elbowX = ndims}
+
+
+
+  stdev <- "Standard Deviation"
 
   plot <- ggplot(data = data.frame(dims = 1:ndims, stdev = data.use[1:ndims])) +
     geom_point(mapping = aes_string(x = "dims", y = "stdev")) +
-    labs(x = gsub(pattern = "_$", replacement = "", x = Key(object = seuratObj[[reduction]])),
-         y = "Standard Deviation") + theme_bw() + geom_vline(xintercept = elbowX) + ggtitle("Elbow Identification")
+    labs(x = gsub(pattern = "_$", replacement = "", x = Key(object = object[[reduction]])),
+         y = stdev) +theme_bw() + geom_vline(xintercept = elbowX) + ggtitle("Elbow Identification")
 
   if (print.plot) {
     print(plot)
@@ -1027,12 +988,14 @@ findSeuratElbow <- function(seuratObj, ndims = 25, reduction = "pca", print.plot
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 findElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min.x = NA) {
 
   # minor modification to debug specic scenarios when fail to find elbow
@@ -1211,12 +1174,14 @@ writeSummaryMetrics <- function(seuratObj, file) {
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 writeCellBarcodes <- function(seuratObj, file) {
   df <- data.frame(CellBarcode = colnames(seuratObj))
 
@@ -1224,62 +1189,501 @@ writeCellBarcodes <- function(seuratObj, file) {
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-saveDimRedux <- function(serObj, reductions=c("pca", "tsne", "umap"),
-                         file=NA, maxPCAcomps=10){
+SaveDimRedux_SERIII <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
+                                save.path=NA, maxPCAcomps=10, nameID="", returnResults=F, saveResults=T){
 
-  if (is.na(file)){
-    stop("file is required")
+  if(is.na(save.path)){
+    stop("save.path is NA")
   }
 
-  tempDT <- data.table(cbind(1:ncol(serObj), colnames(serObj)))
-  rownames(tempDT) <- colnames(serObj)
+  require(data.table)
+
+  tempDT <- data.table(cbind(1:ncol(seuratObj), colnames(seuratObj)))
+  rownames(tempDT) <- colnames(seuratObj)
   colnames(tempDT) <- c("nID", "cID")
 
+
   if("tsne" %in% reductions) {
-    if(is.null(serObj@reductions$tsne)) print("tsne slot NULL") else {
+    if(is.null(seuratObj@reductions$tsne)) print("tsne slot NULL") else {
 
     }
-    tsneDT <- data.table(serObj@reductions$tsne@cell.embeddings)
-    tsneDT$cID <- rownames(serObj@reductions$tsne@cell.embeddings)
+    tsneDT <- data.table(seuratObj@reductions$tsne@cell.embeddings)
+    tsneDT$cID <- rownames(seuratObj@reductions$tsne@cell.embeddings)
     tempDT <- merge(tempDT, tsneDT, by="cID")
   }
-
   if("pca" %in% reductions) {
-    if(is.null(serObj@reductions$pca)) print("pca slot NULL") else {
-      pcaDT <- data.table(serObj@reductions$pca@cell.embeddings[,1:maxPCAcomps])
-      pcaDT$cID <- rownames(serObj@reductions$pca@cell.embeddings)
+    if(is.null(seuratObj@reductions$pca)) print("pca slot NULL") else {
+      pcaDT <- data.table(seuratObj@reductions$pca@cell.embeddings[,1:maxPCAcomps])
+      pcaDT$cID <- rownames(seuratObj@reductions$pca@cell.embeddings)
       tempDT <- merge(tempDT, pcaDT, by="cID")
     }
 
   }
-
   if("umap" %in% reductions) {
-    if(is.null(serObj@reductions$umap)) print("umap slot NULL") else {
-      umapDT <- data.table(serObj@reductions$umap@cell.embeddings)
-      umapDT$cID <- rownames(serObj@reductions$umap@cell.embeddings)
+    if(is.null(seuratObj@reductions$umap)) print("umap slot NULL") else {
+      umapDT <- data.table(seuratObj@reductions$umap@cell.embeddings)
+      umapDT$cID <- rownames(seuratObj@reductions$umap@cell.embeddings)
       tempDT <- merge(tempDT, umapDT, by="cID")
     }
 
   }
 
-  print("saving DimRedux")
+  if(saveResults){
 
-  write.csv(tempDT, file = file, row.names=TRUE)
+    save.path <- paste(save.path, "/", nameID, "_DimReduxComps.csv", sep="")
+    if(file.exists(save.path)) {
+      print(save.path)
+      print("already exists")
+    }else{
+      print("saving DimRedux")
+      write.csv(tempDT, file = save.path, row.names=TRUE, col.names = TRUE)
+    }
+  }
+
+
+  if(returnResults) return(tempDT)
+
+
 }
 
 
-#' FunctionName.
+#' @title A Title
 #'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
 addTitleToMultiPlot <- function(plotGrid, title, relHeights = c(0.1, 1)) {
   return(plot_grid(ggdraw() + draw_label(title), plotGrid, ncol = 1, rel_heights = relHeights))
+}
+
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+ggUMAP_SERIII <- function(object,
+                          colFac = NULL,
+                          col_vector=NULL,
+                          ptSize=0.15, ptAlpha=0.5,
+                          add2title="",
+                          legendTitle="",
+                          cells.use = NULL){
+
+  #updated March/22/19 - EM :: use.cell is needed to subset cells
+  #updated April/03/19 - EM :: debug
+
+
+  datat.temp <- as.data.frame(object@reductions$umap@cell.embeddings)
+  colnames(datat.temp) <- c("UMAP1", "UMAP2")
+
+  if(!is.null(cells.use)){
+    datat.temp <- datat.temp[cells.use, ]
+  }
+
+
+  if(!is.null(colFac)){
+
+    if(!is.factor(colFac)) colFac <- factor(colFac)
+
+    if(is.null(col_vector)) col_vector = gg_color_hue(length(levels(colFac)))
+
+
+    myColors <- col_vector[1:length(levels(colFac))]
+    names(myColors) <- levels(colFac)
+
+    colScale <- scale_colour_manual(name = ifelse(legendTitle=="", "grp", legendTitle), values = myColors)
+
+
+    datat.temp$colFac <- colFac
+
+    ggplot(datat.temp, aes(UMAP1, UMAP2 , col=colFac)) +
+      geom_point(size=ptSize, alpha = ptAlpha) +
+      theme(legend.position = "bottom") +
+      ggtitle(paste("Expression of factor on UMAP", add2title, sep="")) +
+      theme_bw() + colScale + guides(colour = guide_legend(override.aes = list(size=8, alpha=1)))
+
+  } else {
+
+    ggplot(datat.temp, aes(UMAP1, UMAP2)) +
+      geom_point(size=ptSize, alpha = ptAlpha) +
+      theme(legend.position = "bottom") +
+      ggtitle(paste("UMAP 2D Space", add2title, sep="")) +
+      theme_bw()
+
+
+  }
+
+}
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+MakeSerObjs_10XFolders_SERIII <- function(counts.path = NULL,
+                                          min.cells = 0,
+                                          min.genes = 0,
+                                          ProjName="10X",
+                                          save.path = NULL,
+                                          returnList=F, path.exclude="raw", string.exclude=NULL){
+
+  #this function searches for 10X folder.
+  #this is an update from the MakeSerObjs_10XFolders() which was done in Seurat II
+
+
+
+  # counts.path = "../../../Bimber/Expts/214/10X/bin/all"
+  # min.cells = 0
+  # min.genes = 0
+  # ProjName="10X"
+  # save.path = NULL
+  # path.exclude="filtered"
+  # string.exclude = c("/raw_gene_bc_matrices", "/cellRanger-3204293", " 10x Loupe File", "/TempOut")
+  # returnList = F
+
+  require(Seurat)
+  if(returnList) TempLS <- list()
+
+  if(!is.null(counts.path)){
+
+    if(is.null(save.path)) save.path <- counts.path
+
+    exp.dirs <- list.files(counts.path, recursive = T, full.names = T, pattern = ".mtx")
+    exp.dirs <- exp.dirs[!grepl(".gz", exp.dirs)]
+    exp.dirs <- gsub("/matrix.mtx", "", exp.dirs)
+    if(!path.exclude=="") exp.dirs <- exp.dirs[!grepl(path.exclude, exp.dirs)]
+
+    FileNames2Save <- exp.dirs
+    if(is.null(string.exclude)) string.exclude <- paste(counts.path, "/", sep="")
+
+    if(!is.null(string.exclude)){
+      string.exclude <- c(string.exclude, paste(counts.path, "/", sep=""))
+      for(iN in 1:length(string.exclude)){
+        FileNames2Save <- gsub(string.exclude[iN], "", FileNames2Save)
+      }
+    }
+
+    print("Found files... here some..")
+    head(exp.dirs)
+
+    if(returnList) TempLS$exp.dirs <- exp.dirs
+
+    for(xN in 1:length(exp.dirs)){
+      # xN = 1
+      # use the list.files below to make sure the expected files are there....
+      #list.files(exp.dirs[xN], full.names = T, recursive = T)
+
+      if(returnList) TempLS$SeuratObjs <- list()
+
+      print(exp.dirs[xN])
+      print(paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))
+
+      if(!file.exists(paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))){
+
+        SeuratObjs <- readAndFilter10xData_SERIII(dataDir=exp.dirs[xN],
+                                                  datasetName=paste(ProjName, FileNames2Save[xN], sep="-"),
+                                                  minCells = min.cells,   #genes expressed in >= 5 cells
+                                                  minFeatures = min.genes) #Keep all cells with at least 200 detected genes)
+
+        # print("Reading in 10X folder...")
+        # Seurat10X  <- Read10X(data.dir = exp.dirs[xN])
+        #
+        # print("Converting to Seurat Obj....")
+        # rownames(Seurat10X)
+        #
+        # SeuratObjs <- createSeuratObj_SERIII(seuratData = Seurat10X,
+        #                                      minCells = min.cells,   #genes expressed in >= 5 cells
+        #                                      minFeatures = min.genes, #Keep all cells with at least 200 detected genes
+        #                                      project = paste(ProjName, FileNames2Save[xN], sep="-"))
+
+
+
+        if(returnList) TempLS$SeuratObjs[[basename(exp.dirs[xN])]] <- SeuratObjs
+
+        print("saving...")
+        saveRDS(SeuratObjs,
+                paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))
+
+      } else {
+        print(paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))
+        print("already Exists...")
+      }
+
+
+
+    }; remove(xN)
+
+    if(returnList) return(TempLS)
+  }
+
+}
+
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+PreProcess_SerObjs_SERIII <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
+                                      ProjName="10X",
+                                      save.path = NULL, save.fig.path = NULL,
+                                      returnList = F, returnDimReduxOnly=T,
+                                      save.fig = T,
+                                      nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
+                                      nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf,
+                                      fvg.x.low.cutoff = 0.01, fvg.x.high.cutoff = 4.5, fvg.y.cutoff = 1.5,
+                                      KeepGene.LS =NULL,
+                                      nDimPCA=NA, findPCAElbow = T,
+                                      RemoveCellCycle=F,
+                                      path2CCfiles="./data/CellCycle", doUMAP = T){
+
+
+
+  require(Seurat)
+  require(ggplot2)
+
+  #print(c(nGene.low, nGene.high, nUMI.high))
+
+  # SerObj.path = "../../../Bimber/Expts/214/10X/bin/all";
+  # ProjName="10X";
+  # save.path = NULL;
+  # returnList = F;
+  # save.fig = T; save.fig.path = NULL;
+  # ENSMB.tag="ENSMM"; RhesusConvDavid = T;
+  # nUMI.high = 20000; nGene.high = 3000; pMito.high = 0.15;
+  # nUMI.low = 0.99; nGene.low = 200; pMito.low = -Inf;
+  # RhesusConvDavid.path = "/Volumes/Maggie/Work/OHSU/Eisa/R/scRNASeqEISA/data/Rhesus/David6.8_ConvertedRhesus_ENSMMUG.txt";
+  # fvg.x.low.cutoff = 0.01; fvg.x.high.cutoff = 4.5;
+  # fvg.y.cutoff = 1.5;
+  # KeepGene.LS =SGS.LS;
+  # nDimPCA=15; RemoveCellCycle=T; path2CCfiles =
+  #   "/Volumes/Maggie/Work/OHSU/Eisa/R/scRNASeq/data/CellCycle"; cleanGeneNames=F
+  #   SerObjRDSKey="SeuratObj.rds"
+  # library(scRNASeqEISA)
+  # findPCAElbow = T
+
+
+
+
+  if(returnList) TempLS <- list()
+
+  if(!is.null(SerObj.path)){
+
+    if(is.null(save.path)) {
+      save.path <- paste(SerObj.path, "/SerProc", sep="")
+      if(!dir.exists(save.path)) dir.create(save.path, recursive = T)
+    }
+    if(is.null(save.fig.path)) {
+      save.fig.path <- paste(SerObj.path, "/SerProcFigs", sep="")
+      if(!dir.exists(save.fig.path)) dir.create(save.fig.path, recursive = T)
+    }
+
+
+
+    all_RDS  <- list.files(SerObj.path, full.names = T, pattern = ".rds")
+    SeurObj_RDS <-  all_RDS[grep(SerObjRDSKey, all_RDS)]
+
+    print("Found files... examples:")
+    print(head(SeurObj_RDS))
+
+    if(returnList){
+      TempLS$SeuratObjs <- list()
+      TempLS$DimReduxComps <- list()
+    }
+
+
+
+    for(xN in 1:length(SeurObj_RDS)){
+      # xN=1
+      bName <- gsub("\\.", "", gsub( "-", "", gsub( "_", "-", gsub("SeuratObj.rds", "", basename(SeurObj_RDS[xN])))))
+
+
+      if(!file.exists(paste(save.path, "/", basename(SeurObj_RDS[xN]), "_proc.rds", sep=""))){
+
+
+
+        print("Reading in...")
+        print(SeurObj_RDS[xN])
+
+
+        SeuratObjs <- readRDS(SeurObj_RDS[xN])
+
+        ### call fx here....
+        SeuratObjs <- processSeurat1_SERIII(SeuratObjs,
+                                            dispersion.cutoff = c(fvg.y.cutoff, Inf),
+                                            mean.cutoff = c(fvg.x.low.cutoff, fvg.x.high.cutoff),
+                                            saveFile = NULL, doCellFilter=T,
+                                            RemoveCellCycle = F, doJackSaw = F,
+                                            nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
+                                            nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low)
+
+        # nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
+        # nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low
+
+        # saveRDS(SeuratObjs, "./tempSeuratObjs.rds")
+        # SeuratObjs <- readRDS("./tempSeuratObjs.rds")
+
+
+
+
+        # #Genes that dont map to a specific name
+        # noGeneSYM <- rownames(SeuratObjs)[grepl(ENSMB.tag, rownames(SeuratObjs))]
+        #
+        # length(noGeneSYM)
+
+        # write.table(noGeneSYM,
+        #             "./10X/Rhesus_ENSMMUG.csv",
+        #             sep=", ", , row.names = F, quote = F,
+        #             col.names = F)
+
+
+
+
+
+
+
+
+
+        if(is.na(nDimPCA) || findPCAElbow) {
+          nDimPCA <- ElbowPlot_SERIII(SeuratObjs)
+        }
+
+        print(VizDimLoadings(object = SeuratObjs, dims = 1:4))
+        print(DimHeatmap(object = SeuratObjs, dims = 1:nDimPCA, cells = 200, balanced = TRUE))
+
+        # print(JackStrawPlot(object = seuratObj, dims = 1:20))
+
+        SeuratObjs <- findClustersAndDimRedux_SERIII(seuratObj = SeuratObjs, dimsToUse=1:nDimPCA, doUMAP=doUMAP)
+
+
+        # # DimPlot(object = SeuratObjs, reduction = 'umap')
+        # SaveDimRedux_SERIII(seuratObj= SeuratObjs,
+        #                     nameID = basename(SeurObj_RDS[xN]),
+        #                     save.path = save.path)
+
+
+
+
+
+
+
+        print("saving ...")
+        saveRDS(SeuratObjs,
+                paste(save.path, "/", basename(SeurObj_RDS[xN]), "_proc.rds", sep=""))
+
+        if(returnList) TempLS$SeuratObjs[[bName]] <- SeuratObjs
+
+      } else {
+        if(returnList) {
+
+          #to return a full list of data, need to read what is already processed and saved...
+          TempLS$SeuratObjs[[bName]] <- readRDS(
+            paste(save.path, "/", basename(SeurObj_RDS[xN]), "_proc.rds", sep=""))
+
+          TempLS$DimReduxComps[[bName]] <- SaveDimRedux_SERIII(seuratObj= TempLS$SeuratObjs[[bName]],
+                                                               nameID = bName,
+                                                               save.path = save.path, returnResults=T)
+
+        }
+
+      }
+
+
+
+
+    }
+
+    if(returnList) {
+      if(returnDimReduxOnly) {
+        TempLS$SeuratObjs <- NULL
+      }
+      return(TempLS)
+    }
+
+  }
+}
+
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+printQcPlots1_SERIII <- function(seuratObj) {
+  print(VlnPlot(object = seuratObj, features = c("nFeature_RNA", "nCount_RNA", "p.mito"), ncol = 3))
+  print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito"))
+  print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA"))
+
+  #10x-like plot
+  nUMI <- Matrix::colSums(GetAssayData(object = seuratObj, slot = "counts"))
+  nUMI <- sort(nUMI)
+
+  countAbove <-unlist(lapply(nUMI, function(x){
+    sum(nUMI >= x)
+  }))
+
+  plot(log(countAbove), log(nUMI), pch=20, ylab = "UMI/Cell", xlab = "# Cells")
+}
+
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+WilcoxDETest <- function(
+  object,
+  cells.1,
+  cells.2,
+  verbose = TRUE,
+  ...
+) {
+  group.info <- data.frame(row.names = c(cells.1, cells.2))
+  group.info[cells.1, "group"] <- "Group1"
+  group.info[cells.2, "group"] <- "Group2"
+  group.info[, "group"] <- factor(x = group.info[, "group"])
+  object <- object[, rownames(x = group.info), drop = FALSE]
+  my.sapply <- ifelse(
+    test = verbose && PlanThreads() == 1,
+    yes = pbsapply,
+    no = future_sapply
+  )
+  p_val <- my.sapply(
+    X = 1:nrow(x = object),
+    FUN = function(x) {
+      return(wilcox.test(object[x, ] ~ group.info[, "group"], ...)$p.value)
+    }
+  )
+  return(data.frame(p_val, row.names = rownames(x = object)))
 }
