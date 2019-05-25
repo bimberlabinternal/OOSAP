@@ -2,7 +2,15 @@
 Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 
-
+#' @title Read and Filter 10X files
+#'
+#' @description Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords ReadAndFilter10X
+#' @export
+#' @examples
+#' readAndFilter10xData(dataDir="./10Xdata", datasetName = "my10X")
 readAndFilter10xData <- function(dataDir, datasetName) {
   seuratRawData <- Read10X(data.dir = dataDir)
   seuratRawData <- performEmptyDropletFiltering(seuratRawData)

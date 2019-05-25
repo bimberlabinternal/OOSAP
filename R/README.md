@@ -28,11 +28,13 @@ Seurat functions are functions that input a Seurat object, and returns an append
 
 ```{r }
 
-
-#' FunctionName.
-#' 
+#' @title A Title
+#'
+#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
 #' @examples
 #' MyFxName_SER(SeurObj=SO)
 MyFxName_SERIII <- function(SeurObj, ...){

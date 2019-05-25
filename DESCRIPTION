@@ -21,4 +21,4 @@ Imports:
 Suggests:
     ggplot2,
     ggvis
-
+RoxygenNote: 6.1.1
