@@ -129,6 +129,10 @@ CTL_Immune_GeneList <- function(){
   SGS.LS$Testis$Hermann2018_Human_Pertitubular_Sertoli_Leydig_Marler  <- c("GATA4", "ACTA2", "MYH11", "CYP11A1", "NR5A1", "STAR")
   SGS.LS$Testis$Hermann2018_Human_Spermatogenesis_Markers             <- c("NANOS3", "GFRA1", "ETV5", "ID4", "NANOS2", "SOHLH1", "RHOXF1", "MAGEA4", "ZBTB16", "BCL6B", "UCHL1", "FOXO1", "DMRT1", "TAF4B", "PIWIL4", "PIWIL2", "KIT", "SOHLH2", "STRA8", "SCML2", "SYCP3", "DMC1", "PEG10", "GAL3ST1", "TOP2B", "SPO11", "MEIOB", "DAZL", "ATR", "NEUROG3", "SYCP1", "MYBL1", "HORMAD1", "PIWIL1", "ACR", "PGK2", "SAXO1", "ACRV1", "CATSPER1", "CATSPER3", "HSFY2", "RBM5", "CHD5", "TEKT1", "TXNDC8", "GAPDHS", "PRM1", "CA2", "PRM2", "PRM3", "TNP1", "TNP2")
 
+  SGS.LS$Testis$Guo18_Sertoli             <- c("SOX9", "AMH", "WFDC2", "BEX2", "PRND")
+  SGS.LS$Testis$Guo18_Endothelial             <- c("VWF", "NOTCH4", "HES1", "JAG1", "PECAM1", "MAML1")
+  SGS.LS$Testis$Guo18_Myoid          <- c("MYH11", "ACTA2", "PTCH1", "PTCH2", "GLI1", "IGFBP6")
+  SGS.LS$Testis$Guo18_Leydig          <- c("DLK1", "IGF1", "INHBA", "VIT", "IGFBP3", "IGFBP5")
 
 
 
