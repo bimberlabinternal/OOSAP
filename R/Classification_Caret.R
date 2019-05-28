@@ -157,7 +157,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @keywords SerIII_template
 #' @export
 #' @examples
-MultiClassifier_Cells_SERIII <- function (object_train,
+MultiClassifier_Cells <- function (object_train,
                                           object_test,
                                           training.genes = NULL,
                                           Y_Train_True = NULL,

@@ -1,9 +1,10 @@
-#' @title A Title
+#' @title processCiteSeqCount
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @param bFile, A
+#' @param doRowFilter, A
+#' @return A
+#' @keywords CITE-Seq,
 #' @export
 #' @examples
 processCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
@@ -54,7 +55,7 @@ processCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   return(bData)
 }
 
-#' @title A Title
+#' @title doRowFiltering
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
@@ -140,8 +141,8 @@ doRowFiltering <- function(bData, minRowSum = 5,
 
 #' @title A Title
 #'
-#' @description A description
-#' @param SeurObj, A Seurat object.
+#' @description generateByRowSummary
+#' @param barcodeData, A
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export

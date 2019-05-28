@@ -10,11 +10,11 @@ Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 #' @keywords ReadAndFilter10X
 #' @export
 #' @examples
-readAndFilter10xData_SERIII <- function(dataDir, datasetName) {
+readAndFilter10xData <- function(dataDir, datasetName) {
   seuratRawData <- Read10X(data.dir = dataDir)
-  seuratRawData <- performEmptyDropletFiltering_SERIII(seuratRawData)
+  seuratRawData <- performEmptyDropletFiltering(seuratRawData)
 
-  seuratObj <- createSeuratObj_SERIII(seuratRawData, project = datasetName)
+  seuratObj <- createSeuratObj(seuratRawData, project = datasetName)
   printQcPlots(seuratObj)
 
   return(seuratObj)
@@ -33,7 +33,7 @@ readAndFilter10xData_SERIII <- function(dataDir, datasetName) {
 #' @keywords createSeuratObj
 #' @export
 #' @examples
-createSeuratObj_SERIII <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
+createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
   seuratObj <- CreateSeuratObject(counts = seuratData, min.cells = minCells, min.features = minFeatures, project = project)
 
   mito.features <- grep(pattern = MitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
@@ -81,7 +81,7 @@ printQcPlots <- function(seuratObj) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-performEmptyDropletFiltering_SERIII <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
+performEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
   br.out <- barcodeRanks(seuratRawData)
 
   # Making a plot.
@@ -95,7 +95,7 @@ performEmptyDropletFiltering_SERIII <- function(seuratRawData, fdrThreshold=0.01
          legend=c("knee", "inflection")
   )
 
-  e.out <- performEmptyDrops_SERIII(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold)
+  e.out <- performEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold)
 
   toPlot <- e.out[is.finite(e.out$LogProb),]
   if (nrow(toPlot) > 0) {
@@ -123,7 +123,7 @@ performEmptyDropletFiltering_SERIII <- function(seuratRawData, fdrThreshold=0.01
 #' @keywords SerIII_template
 #' @export
 #' @examples
-performEmptyDrops_SERIII <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
+performEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
   print(paste0('Performing emptyDrops with ', emptyDropNIters, ' iterations'))
 
   e.out <- emptyDrops(seuratRawData, niters = emptyDropNIters)
@@ -140,7 +140,7 @@ performEmptyDrops_SERIII <- function(seuratRawData, emptyDropNIters, fdrThreshol
   if (totalLimited == 0){
     return(e.out)
   } else {
-    return(performEmptyDrops_SERIII(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold))
+    return(performEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold))
   }
 }
 
@@ -266,7 +266,7 @@ mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20
 #' @keywords SerIII_template
 #' @export
 #' @examples
-processSeurat1_SERIII <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
+processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
                            variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', printDefaultPlots = T,
@@ -302,7 +302,7 @@ processSeurat1_SERIII <- function(seuratObj, saveFile = NULL, doCellCycle = T, d
   #Eisa: if doCellCycle=T, do we actually need to run PCA here?  Wont it be repeated first using CC genes, and then again for variable genes?
   #Do we actually want to reorder like I do here?
   if (doCellCycle & (forceReCalc | !hasStepRun(seuratObj, 'CellCycle'))) {
-    seuratObj <- removeCellCycle_SERIII(seuratObj)
+    seuratObj <- removeCellCycle(seuratObj)
     seuratObj <- markStepRun(seuratObj, 'CellCycle', saveFile)
   }
 
@@ -631,7 +631,7 @@ processAndAggregateTcrClonotypes <- function(clonotypeFile){
 #' @keywords SerIII_template
 #' @export
 #' @examples
-removeCellCycle_SERIII <- function(seuratObj, runPCAonVariableGenes = F) {
+removeCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   print("Performing cell cycle cleaning ...")
 
   # This might provide a template for how we should include external data like these in a module: http://r-pkgs.had.co.nz/data.html
@@ -674,7 +674,7 @@ removeCellCycle_SERIII <- function(seuratObj, runPCAonVariableGenes = F) {
   colnames(SeuratObjsCCPCA) <- paste(colnames(SeuratObjsCCPCA), "CellCycle", sep="_")
 
   # Eisa: do we still need a custom version of this?
-  seuratObj <- CellCycleScoring_SERIII(object = seuratObj,
+  seuratObj <- CellCycleScoring(object = seuratObj,
                                        s.features = s.genes,
                                        g2m.features = g2m.genes,
                                        set.ident = TRUE)
@@ -709,7 +709,7 @@ removeCellCycle_SERIII <- function(seuratObj, runPCAonVariableGenes = F) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-findClustersAndDimRedux_SERIII <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
+findClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
   if (is.null(dimsToUse)) {
     elbow <- findSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
@@ -778,7 +778,7 @@ findClustersAndDimRedux_SERIII <- function(seuratObj, dimsToUse = NULL, saveFile
 #' @keywords SerIII_template
 #' @export
 #' @examples
-findMarkers_SERIII <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
+findMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
                         testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
                         numGenesToSave = 20, onlypos = F) {
 
@@ -1119,7 +1119,7 @@ writeCellBarcodes <- function(seuratObj, file) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-SaveDimRedux_SERIII <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
+SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
                          file=NA, maxPCAcomps=10, returnResults=F){
 
   if (is.na(file)){
@@ -1189,7 +1189,7 @@ addTitleToMultiPlot <- function(plotGrid, title, relHeights = c(0.1, 1)) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-ggUMAP_SERIII <- function(object,
+ggUMAP <- function(object,
                           colFac = NULL,
                           col_vector=NULL,
                           ptSize=0.15, ptAlpha=0.5,
@@ -1253,7 +1253,7 @@ ggUMAP_SERIII <- function(object,
 #' @keywords SerIII_template
 #' @export
 #' @examples
-MakeSerObjs_10XFolders_SERIII <- function(counts.path = NULL,
+MakeSerObjs_10XFolders <- function(counts.path = NULL,
                                           min.cells = 0,
                                           min.genes = 0,
                                           ProjName="10X",
@@ -1312,7 +1312,7 @@ MakeSerObjs_10XFolders_SERIII <- function(counts.path = NULL,
 
       if (!file.exists(paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))){
 
-        SeuratObjs <- readAndFilter10xData_SERIII(dataDir=exp.dirs[xN],
+        SeuratObjs <- readAndFilter10xData(dataDir=exp.dirs[xN],
                                                   datasetName=paste(ProjName, FileNames2Save[xN], sep="-"))
 
         # print("Reading in 10X folder...")
@@ -1321,7 +1321,7 @@ MakeSerObjs_10XFolders_SERIII <- function(counts.path = NULL,
         # print("Converting to Seurat Obj....")
         # rownames(Seurat10X)
         #
-        # SeuratObjs <- createSeuratObj_SERIII(seuratData = Seurat10X,
+        # SeuratObjs <- createSeuratObj(seuratData = Seurat10X,
         #                                      minCells = min.cells,   #genes expressed in >= 5 cells
         #                                      minFeatures = min.genes, #Keep all cells with at least 200 detected genes
         #                                      project = paste(ProjName, FileNames2Save[xN], sep="-"))
@@ -1358,7 +1358,7 @@ MakeSerObjs_10XFolders_SERIII <- function(counts.path = NULL,
 #' @keywords SerIII_template
 #' @export
 #' @examples
-PreProcess_SerObjs_SERIII <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
+PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
                                       ProjName="10X",
                                       save.path = NULL, save.fig.path = NULL,
                                       returnList = F, returnDimReduxOnly=T,
@@ -1440,7 +1440,7 @@ PreProcess_SerObjs_SERIII <- function(SerObj.path = NULL, SerObjRDSKey="SeuratOb
         SeuratObjs <- readRDS(SeurObj_RDS[xN])
 
         ### call fx here....
-        SeuratObjs <- processSeurat1_SERIII(SeuratObjs,
+        SeuratObjs <- processSeurat1(SeuratObjs,
                                             dispersion.cutoff = c(fvg.y.cutoff, Inf),
                                             mean.cutoff = c(fvg.x.low.cutoff, fvg.x.high.cutoff),
                                             saveFile = NULL, doCellFilter=T,
@@ -1484,7 +1484,7 @@ PreProcess_SerObjs_SERIII <- function(SerObj.path = NULL, SerObjRDSKey="SeuratOb
 
         # print(JackStrawPlot(object = seuratObj, dims = 1:20))
 
-        SeuratObjs <- findClustersAndDimRedux_SERIII(seuratObj = SeuratObjs, dimsToUse=1:nDimPCA, doUMAP=doUMAP)
+        SeuratObjs <- findClustersAndDimRedux(seuratObj = SeuratObjs, dimsToUse=1:nDimPCA, doUMAP=doUMAP)
 
         print("saving ...")
         saveRDS(SeuratObjs,
@@ -1499,7 +1499,7 @@ PreProcess_SerObjs_SERIII <- function(SerObj.path = NULL, SerObjRDSKey="SeuratOb
           TempLS$SeuratObjs[[bName]] <- readRDS(
             paste(save.path, "/", basename(SeurObj_RDS[xN]), "_proc.rds", sep=""))
 
-          TempLS$DimReduxComps[[bName]] <- SaveDimRedux_SERIII(seuratObj= TempLS$SeuratObjs[[bName]],
+          TempLS$DimReduxComps[[bName]] <- SaveDimRedux(seuratObj= TempLS$SeuratObjs[[bName]],
                                                                file = paste(save.path, "/", bName, "_DimReduxComps.csv", sep=""), returnResults=T)
 
         }

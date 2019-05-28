@@ -13,13 +13,13 @@
 #' @keywords SerIII, cellcycle, AddModuleScore
 #' @export
 #' @examples
-CellCycleScoring_SERIII <- function (object,
+CellCycleScoring <- function (object,
 s.features,
 g2m.features,
 set.ident = FALSE) {
     enrich.name <- 'Cell Cycle'
     genes.list <- list('S.Score' = s.features, 'G2M.Score' = g2m.features)
-    object <- AddModuleScore_SERIII(
+    object <- AddModuleScore(
     SeurObj = object,
     genes.list = genes.list,
     enrich.name = enrich.name,
@@ -86,7 +86,7 @@ LengthCheck <- function(values, cutoff = 0) {
 }
 
 
-#' @title AddModuleScore_SERIII
+#' @title AddModuleScore
 #'
 #' @description Using Seurat v2, AddModuleScore and converting to v3.
 #'     this worked in v2 but their new version 3 breaks so this replaces it
@@ -103,7 +103,7 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @keywords SerIII_AddModuleScore
 #' @export
 #' @examples
-AddModuleScore_SERIII <- function(
+AddModuleScore <- function(
 #May-2019 version
 
 #this is a modified version of the AddModuleScore

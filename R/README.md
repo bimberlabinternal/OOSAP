@@ -15,13 +15,8 @@ library(roxygen2)
 
 #### Seurat functions
 
-Seurat functions are functions that input a Seurat object, and returns an appended/changed Seurat object.
+Seurat functions are functions that input a Seurat object, and returns an appended/changed Seurat object. All functions in this package are for Seurat 3, unless specified. 
 
-
-
-  -suffix _SERII: refers to functions that only work on Seurat V 2.x These are legacy and are (need to be) changed to work for V 3.x
-
-  -suffix _SERIII: refers to functions that only work on Seurat V 3.x; since future versions may arrive (usually sooner than expected)
   
   
 ##### Template function and documentation
@@ -36,11 +31,11 @@ Seurat functions are functions that input a Seurat object, and returns an append
 #' @keywords SerIII_template
 #' @export
 #' @examples
-#' MyFxName_SER(SeurObj=SO)
-MyFxName_SERIII <- function(SeurObj, ...){
+#' MyFxName(SeurObj=SO)
+MyFxName <- function(SeurObj, ...){
   #Laste changes: 
   #03/01/2019: changed SeurObj$ExampleInput from NULL to "NA" :: EM
-  #01/01/2019: added retrun() :: EM
+  #01/01/2019: added retrun() :: BB
   
   SeurObj$ExampleInput <- "NA"
   
