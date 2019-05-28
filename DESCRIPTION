@@ -24,6 +24,5 @@ Imports:
     cluster,
     fitdistrplus
 Suggests:
-
     ggvis
 RoxygenNote: 6.1.1

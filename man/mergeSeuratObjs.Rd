@@ -5,7 +5,8 @@
 \title{A Title}
 \usage{
 mergeSeuratObjs(seuratObjs, data = NULL, alignData = T,
-  MaxCCAspaceDim = 20, MaxPCs2Weight = 20, PreProcSeur = F)
+  MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL,
+  PreProcSeur = F)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

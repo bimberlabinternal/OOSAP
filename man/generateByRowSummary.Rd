@@ -7,12 +7,12 @@
 generateByRowSummary(barcodeData)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{barcodeData, }{A}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-A description
+generateByRowSummary
 }
 \keyword{SerIII_template}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/cellHashing.R
 \name{doRowFiltering}
 \alias{doRowFiltering}
-\title{A Title}
+\title{doRowFiltering}
 \usage{
 doRowFiltering(bData, minRowSum = 5, minRowMax = 20,
   minRowMean = 0.2, minMeanNonZeroCount = 2)
