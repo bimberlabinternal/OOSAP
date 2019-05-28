@@ -4,8 +4,8 @@
 \alias{mergeSeuratObjs}
 \title{A Title}
 \usage{
-mergeSeuratObjs(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20,
-  MaxPCs2Weight = 20)
+mergeSeuratObjs(seuratObjs, data = NULL, alignData = T,
+  MaxCCAspaceDim = 20, MaxPCs2Weight = 20, PreProcSeur = F)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

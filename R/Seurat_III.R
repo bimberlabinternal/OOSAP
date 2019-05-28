@@ -215,7 +215,10 @@ markStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20){
+mergeSeuratObjs <- function(seuratObjs, data=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, PreProcSeur = F){
+
+  if(is.null(data)) warning("data is NULL")
+
   for (exptNum in names(data)) {
     print(paste0('adding expt: ', exptNum))
     prefix <- paste0(exptNum)
@@ -250,7 +253,7 @@ mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20
   seuratObj <- NULL
   if (alignData && length(seuratObjs) > 1) {
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = T, verbose = T)
+    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = T)
     # dims here means : #Number of PCs to use in the weighting procedure
     seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight)
     DefaultAssay(seuratObj) <- "integrated"
@@ -301,7 +304,7 @@ processSeurat1_SERIII <- function(seuratObj, saveFile = NULL, doCellCycle = T, d
     seuratObj <- markStepRun(seuratObj, 'FilterCells')
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'NormalizeData')) {
+  if ((forceReCalc | !hasStepRun(seuratObj, 'NormalizeData')) & DefaultAssay(seuratObj)=="RNA") {
     seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
     seuratObj <- markStepRun(seuratObj, 'NormalizeData', saveFile)
   }
