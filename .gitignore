@@ -3,3 +3,5 @@
 *.ipr
 *.iws
 .Rproj.user
+.Rhistory
+

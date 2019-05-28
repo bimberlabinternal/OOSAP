@@ -188,14 +188,9 @@ markStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-<<<<<<< HEAD
-mergeSeuratObjs <- function(seuratObjs, data=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, PreProcSeur = F){
-
+mergeSeuratObjs <- function(seuratObjs, data=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F){
   if(is.null(data)) warning("data is NULL")
 
-=======
-mergeSeuratObjs <- function(seuratObjs, data, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL){
->>>>>>> 0617d4e11c95b5d18c8ac5c89567c0a20d2df8f8
   for (exptNum in names(data)) {
     print(paste0('adding expt: ', exptNum))
     prefix <- paste0(exptNum)
