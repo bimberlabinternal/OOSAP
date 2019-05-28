@@ -29,4 +29,5 @@ TODO:
 
 Latest Updates:
 
+    May/28/2019 Merged with B.B. Seurat Fxs. _SERIII prefix removed. Minor documentation added.
     May/25/2019 All functions in current pipeline moved to this package.
