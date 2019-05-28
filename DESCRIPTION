@@ -18,8 +18,12 @@ Imports:
     Matrix,
     ggplot2,
     cowplot,
-    dtplyr
-Suggests:
+    dtplyr,
+    reshape2,
     ggplot2,
+    cluster,
+    fitdistrplus
+Suggests:
+
     ggvis
 RoxygenNote: 6.1.1
