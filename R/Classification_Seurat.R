@@ -6,7 +6,7 @@
 #' @keywords SerIII_template
 #' @export
 #' @examples
-SaveDimRedux_SERIII <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
+SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
                                 save.path=NA, maxPCAcomps=10, nameID=""){
 
   if(is.na(save.path)){
@@ -64,7 +64,7 @@ SaveDimRedux_SERIII <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
 #' @keywords SerIII_template
 #' @export
 #' @examples
-ClassifyCellsCustom_SERIII <- function(Classifier.rds.path = "",
+ClassifyCellsCustom <- function(Classifier.rds.path = "",
                                        ClassifierNames="",
                                        testing.data, log10T=T, returnTraining=F){
   #March-2019 version
@@ -163,7 +163,7 @@ ClassifyCellsCustom_SERIII <- function(Classifier.rds.path = "",
 #' @keywords SerIII_template
 #' @export
 #' @examples
-predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
+predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
                            classification.path = NULL, file.select = NULL,
                            TrainedClassifiers.path = "../PBMC3k/data",
                            save.fig.path = NULL, col_vector=NULL, returnLS = F, GarnettClassify=F,
@@ -233,7 +233,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(length(ModuleScoreGeneLists[[GeneList]])>0){
 
-            MS.temp <-  try(AddModuleScore_SERIII(SeurObj=tempSER,
+            MS.temp <-  try(AddModuleScore_avg(SeurObj=tempSER,
                                                   genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                   genes.pool = NULL,
                                                   n.bin = 25,
@@ -247,7 +247,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
               #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
               print("bin size 25 was problematic... trying 30")
-              MS.temp <-  try(AddModuleScore_SERIII(SeurObj=tempSER,
+              MS.temp <-  try(AddModuleScore_avg(SeurObj=tempSER,
                                                     genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                     genes.pool = NULL,
                                                     n.bin = 30,
@@ -261,7 +261,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
                 #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
                 print("bin size 30 was problematic... trying 50")
-                MS.temp <-  try(AddModuleScore_SERIII(SeurObj =tempSER,
+                MS.temp <-  try(AddModuleScore_avg(SeurObj =tempSER,
                                                       genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                       genes.pool = NULL,
                                                       n.bin = 50,
@@ -324,7 +324,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
         if(!file.exists(paste(classification.path, "/", basename(gsub(".rds_proc.rds", "", SERObj.path)), "_CD8T_MCEyhat.rds",sep=""))){
 
-          #one can directly give the Seurat object to the ClassifyCellsCustom_SERIII()
+          #one can directly give the Seurat object to the ClassifyCellsCustom()
           #since looping, its faster to compute the non-sparse log once
 
           X.SerObj.temp <- log10(Matrix::as.matrix(Matrix::t(tempSER@assays$RNA@data))+1)
@@ -347,7 +347,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
           if(cleanName) colnames(X.SerObj.temp) <- gsub("-", "", colnames(X.SerObj.temp))
 
 
-          ClassifiersLS$MCEyhat$CD8T[[tempName]]  <- list(MCE=ClassifyCellsCustom_SERIII(
+          ClassifiersLS$MCEyhat$CD8T[[tempName]]  <- list(MCE=ClassifyCellsCustom(
             Classifier.rds.path = paste(TrainedClassifiers.path, "/MCR_LS_CD8T.rds", sep=""),
             testing.data = X.SerObj.temp, log10T=F))
 
@@ -374,7 +374,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(!exists("X.SerObj.temp")) X.SerObj.temp <- readRDS(SERObj.path)
 
-          ClassifiersLS$MCEyhat$CD4T[[tempName]]  <- list(MCE=ClassifyCellsCustom_SERIII(
+          ClassifiersLS$MCEyhat$CD4T[[tempName]]  <- list(MCE=ClassifyCellsCustom(
             Classifier.rds.path = paste(TrainedClassifiers.path, "/MCR_LS_CD4T.rds", sep=""),
             testing.data = X.SerObj.temp, log10T=F))
           ClassifiersLS$MCEyhat$CD4T[[tempName]]$MCE$log10T = T
@@ -396,7 +396,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(!exists("X.SerObj.temp")) X.SerObj.temp <- readRDS(SERObj.path)
 
-          ClassifiersLS$MCEyhat$NK[[tempName]]  <- list(MCE=ClassifyCellsCustom_SERIII(
+          ClassifiersLS$MCEyhat$NK[[tempName]]  <- list(MCE=ClassifyCellsCustom(
             Classifier.rds.path = paste(TrainedClassifiers.path, "/MCR_LS_NK.rds", sep=""),
             testing.data = X.SerObj.temp, log10T=F))
           ClassifiersLS$MCEyhat$NK[[tempName]]$MCE$log10T = T
@@ -420,7 +420,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(!exists("X.SerObj.temp")) X.SerObj.temp <- readRDS(SERObj.path)
 
-          ClassifiersLS$MCEyhat$B[[tempName]]  <- list(MCE=ClassifyCellsCustom_SERIII(
+          ClassifiersLS$MCEyhat$B[[tempName]]  <- list(MCE=ClassifyCellsCustom(
             Classifier.rds.path = paste(TrainedClassifiers.path, "/MCR_LS_B.rds", sep=""),
             testing.data = X.SerObj.temp, log10T=F))
           ClassifiersLS$MCEyhat$B[[tempName]]$MCE$log10T = T
@@ -443,7 +443,7 @@ predict_SERIII <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rd
 
           if(!exists("X.SerObj.temp")) X.SerObj.temp <- readRDS(SERObj.path)
 
-          ClassifiersLS$MCEyhat$Lymph[[tempName]]  <- list(MCE=ClassifyCellsCustom_SERIII(
+          ClassifiersLS$MCEyhat$Lymph[[tempName]]  <- list(MCE=ClassifyCellsCustom(
             Classifier.rds.path = paste(TrainedClassifiers.path, "/MCR_LS_Lymph.rds", sep=""),
             testing.data = X.SerObj.temp, log10T=F))
 

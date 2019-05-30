@@ -86,10 +86,9 @@ LengthCheck <- function(values, cutoff = 0) {
 }
 
 
-#' @title AddModuleScore
+#' @title AddModuleScore_avg
 #'
-#' @description Using Seurat v2, AddModuleScore and converting to v3.
-#'     this worked in v2 but their new version 3 breaks so this replaces it
+#' @description Instead of the status quo score of Seurat which is 1 score 1 gene, this function takes a list of genes and computes per set, the average of the individual scores.
 #' @param object, A Seurat object.
 #' @param genes.list, Gene list to obtain a score for
 #' @param genes.pool, Gene list to base as the pool; NULL = all.
@@ -103,7 +102,7 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @keywords SerIII_AddModuleScore
 #' @export
 #' @examples
-AddModuleScore <- function(
+AddModuleScore_avg <- function(
 #May-2019 version
 
 #this is a modified version of the AddModuleScore
