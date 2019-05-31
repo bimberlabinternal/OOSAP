@@ -193,9 +193,20 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
   if (alignData && length(seuratObjs) > 1) {
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
     anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = F)
+
+    #always run using intersection of all features
+    features <- rownames(seuratObjs[[1]])
+    if (length(seuratObjs) > 1) {
+      for (i : 2:length(seuratObjs)) {
+        features <- c(features, rownames(seuratObjs[[i]]))
+      }
+    }
+
+    print(paste0('Total features in common: ', length(features)))
+
     # dims here means : #Number of PCs to use in the weighting procedure
-    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F)
-    DefaultAssay(seuratObj) <- "integrated"
+    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F, features.to.integrate = features, new.assay.name = "Integrated")
+    DefaultAssay(seuratObj) <- "Integrated"
 
     # This will prevent repeating this step downstream
     seuratObj <- MarkStepRun(seuratObj, 'NormalizeData')
