@@ -572,12 +572,16 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   # cc.genes
   # g2m.genes
   if (length(cc.genes) != 97) {
-    stop('Something went wrong loading gene list')
+    stop('Something went wrong loading cc.genes list')
+  }
+
+  if (length(g2m.genes.orig) != 200) {
+    stop('Something went wrong loading g2m.genes list')
   }
 
   # We can segregate this list into markers of G2/M phase and markers of S-phase
   s.genes <- cc.genes[1:43]
-  g2m.genes <- unique(c(g2m.genes, cc.genes[44:97]))
+  g2m.genes <- unique(c(g2m.genes.orig, cc.genes[44:97]))
 
   s.genes <- s.genes[which(s.genes %in% rownames(seuratObj))]
   g2m.genes <- g2m.genes[which(g2m.genes %in% rownames(seuratObj))]
