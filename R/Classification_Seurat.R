@@ -173,7 +173,7 @@ predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
 
           if(length(ModuleScoreGeneLists[[GeneList]])>0){
 
-            MS.temp <-  try(AddModuleScore_avg(SeurObj=tempSER,
+            MS.temp <-  try(AddModuleScoreAvg(SeurObj=tempSER,
                                                   genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                   genes.pool = NULL,
                                                   n.bin = 25,
@@ -187,7 +187,7 @@ predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
               #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
               print("bin size 25 was problematic... trying 30")
-              MS.temp <-  try(AddModuleScore_avg(SeurObj=tempSER,
+              MS.temp <-  try(AddModuleScoreAvg(SeurObj=tempSER,
                                                     genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                     genes.pool = NULL,
                                                     n.bin = 30,
@@ -201,7 +201,7 @@ predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
                 #TODO: is there a quantitative way to best estimate n.bin based on number of genes?
 
                 print("bin size 30 was problematic... trying 50")
-                MS.temp <-  try(AddModuleScore_avg(SeurObj =tempSER,
+                MS.temp <-  try(AddModuleScoreAvg(SeurObj =tempSER,
                                                       genes.list = list(ModuleScoreGeneLists[[GeneList]]),
                                                       genes.pool = NULL,
                                                       n.bin = 50,

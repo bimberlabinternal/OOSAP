@@ -18,7 +18,7 @@ g2m.features,
 set.ident = FALSE) {
     enrich.name <- 'Cell Cycle'
     genes.list <- list('S.Score' = s.features, 'G2M.Score' = g2m.features)
-    object <- AddModuleScore(
+    object <- AddModuleScoreAvg(
     SeurObj = object,
     genes.list = genes.list,
     enrich.name = enrich.name,
@@ -84,7 +84,7 @@ LengthCheck <- function(values, cutoff = 0) {
 }
 
 
-#' @title AddModuleScore_avg
+#' @title AddModuleScoreAvg
 #'
 #' @description Instead of the status quo score of Seurat which is 1 score 1 gene, this function takes a list of genes and computes per set, the average of the individual scores.
 #' @param object, A Seurat object.
@@ -99,7 +99,7 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_AddModuleScore
 #' @export
-AddModuleScore_avg <- function(
+AddModuleScoreAvg <- function(
 #May-2019 version
 
 #this is a modified version of the AddModuleScore
