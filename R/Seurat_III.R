@@ -866,8 +866,6 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
     lineMagnitude <- function(x1, y1, x2, y2) sqrt((x2-x1)^2+(y2-y1)^2)
     ans <- NULL
     ix <- iy <- 0   # intersecting point
-    print(ix)
-    print(iy)
     lineMag <- lineMagnitude(x1, y1, x2, y2)
     if (any(lineMag < 0.00000001)) { # modified for vectorization by BAH
       #warning("short segment")
@@ -876,12 +874,16 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
     }
     u <- (((px - x1) * (x2 - x1)) + ((py - y1) * (y2 - y1)))
     u <- u / (lineMag * lineMag)
-    if (any((u < 0.00001) || (u > 1))) { # BAH added any to vectorize
+    if (any(u < 0.00001) || any(u > 1)) { # BAH added any to vectorize
       ## closest point does not fall within the line segment, take the shorter distance
       ## to an endpoint
       ix <- lineMagnitude(px, py, x1, y1)
       iy <- lineMagnitude(px, py, x2, y2)
-      #TODO: giving warning.  needs any() or all()??
+      #TODO: giving warning.  maybe if needs any() or all()??
+      if (length(ix > 1) || length(iy) > 1) {
+        warn(paste0('length GT 1: ', length(ix), '/', length(iy)))
+      }
+
       if (ix > iy)  ans <- iy
       else ans <- ix
     } else {
@@ -924,9 +926,8 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
   if (ignore.concavity) concave <- TRUE
 
   if (!concave) {
-    print("Your curve doesn't appear to be concave")
+    stop("Your curve doesn't appear to be concave")
   }
-
 
   # Calculate the orthogonal distances
   if (is.na(min.x)){
