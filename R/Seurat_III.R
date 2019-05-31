@@ -572,7 +572,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   # cc.genes
   # g2m.genes
   if (length(cc.genes) != 97) {
-    stop('Something went wrong downloading gene list')
+    stop('Something went wrong loading gene list')
   }
 
   # We can segregate this list into markers of G2/M phase and markers of S-phase
@@ -583,7 +583,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   g2m.genes <- g2m.genes[which(g2m.genes %in% rownames(seuratObj))]
 
   if (length(g2m.genes) < 20 || length(s.genes) < 20) {
-    print(paste0("Warning, the number of g2m (", length(g2m.genes), ") and/or s genes (", length(s.genes), ") in your data has low coverage"))
+    print(paste0("Warning, the number of g2m (", length(g2m.genes), ") and/or s genes (", length(s.genes), ") in your data is low"))
   }
 
   #proceeds <20 but warns, but <5 is fishy and cant use
@@ -822,6 +822,7 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
   ##
   ##========================================================
   #' @examples
+  #' \dontrun{
   #' tmp <- FindElbow(c(0.9, 1.1, 1.1, 1.9, 2.5, 2.8, 4.9, 8.5),
   #' 	plot = TRUE) # wandering
   #' tmp <- FindElbow(c(0.9, 1.0, 1.2, 1.3, 1.5, 1.5, 10.0, 22.0),
@@ -838,7 +839,7 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
   #' cs <- cumsum(vv)
   #' tmp <- FindElbow(vv, plot = TRUE)
   #' tmp <- FindElbow(cs, plot = TRUE)
-  #'
+  #' }
 
   distancePointLine <- function(x, y, slope, intercept) {
     ## x, y is the point to test.
@@ -881,7 +882,7 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
       iy <- lineMagnitude(px, py, x2, y2)
       #TODO: giving warning.  maybe if needs any() or all()??
       if (length(ix > 1) || length(iy) > 1) {
-        warn(paste0('length GT 1: ', length(ix), '/', length(iy)))
+        warning(paste0('length GT 1: ', length(ix), '/', length(iy)))
       }
 
       if (ix > iy)  ans <- iy
@@ -1317,7 +1318,7 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
                                             dispersion.cutoff = c(fvg.y.cutoff, Inf),
                                             mean.cutoff = c(fvg.x.low.cutoff, fvg.x.high.cutoff),
                                             saveFile = NULL, doCellFilter=T,
-                                            RemoveCellCycle = F, doJackSaw = F,
+                                            RemoveCellCycle = F,
                                             nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
                                             nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low)
 
@@ -1429,19 +1430,38 @@ WilcoxDETest <- function(
 }
 
 #' @export
+GetXYDataFromPlot <- function(plot, cellNames) {
+  xynames <- Seurat:::GetXYAesthetics(plot = plot)
+
+  plot.data <- plot$data[cellNames, ]
+  names(plot.data)[names(plot.data) == xynames$x] <- 'x'
+  names(plot.data)[names(plot.data) == xynames$y] <- 'y'
+
+  return(plot.data)
+}
+
+#' @export
 #' @import ggplot2
-LabelClonesOnPlot <- function(plot, cloneNames = NULL, shapes = NULL, colors = NULL) {
-  xynames <- GetXYAesthetics(plot = plot)
+AddClonesToPlot <- function(seuratObject, plot) {
+  cellNames <- colnames(seuratObject)[!is.na(seuratObject$CloneNames)]
+  plot.data <- GetXYDataFromPlot(plot, cellNames)
+  plot.data$CloneName <- seuratObject$CloneNames[!is.na(seuratObject$CloneNames)]
 
-  label.data <- data.frame(
-    x = xynames$x,
-    y = xynames$y
-  )
-
-  plot <- plot + geom.point(
-    mapping = aes_string(x = xynames$x, y = xynames$y, label = 'labels'),
-    data = label.data,
+  plot <- plot + geom_point(
+  mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName'),
+  data = plot.data
 
   )
+
   return(plot)
+}
+
+#' @export
+FilterCloneNames <- function(seuratObject, minValue) {
+  ct <- table(seuratObject$CloneNames)
+  ct <- ct[ct < minValue]
+
+  seuratObject$CloneNames[seuratObject$CloneNames %in% names(ct)] <- NA
+
+  return(seuratObject)
 }

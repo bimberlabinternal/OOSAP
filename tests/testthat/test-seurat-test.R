@@ -7,8 +7,8 @@ outPrefix <- paste0(outDir, 'testData')
 resolutionToUse <- 0.6
 
 data <- list(
-  'Set1' = '../testdata/10XCounts/247-1-CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
-  'Set2' = '../testdata/10xCounts/248-1-CellRanger3/raw_feature_bc_matrix'
+  'Set1' = '../testdata/10XCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
+  'Set2' = '../testdata/10xCounts/CellRanger3/raw_feature_bc_matrix'
 )
 
 seuratObjs <- list()
