@@ -2,19 +2,19 @@
 Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 
-#' @title Read and Filter 10X files. old name readAndFilter10xData.
+#' @title Read and Filter 10X files. old name ReadAndFilter10xData.
 #'
-#' @description Reads in 10X files using Read10X and filters abberent cells using performEmptyDropletFiltering and returns a Seurat object.
+#' @description Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords ReadAndFilter10X
 #' @export
 #' @examples
-readAndFilter10xData <- function(dataDir, datasetName) {
+ReadAndFilter10xData <- function(dataDir, datasetName) {
   seuratRawData <- Read10X(data.dir = dataDir)
-  seuratRawData <- performEmptyDropletFiltering(seuratRawData)
+  seuratRawData <- PerformEmptyDropletFiltering(seuratRawData)
 
-  seuratObj <- createSeuratObj(seuratRawData, project = datasetName)
+  seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
   printQcPlots(seuratObj)
 
   return(seuratObj)
@@ -24,16 +24,16 @@ readAndFilter10xData <- function(dataDir, datasetName) {
 
 #' @title Create a Seurat 3 object
 #'
-#' @description Create Seurat Object from Read10X(). old name createSeuratObj.
+#' @description Create Seurat Object from Read10X(). old name CreateSeuratObj.
 #' @param seuratData, A Seurat input data from Read10X().
 #' @param project, Sets the project name for the Seurat object.
 #' @param minFeatures, Include cells where at least this many features are detected.
 #' @param minCells, Include features detected in at least this many cells.
 #' @return A Seurat object with p.mito calculated.
-#' @keywords createSeuratObj
+#' @keywords CreateSeuratObj
 #' @export
 #' @examples
-createSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
+CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, MitoGenesPattern = "^MT-"){
   seuratObj <- CreateSeuratObject(counts = seuratData, min.cells = minCells, min.features = minFeatures, project = project)
 
   mito.features <- grep(pattern = MitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
@@ -81,7 +81,7 @@ printQcPlots <- function(seuratObj) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-performEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
+PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
   br.out <- barcodeRanks(seuratRawData)
 
   # Making a plot.
@@ -188,11 +188,11 @@ markStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @keywords SerIII_template
 #' @export
 #' @examples
-mergeSeuratObjs <- function(seuratObjs, data=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F){
-  if(is.null(data)) warning("data is NULL")
+mergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F){
+  nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
 
-  for (exptNum in names(data)) {
-    print(paste0('adding expt: ', exptNum))
+  for (exptNum in nameList) {
+    print(paste0('adding dataset: ', exptNum))
     prefix <- paste0(exptNum)
     so <- seuratObjs[[exptNum]]
 
@@ -225,16 +225,16 @@ mergeSeuratObjs <- function(seuratObjs, data=NULL, alignData = T, MaxCCAspaceDim
   seuratObj <- NULL
   if (alignData && length(seuratObjs) > 1) {
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = T)
+    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = F)
     # dims here means : #Number of PCs to use in the weighting procedure
-    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight)
+    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F)
     DefaultAssay(seuratObj) <- "integrated"
 
     # This will prevent repeating this step downstream
     seuratObj <- markStepRun(seuratObj, 'NormalizeData')
   }
   else {
-    for (exptNum in names(data)) {
+    for (exptNum in nameList) {
       if (is.null(seuratObj)) {
         seuratObj <- seuratObjs[[exptNum]]
       } else {
@@ -279,7 +279,7 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- markStepRun(seuratObj, 'FilterCells')
   }
 
-  if ((forceReCalc | !hasStepRun(seuratObj, 'NormalizeData')) & DefaultAssay(seuratObj)=="RNA") {
+  if (forceReCalc | !hasStepRun(seuratObj, 'NormalizeData')) {
     seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
     seuratObj <- markStepRun(seuratObj, 'NormalizeData', saveFile)
   }
@@ -294,20 +294,13 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- markStepRun(seuratObj, 'ScaleData')
   }
 
-  #Eisa: if doCellCycle=T, do we actually need to run PCA here?  Wont it be repeated first using CC genes, and then again for variable genes?
-  #Do we actually want to reorder like I do here?
   if (doCellCycle & (forceReCalc | !hasStepRun(seuratObj, 'CellCycle'))) {
-    seuratObj <- removeCellCycle(seuratObj)
+    seuratObj <- RemoveCellCycle(seuratObj)
     seuratObj <- markStepRun(seuratObj, 'CellCycle', saveFile)
   }
 
+  vg <- VariableFeatures(object = seuratObj)
   if (forceReCalc | !hasStepRun(seuratObj, 'RunPCA')) {
-    vg <- VariableFeatures(object = seuratObj)
-    print(paste0('Total variable genes: ', length(vg)))
-    if (!is.null(variableGeneTable)){
-      write.table(sort(vg), file = variableGeneTable, sep = '\t', row.names = F, quote = F, col.names = F)
-    }
-
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- markStepRun(seuratObj, 'RunPCA')
   }
@@ -327,7 +320,10 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- markStepRun(seuratObj, 'ScoreJackStraw')
   }
 
-  print(paste0('Variable genes: ', length(x = VariableFeatures(object = seuratObj))))
+  print(paste0('Total variable genes: ', length(vg)))
+  if (!is.null(variableGeneTable)){
+    write.table(sort(vg), file = variableGeneTable, sep = '\t', row.names = F, quote = F, col.names = F)
+  }
 
   if (printDefaultPlots){
     print(VizDimLoadings(object = seuratObj, dims = 1:2))
@@ -352,12 +348,14 @@ processSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 #' @keywords SerIII_template
 #' @export
 #' @examples
-downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.'){
+downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T){
   if (is.null(seuratObject[['BarcodePrefix']])){
     stop('Seurat object lacks BarcodePrefix column')
   }
 
+  i <- 0
   for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
+    i <- i + 1
     print(paste0('Adding TCR clonotypes for prefix: ', barcodePrefix))
 
     vloupeId <- findMatchedVloupe(barcodePrefix)
@@ -371,7 +369,8 @@ downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.'){
       stop(paste0('Unable to download clonotype file for prefix: ', barcodePrefix))
     }
 
-    seuratObject <- appendTcrClonotypes(seuratObject, clonotypeFile, barcodePrefix)
+    doDropExisting <- i == 1 && dropExisting
+    seuratObject <- appendTcrClonotypes(seuratObject, clonotypeFile, barcodePrefix = barcodePrefix, dropExisting = doDropExisting)
   }
 
   return(seuratObject)
@@ -386,7 +385,7 @@ downloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.'){
 #' @keywords SerIII_template
 #' @export
 #' @examples
-appendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL){
+appendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F){
   tcr <- processAndAggregateTcrClonotypes(clonotypeFile)
 
   if (!is.null(barcodePrefix)){
@@ -419,11 +418,17 @@ appendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
     toAdd <- as.character(merged[[colName]])
     names(toAdd) <- merged[['barcode']]
 
-    if (!(colName %in% names(seuratObject@meta.data))) {
-      seuratObject[[colName]] <- c(NA)
+    if ((colName %in% names(seuratObject@meta.data)) && dropExisting) {
+      seuratObject@meta.data[colName] <- NULL
     }
 
-    toUpdate <- as.character(seuratObject[[colName]])
+    if (!(colName %in% names(seuratObject@meta.data))) {
+      toUpdate <- rep(NA, ncol(seuratObject))
+    } else {
+      toUpdate <- unlist(seuratObject[[colName]])
+    }
+
+    names(toUpdate) <- colnames(seuratObject)
     toUpdate[datasetSelect] <- toAdd
     seuratObject[[colName]] <- as.factor(toUpdate)
   }
@@ -562,11 +567,11 @@ processAndAggregateTcrClonotypes <- function(clonotypeFile){
     colNameOpt='rname'
   )
 
-  labelDf$LabelCol <- coalesce(labelDf$displayname, labelDf$clonename)
+  labelDf$LabelCol <- coalesce(as.character(labelDf$displayname), as.character(labelDf$clonename))
 
   labelDf <- labelDf %>%
     group_by(chain, cdr3) %>%
-    summarize(CloneName = paste(sort(unique(LabelCol)), collapse = ","))
+    summarize(CloneName = paste0(sort(unique(LabelCol)), collapse = ","))
 
   tcr <- merge(tcr, labelDf, by.x = c('chain', 'cdr3'), by.y = c('chain', 'cdr3'), all.x = TRUE, all.y = FALSE)
 
@@ -586,25 +591,24 @@ processAndAggregateTcrClonotypes <- function(clonotypeFile){
 
   # Summarize, grouping by barcode
   tcr <- tcr %>% group_by(barcode) %>% summarize(
-    ChainCDR3s = paste(sort(unique(ChainCDR3s)), collapse = ","),
-    CDR3s = paste(sort(unique(cdr3)), collapse = ","),
-    TRA = paste(sort(unique(as.character(TRA))), collapse = ","),
-    TRB = paste(sort(unique(as.character(TRB))), collapse = ","),
-    TRD = paste(sort(unique(as.character(TRD))), collapse = ","),
-    TRG = paste(sort(unique(as.character(TRG))), collapse = ","),
-    TRAV = paste(sort(unique(as.character(TRAV))), collapse = ","),
-    TRBV = paste(sort(unique(as.character(TRBV))), collapse = ","),
-    TRDV = paste(sort(unique(as.character(TRDV))), collapse = ","),
-    TRGV = paste(sort(unique(as.character(TRGV))), collapse = ","),
+    ChainCDR3s = paste0(sort(unique(ChainCDR3s)), collapse = ","),
+    CDR3s = paste0(sort(unique(cdr3)), collapse = ","),
+    TRA = paste0(sort(unique(as.character(TRA))), collapse = ","),
+    TRB = paste0(sort(unique(as.character(TRB))), collapse = ","),
+    TRD = paste0(sort(unique(as.character(TRD))), collapse = ","),
+    TRG = paste0(sort(unique(as.character(TRG))), collapse = ","),
+    TRAV = paste0(sort(unique(as.character(TRAV))), collapse = ","),
+    TRBV = paste0(sort(unique(as.character(TRBV))), collapse = ","),
+    TRDV = paste0(sort(unique(as.character(TRDV))), collapse = ","),
+    TRGV = paste0(sort(unique(as.character(TRGV))), collapse = ","),
 
-    CloneNames = paste(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
+    CloneNames = paste0(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
   )
 
   # Note: we should attempt to produce a more specfic call, assuming we have data from multiple chains
   # The intent of this was to allow a A- or B-only hit to produce a call, but if we have both A/B, take their intersect.
 
-  tcr$CloneNames <- sapply(strsplit(as.character(tcr$CloneNames), ",", fixed = TRUE), function(x) paste(naturalsort(unique(x)), collapse = ","))
-  tcr$CloneNames[tcr$CloneNames == 'NA'] <- NA
+  tcr$CloneNames <- sapply(strsplit(as.character(tcr$CloneNames), ",", fixed = TRUE), function(x) paste0(naturalsort(unique(x)), collapse = ","))
 
   tcr$barcode <- as.factor(tcr$barcode)
   for (colName in colnames(tcr)[colnames(tcr) != 'barcode']) {
@@ -626,20 +630,16 @@ processAndAggregateTcrClonotypes <- function(clonotypeFile){
 #' @keywords SerIII_template
 #' @export
 #' @examples
-removeCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
+RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   print("Performing cell cycle cleaning ...")
 
-  # This might provide a template for how we should include external data like these in a module: http://r-pkgs.had.co.nz/data.html
-  con <- url("https://raw.githubusercontent.com/bbimber/rnaseq/master/data/cellCycle/regev_lab_cell_cycle_genes.txt")
-  cc.genes <- readLines(con = con, warn = F)
-  close(con)
+  # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
+  # and stored using use_data(internal = T) (https://github.com/r-lib/usethis and use_data)
+  # cc.genes
+  # g2m.genes
   if (length(cc.genes) != 97) {
     stop('Something went wrong downloading gene list')
   }
-
-  con <- url("https://raw.githubusercontent.com/bbimber/rnaseq/master/data/cellCycle/G2M.txt")
-  g2m.genes <- readLines(con =  con, warn = F)
-  close(con)
 
   # We can segregate this list into markers of G2/M phase and markers of S-phase
   s.genes <- cc.genes[1:43]
@@ -656,7 +656,7 @@ removeCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   if (length(g2m.genes) < 5 || length(s.genes) < 5) {
     print("Error, the number of g2m and/or s genes < 5")
     #break()
-    seuratObj <- markStepRun(seuratObj, 'FAIL_removeCellCycle')
+    seuratObj <- markStepRun(seuratObj, 'FAIL_RemoveCellCycle')
     return(seuratObj) # for pipeline not breaking,... but
   }
 
@@ -1307,7 +1307,7 @@ MakeSerObjs_10XFolders <- function(counts.path = NULL,
 
       if (!file.exists(paste(save.path,"/",FileNames2Save[xN], "_SeuratObj.rds", sep=""))){
 
-        SeuratObjs <- readAndFilter10xData(dataDir=exp.dirs[xN],
+        SeuratObjs <- ReadAndFilter10xData(dataDir=exp.dirs[xN],
                                                   datasetName=paste(ProjName, FileNames2Save[xN], sep="-"))
 
         # print("Reading in 10X folder...")
@@ -1316,7 +1316,7 @@ MakeSerObjs_10XFolders <- function(counts.path = NULL,
         # print("Converting to Seurat Obj....")
         # rownames(Seurat10X)
         #
-        # SeuratObjs <- createSeuratObj(seuratData = Seurat10X,
+        # SeuratObjs <- CreateSeuratObj(seuratData = Seurat10X,
         #                                      minCells = min.cells,   #genes expressed in >= 5 cells
         #                                      minFeatures = min.genes, #Keep all cells with at least 200 detected genes
         #                                      project = paste(ProjName, FileNames2Save[xN], sep="-"))
@@ -1551,4 +1551,20 @@ WilcoxDETest <- function(
     }
   )
   return(data.frame(p_val, row.names = rownames(x = object)))
+}
+
+LabelClonesOnPlot <- function(plot, cloneNames = NULL, shapes = NULL, colors = NULL) {
+  xynames <- GetXYAesthetics(plot = plot)
+
+  label.data <- data.frame(
+    x = xynames$x,
+    y = xynames$y
+  )
+
+  plot <- plot + geom.point(
+    mapping = aes_string(x = xynames$x, y = xynames$y, label = 'labels'),
+    data = label.data,
+
+  )
+  return(plot)
 }

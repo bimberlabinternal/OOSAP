@@ -234,6 +234,7 @@ random.seed = 1, returnScore = F) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
+#' @importFrom fitdistrplus fitdist
 #' @examples
 HTODemux2 <- function(
   object,
