@@ -193,9 +193,20 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
   if (alignData && length(seuratObjs) > 1) {
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
     anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = F)
+
+    #always run using intersection of all features
+    features <- rownames(seuratObjs[[1]])
+    if (length(seuratObjs) > 1) {
+      for (i : 2:length(seuratObjs)) {
+        features <- c(features, rownames(seuratObjs[[i]]))
+      }
+    }
+
+    print(paste0('Total features in common: ', length(features)))
+
     # dims here means : #Number of PCs to use in the weighting procedure
-    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F)
-    DefaultAssay(seuratObj) <- "integrated"
+    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F, features.to.integrate = features, new.assay.name = "Integrated")
+    DefaultAssay(seuratObj) <- "Integrated"
 
     # This will prevent repeating this step downstream
     seuratObj <- MarkStepRun(seuratObj, 'NormalizeData')
@@ -572,12 +583,16 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   # cc.genes
   # g2m.genes
   if (length(cc.genes) != 97) {
-    stop('Something went wrong loading gene list')
+    stop('Something went wrong loading cc.genes list')
+  }
+
+  if (length(g2m.genes.orig) != 200) {
+    stop('Something went wrong loading g2m.genes list')
   }
 
   # We can segregate this list into markers of G2/M phase and markers of S-phase
   s.genes <- cc.genes[1:43]
-  g2m.genes <- unique(c(g2m.genes, cc.genes[44:97]))
+  g2m.genes <- unique(c(g2m.genes.orig, cc.genes[44:97]))
 
   s.genes <- s.genes[which(s.genes %in% rownames(seuratObj))]
   g2m.genes <- g2m.genes[which(g2m.genes %in% rownames(seuratObj))]
