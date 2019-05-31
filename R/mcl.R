@@ -314,7 +314,29 @@ ColorTheme <- function(){
 #' @keywords SerIII_template
 #' @export
 #' @examples
-range01 <- function(x){(x-min(x))/(max(x)-min(x))}
+range01 <- function(x, MaxN = NULL, MinN = NULL){
+  if(is.null(MaxN)) MaxN = max(x)
+  if(is.null(MinN)) MinN = min(x)
+
+  (x - MinN)/(MaxN - MinN)
+}
+
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+#' @examples
+range01b <- function(x, MaxN = 10, MinN = -10){
+  if(is.null(MaxN)) MaxN = max(x)
+  if(is.null(MinN)) MinN = min(x)
+
+  (x - MinN)/(MaxN - MinN)
+}
+
+
 
 #' @title A Title
 #'
