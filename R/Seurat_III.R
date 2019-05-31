@@ -131,7 +131,7 @@ PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01)
 
 
 
-hasStepRun <- function(seuratObj, name) {
+HasStepRun <- function(seuratObj, name) {
   return(!is.null(seuratObj@misc[[paste0(name, 'Run')]]))
 }
 
@@ -171,14 +171,14 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
     }
 
     if (alignData && length(seuratObjs) > 1) {
-      if (!hasStepRun(so, 'NormalizeData')) {
+      if (!HasStepRun(so, 'NormalizeData')) {
         print('Normalizing')
         so <- NormalizeData(object = so, verbose = F)
       } else {
         print('Normalization performed')
       }
 
-      if (!hasStepRun(so, 'FindVariableFeatures')) {
+      if (!HasStepRun(so, 'FindVariableFeatures')) {
         print('Finding variable features')
         so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = 2000)
       } else {
@@ -233,7 +233,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
                            variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', printDefaultPlots = T,
                            npcs = 50){
 
-  if (doCellFilter & (forceReCalc | !hasStepRun(seuratObj, 'FilterCells'))) {
+  if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
     seuratObj <- subset(x = seuratObj, subset = nCount_RNA > nGene.low & nCount_RNA < nGene.high)
@@ -245,43 +245,43 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- MarkStepRun(seuratObj, 'FilterCells')
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'NormalizeData')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData')) {
     seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'NormalizeData', saveFile)
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'FindVariableFeatures')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
     seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod)
     seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'ScaleData')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
     seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "percent.mito"), display.progress = F, verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
   }
 
-  if (doCellCycle & (forceReCalc | !hasStepRun(seuratObj, 'CellCycle'))) {
+  if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
     seuratObj <- RemoveCellCycle(seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
   }
 
   vg <- VariableFeatures(object = seuratObj)
-  if (forceReCalc | !hasStepRun(seuratObj, 'RunPCA')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA')) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- MarkStepRun(seuratObj, 'RunPCA')
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'ProjectDim')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'ProjectDim')) {
     seuratObj <- ProjectDim(object = seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'ProjectDim')
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'JackStraw')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'JackStraw')) {
     seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'ScoreJackStraw')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'ScoreJackStraw')) {
     seuratObj <- ScoreJackStraw(object = seuratObj, dims = 1:20)
     seuratObj <- MarkStepRun(seuratObj, 'ScoreJackStraw')
   }
@@ -644,12 +644,12 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     dimsToUse <- 1:elbow
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'FindNeighbors')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'FindNeighbors')) {
     seuratObj <- FindNeighbors(object = seuratObj, dims = dimsToUse)
     seuratObj <- MarkStepRun(seuratObj, 'FindNeighbors')
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'FindClusters')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'FindClusters')) {
     for (resolution in c(0.2, 0.4, 0.8, 1.2, 0.6)){
       seuratObj <- FindClusters(object = seuratObj, resolution = resolution)
       seuratObj[[paste0("ClusterNames_", resolution)]] <- Idents(object = seuratObj, verbose = F)
@@ -657,7 +657,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     }
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'RunTSNE')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE')) {
     # To avoid Rtsne 'perplexity is too large for the number of samples' error.
     # See check here: https://github.com/jkrijthe/Rtsne/blob/ebed20f612712987fd160386132c17289169b4d8/R/utils.R
     # See also: https://github.com/satijalab/seurat/issues/167
@@ -674,7 +674,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
 
-  if (forceReCalc | !hasStepRun(seuratObj, 'RunUMAP')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP')) {
     seuratObj <- RunUMAP(seuratObj,
                            dims = dimsToUse,
                            n.neighbors = 40L,
