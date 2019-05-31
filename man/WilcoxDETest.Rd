@@ -15,4 +15,3 @@ A modified Seurat object.
 \description{
 A description
 }
-\keyword{SerIII_template}

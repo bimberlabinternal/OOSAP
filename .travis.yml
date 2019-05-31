@@ -1,12 +1,15 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
-language: r
+language: R
 sudo: required
 cache: packages
+use_bioc: true
 
 os:
   - linux
   - osx
-  - windows
 
 r: release
+
+bioc_packages:
+  DropletUtils

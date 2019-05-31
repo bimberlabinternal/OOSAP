@@ -5,65 +5,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
-SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
-                                save.path=NA, maxPCAcomps=10, nameID=""){
-
-  if(is.na(save.path)){
-    stop("save.path is NA")
-  }
-
-  require(data.table)
-
-  tempDT <- data.table(cbind(1:ncol(serObj), colnames(serObj)))
-  rownames(tempDT) <- colnames(serObj)
-  colnames(tempDT) <- c("nID", "cID")
-
-  #tempDT <- merge(tempDT, )
-
-  if("tsne" %in% reductions) {
-    if(is.null(serObj@reductions$tsne)) print("tsne slot NULL") else {
-
-    }
-    tsneDT <- data.table(serObj@reductions$tsne@cell.embeddings)
-    tsneDT$cID <- rownames(serObj@reductions$tsne@cell.embeddings)
-    tempDT <- merge(tempDT, tsneDT, by="cID")
-  }
-  if("pca" %in% reductions) {
-    if(is.null(serObj@reductions$pca)) print("pca slot NULL") else {
-      pcaDT <- data.table(serObj@reductions$pca@cell.embeddings[,1:maxPCAcomps])
-      pcaDT$cID <- rownames(serObj@reductions$pca@cell.embeddings)
-      tempDT <- merge(tempDT, pcaDT, by="cID")
-    }
-
-  }
-  if("umap" %in% reductions) {
-    if(is.null(serObj@reductions$umap)) print("umap slot NULL") else {
-      umapDT <- data.table(serObj@reductions$umap@cell.embeddings)
-      umapDT$cID <- rownames(serObj@reductions$umap@cell.embeddings)
-      tempDT <- merge(tempDT, umapDT, by="cID")
-    }
-
-  }
-
-  print("saving DimRedux")
-  save.path <- paste(save.path, "/", nameID, "_DimReduxComps.csv", sep="")
-  write.csv(tempDT, file = save.path, row.names=TRUE, col.names = TRUE)
-
-
-}
-
-
-
-
-#' @title A Title
-#'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
 ClassifyCellsCustom <- function(Classifier.rds.path = "",
                                        ClassifierNames="",
                                        testing.data, log10T=T, returnTraining=F){
@@ -162,7 +103,6 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
                            classification.path = NULL, file.select = NULL,
                            TrainedClassifiers.path = "../PBMC3k/data",

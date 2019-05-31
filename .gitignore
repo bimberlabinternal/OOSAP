@@ -4,4 +4,4 @@
 *.iws
 .Rproj.user
 .Rhistory
-
+..Rcheck*

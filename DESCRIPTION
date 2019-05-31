@@ -4,7 +4,7 @@ Title: OHSU-ONPRC Single-cell Analysis Package
 Version: 0.1.0
 Author: Bimber Lab
 Maintainer: The package maintainer <mahyarie@ohsu.edu>
-Description: The goal of this package is bringing together tools and piplines for the analysis of single-cell RNASeq data. 
+Description: The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
 License: Open
 Encoding: UTF-8
 LazyData: true
@@ -18,11 +18,12 @@ Imports:
     Matrix,
     ggplot2,
     cowplot,
-    dtplyr,
-    reshape2,
-    ggplot2,
     cluster,
+    knitr,
+    dtplyr,
     fitdistrplus
 Suggests:
-    ggvis
+    ggvis,
+    testthat (>= 2.1.0),
+    lintr
 RoxygenNote: 6.1.1
