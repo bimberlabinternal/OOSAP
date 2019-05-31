@@ -10,3 +10,6 @@ os:
   - osx
 
 r: release
+
+bioc_packages:
+  DropletUtils
