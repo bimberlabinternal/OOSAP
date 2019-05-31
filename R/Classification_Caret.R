@@ -1,3 +1,8 @@
+
+
+
+
+
 #' @title A Title
 #'
 #' @description A description
@@ -154,6 +159,8 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @keywords SerIII_template
 #' @export
 MultiClassifier_Cells <- function (object_train,
+<<<<<<< HEAD
+=======
                                           object_test,
                                           training.genes = NULL,
                                           Y_Train_True = NULL,
@@ -732,6 +739,7 @@ MultiClassifier_Cells <- function (object_train,
 #' @keywords SerIII_template
 #' @export
 MultiClassifier_Cells <- function (object_train,
+>>>>>>> 56629284cbb085c7fe5fe229531214f2902365a9
                                    object_test,
                                    training.genes = NULL,
                                    Y_Train_True = NULL,
