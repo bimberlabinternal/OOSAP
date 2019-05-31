@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/bimberlabinternal/OOSAP.svg?branch=Dev)](https://travis-ci.com/bimberlabinternal/OOSAP)
+
 # OOSAP :: alpha - development
 
 OHSU-ONPRC Single-cell Analysis Package (alpha 1)
@@ -10,7 +12,12 @@ The goal of this package is bringing together tools and piplines for the analysi
 # install.packages("devtools")
 
 library(devtools)
+
+#Latest stable version:
 install_github("bimberlabinternal/OOSAP")
+
+#Or development:
+install_github("bimberlabinternal/OOSAP@Dev")
 
 ```
 

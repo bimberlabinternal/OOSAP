@@ -5,7 +5,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 GetTraingStats <- function(ClassifierSet=NA, AvailableTrainConfMatrix="", AvailableTestConfMatrix=""){
 
   tempDF1 <- data.frame(lapply(AvailableTrainConfMatrix, function(conftabN){
@@ -31,7 +30,6 @@ GetTraingStats <- function(ClassifierSet=NA, AvailableTrainConfMatrix="", Availa
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", ScaleVarImp=T){
 
   if(AvailableClassifiers[1]=="") AvailableClassifiers =  names(ClassifierSet)
@@ -70,7 +68,6 @@ GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", Scale
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", testing.data, log10T=T, returnTraining=F){
 
   if(file.exists(Classifier.rds.path)){
@@ -156,7 +153,6 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 MultiClassifier_Cells <- function (object_train,
                                           object_test,
                                           training.genes = NULL,
@@ -735,7 +731,6 @@ MultiClassifier_Cells <- function (object_train,
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 MultiClassifier_Cells <- function (object_train,
                                    object_test,
                                    training.genes = NULL,

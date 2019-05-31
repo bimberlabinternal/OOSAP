@@ -7,7 +7,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 CTL_Immune_GeneList <- function(QuickGO.path="./data/QuickGO"){
 
   #This Function is used to store lists of interesting gene sets. They can be useful for phenotyping various cell type and their states.
@@ -183,7 +182,6 @@ CTL_Immune_GeneList <- function(QuickGO.path="./data/QuickGO"){
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 RhesusGeneDavidConv <- function(ColNames2Conv, RhesusConvDavid.path, ENSMB.tag = "ENSMM", returnFull=F){
 
   #Seurat 3 cant update the gene names !!
