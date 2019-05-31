@@ -33,19 +33,20 @@ CTL_Immune_GeneList <- function(QuickGO.path="./data/QuickGO"){
 
   SGS.LS <- list()
   #### IxNG to IFNG
-  SGS.LS$WBC                <- c("PTPRC")
+  SGS.LS$WBC                      <- c("PTPRC")
 
-    SGS.LS$Lymphoid           <- c("PTPRC", "CD2", "CD5", "RPL21", "RPL23", "RPL27", "RPL31", "RPL35", "RPS14", "RPS21", "RPS24", "RPS3A", "RPS6", "TGT", "TPI1")
+    #Lymphocytes generally are though of as T cells, B cells, and NK cells.
+    SGS.LS$Lymphoid               <- c("PTPRC", "CD2", "CD5", "RPL21", "RPL23", "RPL27", "RPL31", "RPL35", "RPS14", "RPS21", "RPS24", "RPS3A", "RPS6", "TGT", "TPI1")
 
-      SGS.LS$TCellCanonical     <- c("CD3G", "CD3D", "CD3E")
-      SGS.LS$TCellSecondary     <- c("CD2", "CD5", "CD6")
-      SGS.LS$TCellTranscription <- c("MAL", "LAT", "TCRIM", "CD28", "ZAP70", "FYN", "GATA3", "LEF1", "TCF7", "RUNX2", "STAT4", "SATB1")
-      SGS.LS$CD8Canonical       <- c("CD8A", "CD8B")
-      SGS.LS$MAIT               <- c("CD8A", "CD8B", "CD4", "KLRB1", "DPP4")
-      SGS.LS$CD8Subphenos1      <- c("IL2RB", "KLRC1", "KLRG1", "PRF1", "GNLY", "GZMC", "GZMH", "TBX21")
-      SGS.LS$CD4Canonical       <- c("CD4", "IL7R")
-      SGS.LS$CD4Subphenos1      <- c("NOSIP", "RGS10", "FOXP3", "IL2RA", "LTB")
-      SGS.LS$CD4Subphenos2      <- c("ANK3", "MXI1",  "CTSB")
+      SGS.LS$TCellCanonical       <- c("CD3G", "CD3D", "CD3E") #canonical TCR complex
+      SGS.LS$TCellSecondary       <- c("CD2", "CD5", "CD6")
+      SGS.LS$TCellTranscription   <- c("MAL", "LAT", "TCRIM", "CD28", "ZAP70", "FYN", "GATA3", "LEF1", "TCF7", "RUNX2", "STAT4", "SATB1")
+        SGS.LS$CD8Canonical       <- c("CD8A", "CD8B")
+        SGS.LS$MAIT               <- c("CD8A", "CD8B", "CD4", "KLRB1", "DPP4")
+        SGS.LS$CD8Subphenos1      <- c("IL2RB", "KLRC1", "KLRG1", "PRF1", "GNLY", "GZMC", "GZMH", "TBX21")
+        SGS.LS$CD4Canonical       <- c("CD4", "IL7R")
+        SGS.LS$CD4Subphenos1      <- c("NOSIP", "RGS10", "FOXP3", "IL2RA", "LTB")
+        SGS.LS$CD4Subphenos2      <- c("ANK3", "MXI1",  "CTSB")
 
       SGS.LS$BCellCanonical     <- c("CD19", "MS4A1", "CD79A")
       SGS.LS$BCellSecondary     <- c("CD20", "CD21", "CD22", "FCGR2B") #[2]
