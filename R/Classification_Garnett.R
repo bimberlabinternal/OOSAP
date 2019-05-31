@@ -6,7 +6,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 Garnett_Classification <- function(SerObj,
                                           marker_file_path = "./data/Garnett/pbmc_classification.txt",
                                           reutrnMonObj=F, returnTrainedClassifier=T){

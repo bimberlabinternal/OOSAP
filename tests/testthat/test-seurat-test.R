@@ -7,8 +7,8 @@ outPrefix <- paste0(outDir, 'testData')
 resolutionToUse <- 0.6
 
 data <- list(
-'Set1' = '../testdata/10XCounts/247-1-CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
-'Set2' = '../testdata/10xCounts/248-1-CellRanger3/raw_feature_bc_matrix'
+  'Set1' = '../testdata/10XCounts/247-1-CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
+  'Set2' = '../testdata/10xCounts/248-1-CellRanger3/raw_feature_bc_matrix'
 )
 
 seuratObjs <- list()
@@ -21,7 +21,7 @@ test_that("object count correct", {
 })
 
 
-seuratObj <- mergeSeuratObjs(seuratObjs, data)
+seuratObj <- MergeSeuratObjs(seuratObjs, data)
 rm(seuratObjs)
 
 test_that("cell count correct", {
@@ -29,7 +29,7 @@ test_that("cell count correct", {
 })
 
 vgFile <- 'variableGenes.txt'
-seuratObj <- processSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile)
+seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile)
 
 test_that("variable genes not saved", {
   expect_equal(file.exists(vgFile), T)
@@ -39,7 +39,7 @@ test_that("variable gene list not expected length", {
   expect_equal(nrow(read.table(vgFile, sep = '\t', header = F)), 2000)
 })
 
-seuratObj <- findClustersAndDimRedux(seuratObj)
+seuratObj <- FindClustersAndDimRedux(seuratObj)
 
 test_that("cell count correct", {
   expect_equal(ncol(seuratObj), 7985)
@@ -49,7 +49,7 @@ unlink(vgFile)
 
 mf <- paste0(outPrefix, '.markers.txt')
 md <- paste0(outPrefix, '.markers.rds')
-findMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md)
+FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md)
 
 test_that("marker list not expected length", {
   expect_equal(nrow(read.table(mf, sep = '\t', header = T)), 1065)
@@ -59,7 +59,7 @@ unlink(md)
 unlink(mf)
 
 sf <- paste0(outPrefix, '.summary.txt')
-writeSummaryMetrics(seuratObj, file = sf)
+WriteSummaryMetrics(seuratObj, file = sf)
 
 test_that("summary file not expected length", {
   expect_equal(nrow(read.table(sf, sep = '\t', header = T)), 2)

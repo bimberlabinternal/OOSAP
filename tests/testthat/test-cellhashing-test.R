@@ -14,16 +14,16 @@ DoTest <- function(barcodeFile, summaryFile, whitelistFile) {
         stop('No passing cells')
     }
 
-    generateQcPlots(barcodeData)
+    GenerateQcPlots(barcodeData)
 
-    sc <- generateCellHashCallsSeurat(barcodeData)
+    sc <- GenerateCellHashCallsSeurat(barcodeData)
 
-    mc <- generateCellHashCallsMultiSeq(barcodeData)
+    mc <- GenerateCellHashCallsMultiSeq(barcodeData)
 
-    dt <- processEnsemblHtoCalls(mc, sc, barcodeData, outFile = summaryFile)
+    dt <- ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = summaryFile)
 
     if (!is.null(whitelistFile) && !is.null(summaryFile)){
-        generateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
+        GenerateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
     }
 
     return(list(barcodeData = barcodeData, dt = dt))

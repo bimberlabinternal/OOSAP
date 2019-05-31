@@ -14,7 +14,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 QuickSerCombObjs <- function(save.fig.path="./Figs",
                              working.serobjs.path="./data/10X/ser/proc", returnComboObj=F){
 
@@ -112,8 +111,7 @@ QuickSerCombObjs <- function(save.fig.path="./Figs",
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
-findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, min.y=NA, min.x=NA) {
+FindElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, min.y=NA, min.x=NA) {
 
   # minor modification to debug specic scenarios when fail to find elbow
   # The following helper functions were found at
@@ -132,11 +130,11 @@ findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, m
   ##
   ##========================================================
   #' @examples
-  #' tmp <- findElbow(c(0.9, 1.1, 1.1, 1.9, 2.5, 2.8, 4.9, 8.5),
+  #' tmp <- FindElbow(c(0.9, 1.1, 1.1, 1.9, 2.5, 2.8, 4.9, 8.5),
   #' 	plot = TRUE) # wandering
-  #' tmp <- findElbow(c(0.9, 1.0, 1.2, 1.3, 1.5, 1.5, 10.0, 22.0),
+  #' tmp <- FindElbow(c(0.9, 1.0, 1.2, 1.3, 1.5, 1.5, 10.0, 22.0),
   #' 	plot = TRUE) # late rise
-  #' tmp <- findElbow(c(2, 4, 6, 8, 10, 12, 14, 16)^2,
+  #' tmp <- FindElbow(c(2, 4, 6, 8, 10, 12, 14, 16)^2,
   #' 	plot = TRUE) # gradual, no obvious break
   #'
   #' # Not the usual way to choose the number of PCs:
@@ -146,8 +144,8 @@ findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, m
   #' eigensum <- sum(pca$sdev * pca$sdev)
   #' vv <- 100 * (pca$sdev * pca$sdev/eigensum)
   #' cs <- cumsum(vv)
-  #' tmp <- findElbow(vv, plot = TRUE)
-  #' tmp <- findElbow(cs, plot = TRUE)
+  #' tmp <- FindElbow(vv, plot = TRUE)
+  #' tmp <- FindElbow(cs, plot = TRUE)
   #'
 
   distancePointLine <- function(x, y, slope, intercept) {
@@ -202,7 +200,7 @@ findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, m
 
   # End of helper functions by PB
 
-  ### Now for the actual findElbow function!
+  ### Now for the actual FindElbow function!
 
   # Find the elbow using the method described in
   # stackoverflow.com/a/2022348/633251
@@ -265,7 +263,7 @@ findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, m
 
   if (returnIndex) return(which.max(DF$dist)) else return(DF)
 
-} # end of findElbow
+} # end of FindElbow
 
 
 #' @title A Title
@@ -275,7 +273,6 @@ findElbow <- function(y, plot = FALSE, returnIndex = TRUE, ignore.concavity=F, m
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 ColorTheme <- function(){
   require(RColorBrewer)
 
@@ -313,7 +310,6 @@ ColorTheme <- function(){
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 range01 <- function(x, MaxN = NULL, MinN = NULL){
   if(is.null(MaxN)) MaxN = max(x)
   if(is.null(MinN)) MinN = min(x)
@@ -328,7 +324,6 @@ range01 <- function(x, MaxN = NULL, MinN = NULL){
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 range01b <- function(x, MaxN = 10, MinN = -10){
   if(is.null(MaxN)) MaxN = max(x)
   if(is.null(MinN)) MinN = min(x)
@@ -345,7 +340,6 @@ range01b <- function(x, MaxN = 10, MinN = -10){
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector){
 
 
@@ -383,7 +377,6 @@ MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector){
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, col_vector, namePointBL = F) {
   if(class(labels) == "function") {
     print("no labels, using factor as names")
@@ -431,7 +424,6 @@ PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, co
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 transposedt <- function(dt, varlabel="myVar") {
   require(data.table)
   dtrows = names(dt)
@@ -444,18 +436,6 @@ transposedt <- function(dt, varlabel="myVar") {
   return(dtt)
 }
 
-#' @title A Title
-#'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-gg_color_hue <- function(n) {
-  hues = seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
 
 
 #' @title A Title
@@ -465,7 +445,6 @@ gg_color_hue <- function(n) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 LogAdd <- function(x) {
   mpi <- max(x)
   return(mpi + log(x = sum(exp(x = x - mpi))))
@@ -478,7 +457,6 @@ LogAdd <- function(x) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 SetIfNull <- function(x, default) {
   if(is.null(x = x)){
     return(default)
@@ -495,7 +473,6 @@ SetIfNull <- function(x, default) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 UniformSampleDF_FacPor <- function(x, ClassF, p){
   nr <- NROW(x)
   size <- (nr * p) %/% length(unique(ClassF))

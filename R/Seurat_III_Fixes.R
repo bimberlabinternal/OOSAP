@@ -12,7 +12,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII, cellcycle, AddModuleScore
 #' @export
-#' @examples
 CellCycleScoring <- function (object,
 s.features,
 g2m.features,
@@ -66,7 +65,6 @@ set.ident = FALSE) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 LengthCheck <- function(values, cutoff = 0) {
     #Seurat v2 fx
     # Check the length of components of a list
@@ -101,7 +99,6 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_AddModuleScore
 #' @export
-#' @examples
 AddModuleScore_avg <- function(
 #May-2019 version
 
@@ -234,7 +231,7 @@ random.seed = 1, returnScore = F) {
 #' @keywords SerIII_template
 #' @export
 #' @importFrom fitdistrplus fitdist
-#' @examples
+#' @importFrom cluster clara
 HTODemux2 <- function(
   object,
   assay = "HTO",

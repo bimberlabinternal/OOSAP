@@ -1,30 +1,11 @@
 #' @import Rlabkey
 
-#' @title A Title
+Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
+
+#' @title GetCdnaRecords
 #'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
-#' @examples
-getCdnaId <- function(readsetId, type = 'GEX'){
-  df <- getCdnaRecord(readsetId, type)
-
-  if (nrow(df) > 1) {
-
-  }
-}
-
-#' @title A Title
-#'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-getCdnaRecords <- function(readsetId, type = 'GEX') {
+GetCdnaRecords <- function(readsetId, type = 'GEX') {
   fieldName <- switch(type,
                       'GEX' = 'readsetId',
                       'TCR' = 'enrichedReadsetId',
@@ -45,15 +26,13 @@ getCdnaRecords <- function(readsetId, type = 'GEX') {
   return(df)
 }
 
-#' @title A Title
+#' @title QueryAndApplyCdnaMetadata
 #'
-#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
-#' @examples
-queryAndApplyCdnaMetadata <- function(seuratObj,
+#' @importFrom dplyr %>% group_by_at summarise_at
+QueryAndApplyCdnaMetadata <- function(seuratObj,
                                       fieldSelect = c('rowid', 'sortid/population', 'sortid/stimid/animalId', 'sortid/stimid/date', 'sortid/stimid/stim'),
                                       fieldNames = c('cDNA ID', 'Population', 'SubjectId', 'SampleDate', 'Stim'), overwriteExisting = F) {
   if (length(fieldSelect) != length(fieldNames)) {
@@ -87,8 +66,7 @@ queryAndApplyCdnaMetadata <- function(seuratObj,
 
   #Download info, based on BarcodePrefix:
   outputFiles <- labkey.selectRows(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/"),
+    folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -102,8 +80,7 @@ queryAndApplyCdnaMetadata <- function(seuratObj,
   outputFiles$BarcodePrefix <- as.character(outputFiles$BarcodePrefix)
 
   rows <- labkey.selectRows(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/"),
+    folderPath="/Labs/Bimber/",
     schemaName="tcrdb",
     queryName="cdnas",
     viewName="",

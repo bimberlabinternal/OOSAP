@@ -7,7 +7,6 @@
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' @examples
 Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
                                      doUMAP = T, min_dist=.3, n_neighbors = 40,
                                      dotSNE = F,

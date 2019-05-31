@@ -1,4 +1,9 @@
 #' @import Seurat
+#' @import Rlabkey
+
+Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
+
+
 
 #' @title ProcessCiteSeqCount
 #'
@@ -9,7 +14,6 @@
 #' @keywords CITE-Seq,
 #' @export
 #' @importFrom knitr kable
-#' @examples
 ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   if (is.na(bFile)){
     stop("No file set: change bFile")
@@ -27,13 +31,13 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   }
 
   print(paste0('Initial barcodes in HTO data: ', ncol(bData)))
-  bData <- doCellFiltering(bData)
+  bData <- DoCellFiltering(bData)
 
   if (doRowFilter) {
-    bData <- doRowFiltering(bData)
+    bData <- DoRowFiltering(bData)
 
     # repeat colsum filter.  because we potentially dropped rows, some cells might now drop out
-    bData <- doCellFiltering(bData)
+    bData <- DoCellFiltering(bData)
   } else {
     print('Row filtering will not be performed')
 
@@ -51,34 +55,34 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   if (nrow(bData) == 0) {
     print('No HTOs remaining')
   } else {
-    rowSummary <- generateByRowSummary(bData)
+    rowSummary <- GenerateByRowSummary(bData)
     print(kable(rowSummary, caption = 'HTO Summary After Filter', row.names = F))
   }
 
   return(bData)
 }
 
-#' @title doRowFiltering
+#' @title DoRowFiltering
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-doRowFiltering <- function(bData, minRowSum = 5,
+DoRowFiltering <- function(bData, minRowSum = 5,
                            minRowMax = 20,
                            minRowMean = 0.2,
                            minMeanNonZeroCount = 2){
 
-  #thresholdRowSum <- inferThresholds(rowSums(bData), dataLabel = 'Row Sums')
+  #thresholdRowSum <- InferThresholds(rowSums(bData), dataLabel = 'Row Sums')
   #print(thresholdRowSum)
   #TODO: consider using this
   #minRowSum <- thresholdRowSum$ElbowThreshold
 
-  #thresholdRowMax <- inferThresholds(rowSummary$max, dataLabel = 'Row Max')
+  #thresholdRowMax <- InferThresholds(rowSummary$max, dataLabel = 'Row Max')
   #print(thresholdRowMax)
   #TODO: consider using this
   #minRowMax <- thresholdRowMax$ElbowThreshold
 
-  thresholdRowMean <- inferThresholds(rowMeans(bData), dataLabel = 'Row Mean')
+  thresholdRowMean <- InferThresholds(rowMeans(bData), dataLabel = 'Row Mean')
   print(thresholdRowMean)
 
   #rowsum
@@ -91,8 +95,8 @@ doRowFiltering <- function(bData, minRowSum = 5,
     print(paste(rownames(bData), collapse = ', '))
   }
 
-  #summarize
-  rowSummary <- generateByRowSummary(bData)
+  #summarise
+  rowSummary <- GenerateByRowSummary(bData)
   print(kable(rowSummary, caption = 'HTO Summary', row.names = F))
 
   #rowmean
@@ -105,8 +109,8 @@ doRowFiltering <- function(bData, minRowSum = 5,
     print(paste(rownames(bData), collapse = ', '))
   }
 
-  #summarize
-  rowSummary <- generateByRowSummary(bData)
+  #summarise
+  rowSummary <- GenerateByRowSummary(bData)
   print(kable(rowSummary, caption = 'HTO Summary', row.names = F))
 
   #Drop HTOs with zero strong cells:
@@ -141,7 +145,7 @@ doRowFiltering <- function(bData, minRowSum = 5,
 
 
 #' @importFrom naturalsort naturalfactor
-generateByRowSummary <- function(barcodeData) {
+GenerateByRowSummary <- function(barcodeData) {
   if (nrow(barcodeData) == 0) {
     print('No rows in data, cannot generate summary')
     return(data.frame(HTO = character()))
@@ -166,10 +170,7 @@ generateByRowSummary <- function(barcodeData) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-inferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, findElbowMinY = NA) {
+InferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, FindElbowMinY = NA) {
   print(paste0('Inferring thresholds for: ', dataLabel))
   ret <- list()
   if (length(data) == 0) {
@@ -205,9 +206,9 @@ inferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, find
   }
 
   if (nrow(tempDF.plot) > 1) {
-    tempElbow <- findElbow(y=(tempDF.plot$y), plot=F, min.y = findElbowMinY, ignore.concavity = T)
+    tempElbow <- FindElbow(y=(tempDF.plot$y), plot=F, min.y = FindElbowMinY, ignore.concavity = T)
 
-    #since the findElbow is ordering y decendingly, and we did 1:30
+    #since the FindElbow is ordering y decendingly, and we did 1:30
     tempElbow <- NoOfSteps - tempElbow
     if (plotFigs){
       plot(tempDF.plot, main = paste0(dataLabel, " Threshold Based on Elbow"), xlab = dataLabel)
@@ -229,11 +230,8 @@ inferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, find
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-doCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5){
-  thresholdsSum <- inferThresholds(colSums(bData), dataLabel = "Column Sums", minQuant = minQuant, findElbowMinY = 5000)
+DoCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5){
+  thresholdsSum <- InferThresholds(colSums(bData), dataLabel = "Column Sums", minQuant = minQuant, FindElbowMinY = 5000)
   minColSum <- thresholdsSum$ElbowThreshold
   minColSum <- min(minColSum, maxValueForColSumFilter)
 
@@ -248,7 +246,7 @@ doCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5)
   #colmax filter
   #barcodeMatrix <- as.matrix(bData)
   #cm <- apply(barcodeMatrix, 2, max)
-  #thresholdsMax <- inferThresholds(cm, dataLabel = "Column Max", minQuant = minQuant, findElbowMinY = 5000)
+  #thresholdsMax <- InferThresholds(cm, dataLabel = "Column Max", minQuant = minQuant, FindElbowMinY = 5000)
   #minColMax <- thresholdsMax$ElbowThreshold
 
   #toDrop <- sum(cm < minColMax)
@@ -266,11 +264,9 @@ doCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5)
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
 #' @importFrom knitr kable
-#' @examples
-generateQcPlots <- function(barcodeData){
+#' @import ggplot2
+GenerateQcPlots <- function(barcodeData){
   print('Generating QC Plots')
 
   #Plot counts/cell:
@@ -328,14 +324,12 @@ generateQcPlots <- function(barcodeData){
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-generateCellHashCallsSeurat <- function(barcodeData) {
+#' @import data.table
+GenerateCellHashCallsSeurat <- function(barcodeData) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
-    seuratObj <- doHtoDemux(seuratObj)
+    seuratObj <- DoHtoDemux(seuratObj)
 
     return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode')))
   }, error = function(e){
@@ -345,15 +339,13 @@ generateCellHashCallsSeurat <- function(barcodeData) {
   })
 }
 
-#' @title A Title
+#' @title AppendCellHashing
 #'
-#' @description A description
+#' @description Appends cell hashing calls to a seurat object
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-appendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) {
+#' @importFrom dplyr arrange
+AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) {
   initialCells <- ncol(seuratObj)
   print(paste0('Initial cell barcodes in GEX data: ', ncol(seuratObj)))
 
@@ -426,12 +418,9 @@ appendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
 #' @importFrom cluster clara
-#' @examples
-debugDemux <- function(seuratObj) {
+#' @return A modified Seurat object.
+DebugDemux <- function(seuratObj) {
   print('Debugging information for Seurat HTODemux:')
   data <- GetAssayData(object = seuratObj, assay = 'HTO')
   ncenters <- (nrow(x = data) + 1)
@@ -458,18 +447,15 @@ debugDemux <- function(seuratObj) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-doHtoDemux <- function(seuratObj) {
+DoHtoDemux <- function(seuratObj) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
 
-  debugDemux(seuratObj)
+  DebugDemux(seuratObj)
 
   seuratObj <- HTODemux2(seuratObj, positive.quantile =  0.99)
 
-  htoSummary(seuratObj, field1 = 'HTO_classification.global', field2 = 'hash.ID')
+  HtoSummary(seuratObj, field1 = 'HTO_classification.global', field2 = 'hash.ID')
 
   return(seuratObj)
 }
@@ -479,14 +465,12 @@ doHtoDemux <- function(seuratObj) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-generateCellHashCallsMultiSeq <- function(barcodeData) {
+#' @import data.table
+GenerateCellHashCallsMultiSeq <- function(barcodeData) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
-    seuratObj <- doMULTIseqDemux(seuratObj)
+    seuratObj <- DoMULTIseqDemux(seuratObj)
 
     return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$MULTI_ID, HTO_classification.global = seuratObj$MULTI_classification.global, key = c('Barcode')))
   }, error = function(e){
@@ -501,10 +485,7 @@ generateCellHashCallsMultiSeq <- function(barcodeData) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-doMULTIseqDemux <- function(seuratObj) {
+DoMULTIseqDemux <- function(seuratObj) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
 
@@ -514,7 +495,7 @@ doMULTIseqDemux <- function(seuratObj) {
   seuratObj$MULTI_classification.global[!(seuratObj$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
   seuratObj$MULTI_classification.global <- as.factor(seuratObj$MULTI_classification.global)
 
-  htoSummary(seuratObj, field1 = 'MULTI_classification.global', field2 = 'MULTI_ID', doHeatmap = F)
+  HtoSummary(seuratObj, field1 = 'MULTI_classification.global', field2 = 'MULTI_ID', doHeatmap = F)
 
   return(seuratObj)
 }
@@ -524,10 +505,7 @@ doMULTIseqDemux <- function(seuratObj) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-htoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
+HtoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
   #report outcome
   print(table(seuratObj[[field1]]))
   print(table(seuratObj[[field2]]))
@@ -545,15 +523,16 @@ htoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
   }
 }
 
-#' @title A Title
+#' @title ProcessEnsemblHtoCalls
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
-#' @examples
-processEnsemblHtoCalls <- function(mc, sc, barcodeData,
+#' @import data.table
+#' @import ggplot2
+#' @importFrom dplyr %>% group_by summarise
+ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
                                    outFile = 'combinedHtoCalls.txt',
                                    allCallsOutFile = NA) {
 
@@ -565,7 +544,7 @@ processEnsemblHtoCalls <- function(mc, sc, barcodeData,
   if (all(is.na(sc))){
     print('No calls for seurat found')
     dt <- data.table(CellBarcode = mc$Barcode, HTO = mc$HTO_classification, HTO_Classification = mc$HTO_classification.global, key = 'CellBarcode', Seurat = c(F), MultiSeq = c(T))
-    dt <- printFinalSummary(dt, barcodeData)
+    dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
     return(dt)
@@ -574,7 +553,7 @@ processEnsemblHtoCalls <- function(mc, sc, barcodeData,
   if (all(is.na(mc))){
     print('No calls for MULTI-seq found')
     dt <- data.table(CellBarcode = sc$Barcode, HTO = sc$HTO_classification, HTO_Classification = sc$HTO_classification.global, key = 'CellBarcode', Seurat = c(T), MultiSeq = c(F))
-    dt <- printFinalSummary(dt, barcodeData)
+    dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
     return(dt)
@@ -646,7 +625,7 @@ processEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   if (nrow(ret) > 0){
     dt <- data.table(CellBarcode = ret$Barcode, HTO = ret$FinalCall, HTO_Classification = ret$FinalClassification, key = 'CellBarcode', Seurat = ret$HasSeuratCall, MultiSeq = ret$HasMultiSeqCall)
-    dt <- printFinalSummary(dt, barcodeData)
+    dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
     return(dt)
@@ -656,17 +635,16 @@ processEnsemblHtoCalls <- function(mc, sc, barcodeData,
   }
 }
 
-#' @title A Title
+#' @title PrintFinalSummary
 #'
-#' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
 #' @importFrom naturalsort naturalfactor
 #' @importFrom knitr kable
-#' @examples
-printFinalSummary <- function(dt, barcodeData){
+#' @importFrom data.table melt
+#' @importFrom naturalsort naturalfactor
+#' @import ggplot2
+PrintFinalSummary <- function(dt, barcodeData){
   #Append raw counts:
   bc <- t(barcodeData)
   x <- melt(bc)
@@ -681,7 +659,7 @@ printFinalSummary <- function(dt, barcodeData){
   merged$HTO[is.na(merged$HTO)] <- c('Negative')
   merged$HTO_Classification[is.na(merged$HTO_Classification)] <- c('Negative')
 
-  #summarize reads by type:
+  #summarise reads by type:
   barcodeMatrix <- as.matrix(barcodeData)
   cs <- colSums(barcodeMatrix)
   cs <- cs[merged$CellBarcode]
@@ -731,14 +709,8 @@ printFinalSummary <- function(dt, barcodeData){
   return(merged)
 }
 
-#' @title A Title
-#'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
+
+
 simplifyHtoNames <- function(v) {
   return(sapply(v, function(x){
     x <- unlist(strsplit(x, '-'))
@@ -752,15 +724,12 @@ simplifyHtoNames <- function(v) {
 
 
 
-#' @title A Title
+#' @title GenerateSummaryForExpectedBarcodes
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
-#' @examples
-generateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, barcodeData) {
+GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, barcodeData) {
   categoryName <- "Cell Hashing Concordance"
 
   whitelist <- read.table(whitelistFile, sep = '\t', header = F)
@@ -814,15 +783,13 @@ generateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, ba
 }
 
 
-#' @title A Title
+#' @title DownloadAndAppendCellHashing
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
-#' @examples
-downloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
+DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
   if (is.null(seuratObject[['BarcodePrefix']])){
     stop('Seurat object lacks BarcodePrefix column')
   }
@@ -830,37 +797,34 @@ downloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
   for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
     print(paste0('Adding cell hashing data for prefix: ', barcodePrefix))
 
-    cellHashingId <- findMatchedCellHashing(barcodePrefix)
+    cellHashingId <- FindMatchedCellHashing(barcodePrefix)
     if (is.na(cellHashingId)){
       stop(paste0('Unable to find cellHashing calls table file for prefix: ', barcodePrefix))
     }
 
     callsFile <- file.path(outPath, paste0(barcodePrefix, '_cellHashingCalls.csv'))
-    downloadOutputFile(outputFileId = cellHashingId, outFile = callsFile, overwrite = T)
+    DownloadOutputFile(outputFileId = cellHashingId, outFile = callsFile, overwrite = T)
     if (!file.exists(callsFile)){
       stop(paste0('Unable to download calls table for prefix: ', barcodePrefix))
     }
 
-    seuratObject <- appendCellHashing(seuratObj = seuratObject, barcodeCallFile = callsFile, barcodePrefix = barcodePrefix)
+    seuratObject <- AppendCellHashing(seuratObj = seuratObject, barcodeCallFile = callsFile, barcodePrefix = barcodePrefix)
   }
 
   return(seuratObject)
 }
 
 
-#' @title A Title
+#' @title FindMatchedCellHashing
 #'
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-findMatchedCellHashing <- function(loupeDataId){
+#' @import Rlabkey
+FindMatchedCellHashing <- function(loupeDataId){
   #Note: the seurat object gets associated with the GEX readset, so look based on this:
   rows <- labkey.selectRows(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/"),
+    folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -881,8 +845,7 @@ findMatchedCellHashing <- function(loupeDataId){
   }
 
   rows <- labkey.selectRows(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/"),
+    folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -901,19 +864,13 @@ findMatchedCellHashing <- function(loupeDataId){
 }
 
 
-#' @title A Title
+#' @title DownloadOutputFile
 #'
-#' @description A description
-#' @param SeurObj, A Seurat object.
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-#' @examples
-downloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
+#' @import Rlabkey
+DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/"),
+    folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -936,7 +893,6 @@ downloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   remotePath <- rows[['dataid_webdavurlrelative']]
 
   success <- labkey.webdav.get(
-    baseUrl="https://prime-seq.ohsu.edu",
     folderPath=paste0("/Labs/Bimber/",wb),
     remoteFilePath = remotePath,
     overwrite = overwrite,
