@@ -727,7 +727,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
 
 
-#' @importFrom dplyr %>% coalesce group_by summarise
+#' @importFrom dplyr %>% coalesce group_by summarise filter top_n
 #' @export
 FindMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
                         testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
@@ -766,7 +766,7 @@ FindMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = N
     }
 
     if (!('cluster' %in% names(seuratObj.markers))) {
-      print('cluster column not found!')
+      warning('cluster column not found!')
     } else {
       seuratObj.markers$cluster <- as.factor(seuratObj.markers$cluster)
     }
