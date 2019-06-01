@@ -456,23 +456,23 @@ MultiClassifier_Cells <- function (object_train,
                                                                        lambda = c(0.001, 0.0001))),
                                    silent = T)
     }
-    if(class(ElasticNet_classifier)[1]=="try-error") {
-      warning("ElasticNet classifier failed ")
-    } else {
+        if(class(ElasticNet_classifier)[1]=="try-error") {
+          warning("ElasticNet classifier failed ")
+        } else {
 
-    ElasticNet_yhat <- predict(ElasticNet_classifier, testing.data)
-    results_ls$Caret_ElasticNet_train_yhat      <- predict(ElasticNet_classifier, newdata=training.data[,training.genes])
-
-
-    results_ls$Caret_ElasticNet_classifier      <- ElasticNet_classifier
-    results_ls$Caret_ElasticNet_test_yhat       <- ElasticNet_yhat
-    results_ls$Caret_ElasticNet_test_ConfMat    <- confusionMatrix(ElasticNet_yhat, (Y_Test_True))
-    results_ls$Caret_ElasticNet_test_ConfTab    <- table(pred=ElasticNet_yhat, truth=Y_Test_True)
-
-    results_ls$Caret_ElasticNet_train_ConfMat   <- confusionMatrix((results_ls$Caret_ElasticNet_train_yhat), (training.data$Class))
-    results_ls$Caret_ElasticNet_train_ConfTab   <- table(pred=results_ls$Caret_ElasticNet_train_yhat, truth=training.data$Class)
+        ElasticNet_yhat <- predict(ElasticNet_classifier, testing.data)
+        results_ls$Caret_ElasticNet_train_yhat      <- predict(ElasticNet_classifier, newdata=training.data[,training.genes])
 
 
+        results_ls$Caret_ElasticNet_classifier      <- ElasticNet_classifier
+        results_ls$Caret_ElasticNet_test_yhat       <- ElasticNet_yhat
+        results_ls$Caret_ElasticNet_test_ConfMat    <- confusionMatrix(ElasticNet_yhat, (Y_Test_True))
+        results_ls$Caret_ElasticNet_test_ConfTab    <- table(pred=ElasticNet_yhat, truth=Y_Test_True)
+
+        results_ls$Caret_ElasticNet_train_ConfMat   <- confusionMatrix((results_ls$Caret_ElasticNet_train_yhat), (training.data$Class))
+        results_ls$Caret_ElasticNet_train_ConfTab   <- table(pred=results_ls$Caret_ElasticNet_train_yhat, truth=training.data$Class)
+
+     }
 
   }
 

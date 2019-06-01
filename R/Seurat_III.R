@@ -155,7 +155,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F){
+MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
   nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
 
   for (exptNum in nameList) {
@@ -180,7 +180,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
 
       if (!HasStepRun(so, 'FindVariableFeatures')) {
         print('Finding variable features')
-        so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = 2000)
+        so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
       } else {
         print('FindVariableFeatures performed')
       }
@@ -195,14 +195,27 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
     anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = F)
 
     #always run using intersection of all features
-    features <- rownames(seuratObjs[[1]])
-    if (length(seuratObjs) > 1) {
-      for (i : 2:length(seuratObjs)) {
-        features <- c(features, rownames(seuratObjs[[i]]))
+    features <- NULL
+    if (useAllFeatures) {
+      features <- rownames(seuratObjs[[1]])
+      if (length(seuratObjs) > 1) {
+        for (i in 2:length(seuratObjs)) {
+          features <- c(features, rownames(seuratObjs[[i]]))
+        }
       }
-    }
 
-    print(paste0('Total features in common: ', length(features)))
+      print(paste0('Total features in common: ', length(features)))
+    } else if (includeCellCycleGenes) {
+        features <- unique(c(cc.genes, g2m.genes.orig))
+        if (length(seuratObjs) > 1) {
+            for (i in 2:length(seuratObjs)) {
+                features <- intersect(features, rownames(seuratObjs[[i]]))
+            }
+        }
+
+        #Merge with the default set Seurat will use
+        features <- unique(c(features, slot(object = anchors, name = "anchor.features")))
+    }
 
     # dims here means : #Number of PCs to use in the weighting procedure
     seuratObj <- IntegrateData(anchorset = anchors, dims = 1:MaxPCs2Weight, verbose = F, features.to.integrate = features, new.assay.name = "Integrated")
@@ -241,7 +254,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
-                           variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', printDefaultPlots = T,
+                           variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', nVariableFeatures = 2000, printDefaultPlots = T,
                            npcs = 50){
 
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
@@ -262,7 +275,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
-    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod)
+    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = NULL)
     seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
   }
 
@@ -581,7 +594,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
   # and stored using use_data(internal = T) (https://github.com/r-lib/usethis and use_data)
   # cc.genes
-  # g2m.genes
+  # g2m.genes.orig
   if (length(cc.genes) != 97) {
     stop('Something went wrong loading cc.genes list')
   }
@@ -895,7 +908,7 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
       ## to an endpoint
       ix <- lineMagnitude(px, py, x1, y1)
       iy <- lineMagnitude(px, py, x2, y2)
-      #TODO: giving warning.  maybe if needs any() or all()??
+      #TODO: giving warning b/c length of ix/iy can be >1.  maybe if needs any() or all()??
       if (length(ix > 1) || length(iy) > 1) {
         warning(paste0('length GT 1: ', length(ix), '/', length(iy)))
       }
