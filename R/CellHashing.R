@@ -563,11 +563,21 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   sc$Barcode <- as.character(sc$Barcode)
   merged <- merge(mc, sc, all = T, by = 'Barcode', suffixes = c('.MultiSeq', '.Seurat'))
 
+  merged$HTO_classification.MultiSeq <- as.character(merged$HTO_classification.MultiSeq)
   merged$HTO_classification.MultiSeq[is.na(merged$HTO_classification.MultiSeq)] <- 'Negative'
-  merged$HTO_classification.Seurat[is.na(merged$HTO_classification.Seurat)] <- 'Negative'
+  merged$HTO_classification.MultiSeq <- as.factor(merged$HTO_classification.MultiSeq)
 
+  merged$HTO_classification.Seurat <- as.character(merged$HTO_classification.Seurat)
+  merged$HTO_classification.Seurat[is.na(merged$HTO_classification.Seurat)] <- 'Negative'
+  merged$HTO_classification.Seurat <- as.factor(merged$HTO_classification.Seurat)
+
+  merged$HTO_classification.global.MultiSeq <- as.character(merged$HTO_classification.global.MultiSeq)
   merged$HTO_classification.global.MultiSeq[is.na(merged$HTO_classification.global.MultiSeq)] <- 'Negative'
+  merged$HTO_classification.global.MultiSeq <- as.factor(merged$HTO_classification.global.MultiSeq)
+
+  merged$HTO_classification.global.Seurat <- as.character(merged$HTO_classification.global.Seurat)
   merged$HTO_classification.global.Seurat[is.na(merged$HTO_classification.global.Seurat)] <- 'Negative'
+  merged$HTO_classification.global.Seurat <- as.factor(merged$HTO_classification.global.Seurat)
 
   merged$Concordant <- as.character(merged$HTO_classification.MultiSeq) == as.character(merged$HTO_classification.Seurat)
   merged$ConcordantNoNeg <- !(!merged$Concordant & merged$HTO_classification.MultiSeq != 'Negative' & merged$HTO_classification.Seurat != 'Negative')
@@ -609,15 +619,17 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
           ggtitle('Discordance By HTO Call, Ignoring Negatives') + ylab('Seurat') + xlab('MULTI-seq')
   )
-  ret <-merged[merged$ConcordantNoNeg,]
+  ret <- merged[merged$ConcordantNoNeg,]
 
   # These calls should be identical, except for possibly negatives from one method that are non-negative in the other
   # For the time being, accept those as correct.
-  ret$FinalCall <- ret$HTO_classification.MultiSeq
+  ret$FinalCall <- as.character(ret$HTO_classification.MultiSeq)
   ret$FinalCall[ret$HTO_classification.MultiSeq == 'Negative'] <- ret$HTO_classification.Seurat[ret$HTO_classification.MultiSeq == 'Negative']
+  ret$FinalCall <- as.factor(ret$FinalCall)
 
-  ret$FinalClassification <- ret$HTO_classification.global.MultiSeq
+  ret$FinalClassification <- as.character(ret$HTO_classification.global.MultiSeq)
   ret$FinalClassification[ret$HTO_classification.global.MultiSeq == 'Negative'] <- ret$HTO_classification.global.Seurat[ret$HTO_classification.global.MultiSeq == 'Negative']
+  ret$FinalClassification <- as.factor(ret$FinalClassification)
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
@@ -656,8 +668,13 @@ PrintFinalSummary <- function(dt, barcodeData){
   bc$CellBarcode <- rownames(bc)
   merged <- merge(merged, bc, by = c('CellBarcode'), all.x = T, all.y = F)
 
+  merged$HTO <- as.character(merged$HTO)
   merged$HTO[is.na(merged$HTO)] <- c('Negative')
+  merged$HTO <- as.factor(merged$HTO)
+
+  merged$HTO_Classification <- as.character(merged$HTO_Classification)
   merged$HTO_Classification[is.na(merged$HTO_Classification)] <- c('Negative')
+  merged$HTO_Classification <- as.factor(merged$HTO_Classification)
 
   #summarise reads by type:
   barcodeMatrix <- as.matrix(barcodeData)
