@@ -19,6 +19,10 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
     stop("No file set: change bFile")
   }
 
+  if (!file.exists(bFile)){
+    stop(paste0("File does not exist: ", bFile))
+  }
+
   if (dir.exists(bFile)) {
     #CITE-seq-Count 1.4.2 and higher creates a folder
     bData <- Read10X(bFile, gene.column=1)
@@ -624,11 +628,11 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   # These calls should be identical, except for possibly negatives from one method that are non-negative in the other
   # For the time being, accept those as correct.
   ret$FinalCall <- as.character(ret$HTO_classification.MultiSeq)
-  ret$FinalCall[ret$HTO_classification.MultiSeq == 'Negative'] <- ret$HTO_classification.Seurat[ret$HTO_classification.MultiSeq == 'Negative']
+  ret$FinalCall[ret$HTO_classification.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.Seurat[ret$HTO_classification.MultiSeq == 'Negative'])
   ret$FinalCall <- as.factor(ret$FinalCall)
 
   ret$FinalClassification <- as.character(ret$HTO_classification.global.MultiSeq)
-  ret$FinalClassification[ret$HTO_classification.global.MultiSeq == 'Negative'] <- ret$HTO_classification.global.Seurat[ret$HTO_classification.global.MultiSeq == 'Negative']
+  ret$FinalClassification[ret$HTO_classification.global.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.global.Seurat[ret$HTO_classification.global.MultiSeq == 'Negative'])
   ret$FinalClassification <- as.factor(ret$FinalClassification)
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
