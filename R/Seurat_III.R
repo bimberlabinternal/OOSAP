@@ -13,6 +13,14 @@ Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 #' @export
 #' @importFrom Seurat Read10X
 ReadAndFilter10xData <- function(dataDir, datasetName) {
+  if (!file.exists(dataDir)){
+    stop(paste0("File does not exist: ", dataDir))
+  }
+
+  if (!dir.exists(dataDir)){
+    stop(paste0("File is not a directory: ", dataDir))
+  }
+
   seuratRawData <- Read10X(data.dir = dataDir)
   seuratRawData <- PerformEmptyDropletFiltering(seuratRawData)
 
