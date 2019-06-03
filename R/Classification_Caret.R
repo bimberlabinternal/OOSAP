@@ -151,19 +151,24 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 
 
 
-#' @title A Title
+#' @title MultiClassifier_Cells
 #'
-#' @description A description
+#' @description This function takes in Seurat objects and performs machine learning; generalized for common use.
+#'     However as with any approach, especially in machine learning and statistical inference world, robust assessments are needed. 
+#'     This is a first step.
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @keywords Machine Learning, Seurat, classification
 #' @export
 MultiClassifier_Cells <- function (object_train,
                                   object_test,
+                                  data2use = "data",
+                                  assay = "RNA",
                                   training.genes = NULL,
                                   Y_Train_True = NULL,
                                   Y_Test_True = NULL,
-                                  log10p1=T,
+                                  log10p1=F,
+                                  asinhp1 = F,
                                   do_Adaboost = F,
                                   do_Caret_LinSVM = F,
                                   do_ranger_RF = F,
@@ -182,30 +187,35 @@ MultiClassifier_Cells <- function (object_train,
 {
 
 
-  if(do_Adaboost) library(fastAdaboost)
-  if(do_Caret_LinSVM) library(caret)
-  if(do_Caret_NaiveBayes) library(caret)
-  if(do_Caret_NNet) library(caret)
-  if(do_ranger_RF) library(ranger)
-  if(do_ElasticNet) library(caret)
+  library(fastAdaboost)
+  library(ranger)
   require(Matrix)
-
+  library(rpart)
+  library(rpart.plot)
+  library(glmnet)
+  library(caret)
+  
 
   results_ls <- list()
-
+  
   training.classes <- as.vector(x = Y_Train_True)
-  training.genes   <- SetIfNull(x = training.genes, default = rownames(x = object_train@assays$RNA@data))
-  training.data    <- as.data.frame(x = as.matrix(x = Matrix::t(object_train@assays$RNA@data)))[,training.genes]
-
-
+  #training.genes   <- #SetIfNull(x = training.genes, default = rownames(x = object_train@assays$RNA@data))
+  training.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
+  
+  
   testing.classes <- as.vector(x = Y_Test_True)
-  testing.genes   <- SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
-  testing.data    <- as.data.frame(x = as.matrix(x = Matrix::t(x = object_test@assays$RNA@data)))[,testing.genes ]
+  testing.genes   <- training.genes #SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
+  testing.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
+  
 
 
 
   if(log10p1) training.data <- log10(training.data + 1)
   if(log10p1) testing.data  <- log10(testing.data + 1)
+  
+  if(asinhp1) training.data <- asinh(training.data)
+  if(asinhp1) testing.data  <- asinh(testing.data)
+  
 
 
 
@@ -218,9 +228,9 @@ MultiClassifier_Cells <- function (object_train,
   #colnames(testing.data) <- gsub("-", "", colnames(testing.data))
 
   results_ls$test_data           <- testing.data
-  results_ls$test_Y              <- Y_Test_True
+  results_ls$test_Y              <- testing.classes
   results_ls$train_data          <- training.data
-  results_ls$train_T             <- Y_Train_True
+  results_ls$train_Y             <- training.classes
 
 
 
@@ -333,9 +343,7 @@ MultiClassifier_Cells <- function (object_train,
 
 
   if(do_tree){
-    library(caret)
-    library(rpart)
-    library(rpart.plot)
+    
 
     print("running tree based class with rpart")
     TrainingParameters <- trainControl(method = "repeatedcv", number = NcrossVal, repeats=crossValReps)
@@ -377,9 +385,7 @@ MultiClassifier_Cells <- function (object_train,
   }
 
   if(do_tree_gini){
-    library(caret)
-    library(rpart)
-    library(rpart.plot)
+ 
 
     print("running tree based class with rpart w/ gini index")
     TrainingParameters <- trainControl(method = "repeatedcv", number = NcrossVal, repeats=crossValReps)
@@ -426,7 +432,7 @@ MultiClassifier_Cells <- function (object_train,
   if(do_ElasticNet){
 
 
-    library(glmnet)
+   
 
 
 
