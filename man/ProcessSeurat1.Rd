@@ -8,8 +8,8 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   doCellFilter = F, nUMI.high = 20000, nGene.high = 3000,
   pMito.high = 0.15, nUMI.low = 0.99, nGene.low = 200,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
-  variableFeatureSelectionMethod = "vst", printDefaultPlots = T,
-  npcs = 50)
+  variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
+  printDefaultPlots = T, npcs = 50)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

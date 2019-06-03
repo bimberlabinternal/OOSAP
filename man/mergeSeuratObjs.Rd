@@ -6,7 +6,8 @@
 \usage{
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
   MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL,
-  PreProcSeur = F)
+  PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000,
+  includeCellCycleGenes = T)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

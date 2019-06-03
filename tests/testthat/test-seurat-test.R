@@ -49,7 +49,7 @@ unlink(vgFile)
 
 mf <- paste0(outPrefix, '.markers.txt')
 md <- paste0(outPrefix, '.markers.rds')
-FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md)
+FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
   expect_equal(nrow(read.table(mf, sep = '\t', header = T)), 1065)
