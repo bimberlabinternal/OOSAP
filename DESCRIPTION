@@ -21,7 +21,8 @@ Imports:
     cluster,
     knitr,
     dtplyr,
-    fitdistrplus
+    fitdistrplus,
+    Hmisc
 Suggests:
     ggvis,
     testthat (>= 2.1.0),

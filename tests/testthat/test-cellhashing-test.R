@@ -2,7 +2,7 @@ skip_on_cran()
 
 context("CellHashing")
 
-DoTest <- function(barcodeFile, summaryFile, whitelistFile, doRowFilter = F) {
+DoTest <- function(barcodeFile, callsFile, summaryFile, whitelistFile, doRowFilter = F) {
 
     barcodeData <- ProcessCiteSeqCount(bFile=barcodeFile, doRowFilter = doRowFilter)
 
@@ -20,10 +20,10 @@ DoTest <- function(barcodeFile, summaryFile, whitelistFile, doRowFilter = F) {
 
     mc <- GenerateCellHashCallsMultiSeq(barcodeData)
 
-    dt <- ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = summaryFile)
+    dt <- ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = callsFile)
 
     if (!is.null(whitelistFile) && !is.null(summaryFile)){
-        GenerateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
+      GenerateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
     }
 
     return(list(barcodeData = barcodeData, dt = dt))
@@ -39,6 +39,7 @@ tests <- list(
         Singlet = 8155,
         MultiSeq = 1206,
         Seurat = 9529,
+        CallRows = 21263,
         DoRowFilter = T
     ),
     '283' = list(
@@ -48,9 +49,9 @@ tests <- list(
         Singlet = 2697,
         MultiSeq = 853,
         Seurat = 2900,
+        CallRows = 5346,
         DoRowFilter = T
     )
-    # TODO: revisit the example data
     # 'NewFormat' = list(
     #     input = '../testdata/cellHashing/umi_count',
     #     htos = c(1:4),
@@ -59,6 +60,7 @@ tests <- list(
     #     Singlet = 2697,
     #     MultiSeq = 853,
     #     Seurat = 2900,
+    #     CallRows = 100,
     #     DoRowFilter = F
     # )
 )
@@ -67,12 +69,13 @@ for (testName in names(tests)) {
     print(paste0('Running test: ', testName))
     test <- tests[[testName]]
 
+    callsFile <- paste0(testName, '-calls.txt')
     summaryFile <- NULL
     if (!is.null(test$gexBarcodeFile)) {
-        summaryFile <- 'summary.txt'
+        summaryFile <- paste0(testName, '-summary.txt')
     }
 
-    l <- DoTest(test$input, summaryFile, test$gexBarcodeFile, doRowFilter = test$DoRowFilter)
+    l <- DoTest(test$input, callsFile=callsFile, summaryFile=summaryFile, whitelistFile=test$gexBarcodeFile, doRowFilter = test$DoRowFilter)
     barcodeData <- l$barcodeData
 
     expectedHtos <- sort(paste0('HTO-', test$htos))
@@ -83,10 +86,6 @@ for (testName in names(tests)) {
     })
 
     dt <- l$dt
-    print(nrow(dt))
-    print(nrow(dt[dt$HTO_Classification == 'Singlet',]))
-    print(sum(dt$Seurat))
-    print(sum(dt$MultiSeq))
 
     test_that("Called cells not equal", {
         expect_equal(test[['CalledCells']], nrow(dt))
@@ -104,8 +103,18 @@ for (testName in names(tests)) {
         expect_equal(test[['MultiSeq']], sum(dt$MultiSeq))
     })
 
+    d <- read.table(callsFile, header = T, sep = '\t')
+    test_that("Call file rowcount not correct", {
+        expect_equal(test[['CallRows']], nrow(d))
+    })
+    unlink(callsFile)
+
     if (!is.null(summaryFile)) {
-        unlink(summaryFile)
+        d <- read.table(summaryFile, header = T, sep = '\t')
+        test_that("Metric rowcount not correct", {
+            expect_equal(19, nrow(d))
+        })
+       unlink(summaryFile)
     }
 }
 
