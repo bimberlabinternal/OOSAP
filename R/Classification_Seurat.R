@@ -103,7 +103,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-predict <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
+PredictSER <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
                            classification.path = NULL, file.select = NULL,
                            TrainedClassifiers.path = "../PBMC3k/data",
                            save.fig.path = NULL, col_vector=NULL, returnLS = F, GarnettClassify=F,

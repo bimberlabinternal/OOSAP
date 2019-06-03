@@ -712,10 +712,7 @@ MultiClassifier_Cells <- function (object_train,
 
   return(results_ls)
 
-}
-
-
-
-
+  }
+  }
 
 

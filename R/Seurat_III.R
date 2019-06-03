@@ -210,6 +210,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
         for (i in 2:length(seuratObjs)) {
           features <- c(features, rownames(seuratObjs[[i]]))
         }
+
       }
 
       print(paste0('Total features in common: ', length(features)))
@@ -1283,25 +1284,6 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
 
 
 
-  #print(c(nGene.low, nGene.high, nUMI.high))
-
-  # SerObj.path = "../../../Bimber/Expts/214/10X/bin/all";
-  # ProjName="10X";
-  # save.path = NULL;
-  # returnList = F;
-  # save.fig = T; save.fig.path = NULL;
-  # ENSMB.tag="ENSMM"; RhesusConvDavid = T;
-  # nUMI.high = 20000; nGene.high = 3000; pMito.high = 0.15;
-  # nUMI.low = 0.99; nGene.low = 200; pMito.low = -Inf;
-  # RhesusConvDavid.path = "/Volumes/Maggie/Work/OHSU/Eisa/R/scRNASeqEISA/data/Rhesus/David6.8_ConvertedRhesus_ENSMMUG.txt";
-  # fvg.x.low.cutoff = 0.01; fvg.x.high.cutoff = 4.5;
-  # fvg.y.cutoff = 1.5;
-  # KeepGene.LS =SGS.LS;
-  # nDimPCA=15; RemoveCellCycle=T; path2CCfiles =
-  #   "/Volumes/Maggie/Work/OHSU/Eisa/R/scRNASeq/data/CellCycle"; cleanGeneNames=F
-  #   SerObjRDSKey="SeuratObj.rds"
-  # library(scRNASeqEISA)
-  # findPCAElbow = T
 
 
 
