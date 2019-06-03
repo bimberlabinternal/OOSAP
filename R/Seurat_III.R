@@ -735,7 +735,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 }
 
 
-
+#' @title FindMarkers
 #' @importFrom dplyr %>% coalesce group_by summarise filter top_n
 #' @export
 FindMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
@@ -802,7 +802,7 @@ FindMarkers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = N
 }
 
 
-
+#' @title FindSeuratElbow
 #' @import ggplot2
 FindSeuratElbow <- function(object, ndims = 25, reduction = "pca", print.plot = T, min.y = 1.3) {
   data.use <- Stdev(object = object, reduction = reduction)
@@ -838,7 +838,7 @@ FindSeuratElbow <- function(object, ndims = 25, reduction = "pca", print.plot = 
   return(elbowX)
 }
 
-
+#' @title FindElbow
 #' @importFrom stats coef
 FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min.x = NA) {
 
