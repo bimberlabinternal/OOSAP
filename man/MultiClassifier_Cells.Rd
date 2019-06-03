@@ -11,7 +11,8 @@ MultiClassifier_Cells(object_train, object_test, data2use = "data",
   do_Caret_NNet = F, do_Caret_radialSVM = F, do_ElasticNet = F,
   do_tree = F, do_tree_gini = F, do_Caret_pcaNNet = F,
   do_Caret_rangerRF = F, do_glmStepAIC = F, do_stepLDA = F,
-  crossValReps = 3, NcrossVal = 10)
+  crossValReps = 3, NcrossVal = 10, preProc = c("scale", "center",
+  "nzv", "zv"))
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}
