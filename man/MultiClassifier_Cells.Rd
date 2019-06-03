@@ -2,15 +2,16 @@
 % Please edit documentation in R/Classification_Caret.R
 \name{MultiClassifier_Cells}
 \alias{MultiClassifier_Cells}
-\title{A Title}
+\title{MultiClassifier_Cells}
 \usage{
-MultiClassifier_Cells(object_train, object_test, training.genes = NULL,
-  Y_Train_True = NULL, Y_Test_True = NULL, log10p1 = T,
-  do_Adaboost = F, do_Caret_LinSVM = F, do_ranger_RF = F,
-  do_Caret_NaiveBayes = F, do_Caret_NNet = F, do_Caret_radialSVM = F,
-  do_ElasticNet = F, do_tree = F, do_tree_gini = F,
-  do_Caret_pcaNNet = F, do_Caret_rangerRF = F, do_glmStepAIC = F,
-  do_stepLDA = F, crossValReps = 3, NcrossVal = 10)
+MultiClassifier_Cells(object_train, object_test, data2use = "data",
+  assay = "RNA", training.genes = NULL, Y_Train_True = NULL,
+  Y_Test_True = NULL, log10p1 = F, asinhp1 = F, do_Adaboost = F,
+  do_Caret_LinSVM = F, do_ranger_RF = F, do_Caret_NaiveBayes = F,
+  do_Caret_NNet = F, do_Caret_radialSVM = F, do_ElasticNet = F,
+  do_tree = F, do_tree_gini = F, do_Caret_pcaNNet = F,
+  do_Caret_rangerRF = F, do_glmStepAIC = F, do_stepLDA = F,
+  crossValReps = 3, NcrossVal = 10)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}
@@ -19,6 +20,11 @@ MultiClassifier_Cells(object_train, object_test, training.genes = NULL,
 A modified Seurat object.
 }
 \description{
-A description
+This function takes in Seurat objects and performs machine learning; generalized for common use.
+    However as with any approach, especially in machine learning and statistical inference world, robust assessments are needed. 
+    This is a first step.
 }
-\keyword{SerIII_template}
+\keyword{Learning,}
+\keyword{Machine}
+\keyword{Seurat,}
+\keyword{classification}
