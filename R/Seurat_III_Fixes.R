@@ -1,3 +1,5 @@
+#' @import Seurat
+
 # Note: this file contains methods that are essentially copy/paste from Seurat3 to add fixes.  We should minimize these and
 # remove them from here once Seurat itself is fixed.
 
@@ -99,6 +101,8 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_AddModuleScore
 #' @export
+#' @importFrom Hmisc cut2
+#' @importFrom Matrix colMeans rowMeans
 AddModuleScoreAvg <- function(
 #May-2019 version
 
