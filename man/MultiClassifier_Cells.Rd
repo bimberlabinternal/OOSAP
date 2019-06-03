@@ -11,28 +11,14 @@ MultiClassifier_Cells(object_train, object_test, training.genes = NULL,
   do_ElasticNet = F, do_tree = F, do_tree_gini = F,
   do_Caret_pcaNNet = F, do_Caret_rangerRF = F, do_glmStepAIC = F,
   do_stepLDA = F, crossValReps = 3, NcrossVal = 10)
-
-MultiClassifier_Cells(object_train, object_test, training.genes = NULL,
-  Y_Train_True = NULL, Y_Test_True = NULL, log10p1 = T,
-  do_Adaboost = F, do_Caret_LinSVM = F, do_ranger_RF = F,
-  do_Caret_NaiveBayes = F, do_Caret_NNet = F, do_Caret_radialSVM = F,
-  do_ElasticNet = F, do_tree = F, do_tree_gini = F,
-  do_Caret_pcaNNet = F, do_Caret_rangerRF = F, do_glmStepAIC = F,
-  do_stepLDA = F, crossValReps = 3, NcrossVal = 10)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
-
 \item{SeurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.
-
-A modified Seurat object.
 }
 \description{
-A description
-
 A description
 }
 \keyword{SerIII_template}
