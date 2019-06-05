@@ -1472,13 +1472,14 @@ GetXYDataFromPlot <- function(plot, cellNames) {
 
 #' @export
 #' @import ggplot2
-AddClonesToPlot <- function(seuratObject, plot) {
+AddClonesToPlot <- function(seuratObject, plot, colorShapes = "black") {
   cellNames <- colnames(seuratObject)[!is.na(seuratObject$CloneNames)]
   plot.data <- GetXYDataFromPlot(plot, cellNames)
   plot.data$CloneName <- seuratObject$CloneNames[!is.na(seuratObject$CloneNames)]
 
   plot <- plot + geom_point(
   mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName'),
+  color = colorShapes,
   data = plot.data
 
   )
