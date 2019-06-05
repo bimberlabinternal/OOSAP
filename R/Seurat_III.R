@@ -387,8 +387,10 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   origRows <- nrow(tcr)
 
   datasetSelect <- seuratObject$BarcodePrefix == barcodePrefix
-  gexBarcodes <- colnames(seuratObject)[datasetSelect]
-
+  #gexBarcodes <- colnames(seuratObject)[datasetSelect]
+  # This change is because, one cannot change the cell names of a Seurat object, but the metadata DF rownames cange be changed. 
+  gexBarcodes <- rownames(seuratObject@meta.data)[datasetSelect]
+  
   tcr <- tcr[tcr$barcode %in% gexBarcodes,]
   pct <- nrow(tcr) / origRows * 100
 
