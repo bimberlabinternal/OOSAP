@@ -402,8 +402,10 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   merged <- merged[colnames(merged) != 'sortOrder']
 
   # Check barcodes match before merge
-  if (sum(merged$barcode != colnames(seuratObject)[datasetSelect]) > 0) {
-    stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
+  if (sum(merged$barcode != rownames(seuratObject@meta.data)[datasetSelect]) > 0) {
+    #stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
+    stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != rownames(seuratObject@meta.data)[datasetSelect])))
+    
   }
 
   for (colName in colnames(tcr)[colnames(tcr) != 'barcode']) {
