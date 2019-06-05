@@ -76,6 +76,13 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
     SGS.LS$HighlyActivated2   <- c("NR4A1", "KLF10", "IRF8", "NR4A2", "RGS1", "AHI1", "ZFP36",
                                    "ID2", "BACH2", "MYC", "TNFAIP3", "KLRB1", "TCF7", "TXNIP", "LTB")
     SGS.LS$HighlyActivated3 <- unique(c(SGS.LS$HighlyActivated, SGS.LS$HighlyActivated2))
+    
+    SGS.LS$HA_CART_gini <- c("CD3G", "CD3D", "CD3E", "TNFRSF9", "NFKBID", "CCL4", "CCL4L2", "IRF8", "IFNG", "CD83", "CD82",
+                             "PLEK", "RGCC", "CCL5", "NKG7", "GZMK", "CST7", "CD8A", "CTSW", "KLRG1", "LYAR", "GZMH", 
+                             "FTH1", "CTSS", "CD74", "HLA-DPA1")
+    SGS.LS$HA_ImpGenes <- c("CD3G", "CD3D", "CD3E", "TNFRSF9", "NFKBID", "CCL4", 
+                            "CCL4L2",  "IRF8", "IFNG", "CD83", "CD82", "PLEK", "RGCC", "CCL5", "NKG7" )
+    
 
 
     SGS.LS$LessActivated      <- c("LTB", "IL7R", "PTPRCAP", "GZMK")
