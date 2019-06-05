@@ -345,7 +345,10 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
-DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T){
+DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T, metaFeat = NULL){
+  #metaFeat = NULL is the default behavior colname(seuratObject)
+  #         = "metaFeat" means use the specified metadata column instead
+  
   if (is.null(seuratObject[['BarcodePrefix']])){
     stop('Seurat object lacks BarcodePrefix column')
   }
@@ -367,7 +370,7 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
     }
 
     doDropExisting <- i == 1 && dropExisting
-    seuratObject <- AppendTcrClonotypes(seuratObject, clonotypeFile, barcodePrefix = barcodePrefix, dropExisting = doDropExisting)
+    seuratObject <- AppendTcrClonotypes(seuratObject, clonotypeFile, barcodePrefix = barcodePrefix, dropExisting = doDropExisting, metaFeat = metaFeat)
   }
 
   return(seuratObject)
@@ -375,7 +378,7 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
 
 
 
-AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F){
+AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F, metaFeat = NULL){
   tcr <- ProcessAndAggregateTcrClonotypes(clonotypeFile)
 
   if (!is.null(barcodePrefix)){
@@ -387,9 +390,14 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   origRows <- nrow(tcr)
 
   datasetSelect <- seuratObject$BarcodePrefix == barcodePrefix
-  #gexBarcodes <- colnames(seuratObject)[datasetSelect]
+  #metaFeat = NULL is the default behavior colname(seuratObject)
+  #         = "metaFeat" means use the specified metadata column instead
+  if(is.null(metaFeat)) gexBarcodes <- colnames(seuratObject)[datasetSelect] else {
+    gexBarcodes <- as.vector(seuratObject@meta.data[,metaFeat])
+    #gexBarcodes <- rownames(seuratObject@meta.data)[datasetSelect]
+  }
   # This change is because, one cannot change the cell names of a Seurat object, but the metadata DF rownames cange be changed. 
-  gexBarcodes <- rownames(seuratObject@meta.data)[datasetSelect]
+  # gexBarcodes <- rownames(seuratObject@meta.data)[datasetSelect]
   
   tcr <- tcr[tcr$barcode %in% gexBarcodes,]
   pct <- nrow(tcr) / origRows * 100
@@ -402,9 +410,9 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   merged <- merged[colnames(merged) != 'sortOrder']
 
   # Check barcodes match before merge
-  if (sum(merged$barcode != rownames(seuratObject@meta.data)[datasetSelect]) > 0) {
+  if (sum(merged$barcode != gexBarcodes) > 0) {
     #stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
-    stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != rownames(seuratObject@meta.data)[datasetSelect])))
+    stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != gexBarcodes )))
     
   }
 
@@ -1464,13 +1472,14 @@ GetXYDataFromPlot <- function(plot, cellNames) {
 
 #' @export
 #' @import ggplot2
-AddClonesToPlot <- function(seuratObject, plot) {
+AddClonesToPlot <- function(seuratObject, plot, colorShapes = "black") {
   cellNames <- colnames(seuratObject)[!is.na(seuratObject$CloneNames)]
   plot.data <- GetXYDataFromPlot(plot, cellNames)
   plot.data$CloneName <- seuratObject$CloneNames[!is.na(seuratObject$CloneNames)]
 
   plot <- plot + geom_point(
   mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName'),
+  color = colorShapes,
   data = plot.data
 
   )

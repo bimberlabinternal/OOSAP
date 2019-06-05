@@ -316,4 +316,16 @@ UniformSampleDF_FacPor <- function(x, ClassF, p){
   unlist(idx)
 }
 
-
+#' @title A Title
+#'
+#' @description A description
+#' @param SeurObj, A Seurat object.
+#' @return A modified Seurat object.
+#' @keywords SerIII_template
+#' @export
+WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
+  Gs1 <- subset(DataT, cluster %in% Clus1N)$gene 
+  Gs2 <- subset(DataT, cluster %in% Clus2N)$gene
+  Gs1[which(!Gs1 %in% Gs2)]
+  
+}
