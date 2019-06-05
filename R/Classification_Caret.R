@@ -196,7 +196,7 @@ MultiClassifier_Cells <- function (object_train,
   library(rpart.plot)
   library(glmnet)
   library(caret)
-  
+  library(lattice)
 
   results_ls <- list()
   
@@ -284,8 +284,10 @@ MultiClassifier_Cells <- function (object_train,
                                      summaryFunction = twoClassSummary)
   
   
-  
+  print("getting pre-processing values")
   preProcValues <- preProcess(training.data, method = preProc);preProcValues
+  
+  print("Transforming training and testing data with preprocessing values")
   
   trainTransformed <- predict(preProcValues, training.data)
   testTransformed <- predict(preProcValues, testing.data)
