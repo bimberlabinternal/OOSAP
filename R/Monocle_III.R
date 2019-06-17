@@ -11,7 +11,8 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
                                      doUMAP = T, min_dist=.3, n_neighbors = 40,
                                      dotSNE = F,
                                      doClust = T, ClusLouvRes = 0.00005, louvain_iter = 3,
-                                     KeepTopNgenes = 3000){
+                                     KeepTopNgenes = 3000, 
+                                     minExprGeneDet = 0.1, upperScale = 2, lowerScale = 2.5){
 
   SeurObj.counts   <- SeurObj@assays$RNA@counts
   SeurObj.meta.data <- SeurObj@meta.data
@@ -27,7 +28,7 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
                                 lowerDetectionLimit=1)
 
 
-  SeurObj_cds <- detectGenes(SeurObj_cds, min_expr = 0.1)
+  SeurObj_cds <- detectGenes(SeurObj_cds, min_expr = minExprGeneDet)
 
 
   # plot(density(SeurObj_cds$num_genes_expressed))
@@ -52,9 +53,9 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
 
 
   upper_bound <- 10^(mean(log10(pData(SeurObj_cds)$Total_mRNAs)) +
-                       2*sd(log10(pData(SeurObj_cds)$Total_mRNAs)))
+                       upperScale*sd(log10(pData(SeurObj_cds)$Total_mRNAs)))
   lower_bound <- 10^(mean(log10(pData(SeurObj_cds)$Total_mRNAs)) -
-                       2.5*sd(log10(pData(SeurObj_cds)$Total_mRNAs)))
+                       lowerScale*sd(log10(pData(SeurObj_cds)$Total_mRNAs)))
 
 
 
@@ -62,7 +63,7 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
   SeurObj_cds <- SeurObj_cds[,pData(SeurObj_cds)$Total_mRNAs > lower_bound &
                                pData(SeurObj_cds)$Total_mRNAs < upper_bound]
 
-  SeurObj_cds <- detectGenes(SeurObj_cds, min_expr = 0.1)
+  SeurObj_cds <- detectGenes(SeurObj_cds, min_expr = minExprGeneDet)
 
 
 
