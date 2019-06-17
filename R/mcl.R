@@ -134,7 +134,7 @@ ColorTheme <- function(){
   }))
   col_vector  <- c(col_vector2, col_vector[21:length(col_vector)])
 
-
+  col_vector <- col_vector[c(1:4, 6:length(col_vector))]
 
   return(list(col_vector=col_vector, scaleyellowred=scaleyellowred))
 }
@@ -328,4 +328,17 @@ WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
   Gs2 <- subset(DataT, cluster %in% Clus2N)$gene
   Gs1[which(!Gs1 %in% Gs2)]
   
+}
+
+#' @title quickTabulate
+#'
+#' @description A description
+#' @param sparce.matrix, A Seurat object.
+#' @return histo_numers
+#' @keywords 
+quickTabulate <- function(spMat){
+  histo_numers <- matrix(c(0:max(spMat), rep(0, max(spMat)+1)), ncol = 2)
+  histo_numers[1:max(spMat)+1, 2] <- tabulate(as.matrix(spMat))
+  histo_numers[1, 2] <- sum(spMat == 0)
+  return(histo_numers)
 }

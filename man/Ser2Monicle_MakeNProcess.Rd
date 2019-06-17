@@ -7,7 +7,8 @@
 Ser2Monicle_MakeNProcess(SeurObj = NULL, retunMon = T, PCAnDim = 20,
   doUMAP = T, min_dist = 0.3, n_neighbors = 40, dotSNE = F,
   doClust = T, ClusLouvRes = 5e-05, louvain_iter = 3,
-  KeepTopNgenes = 3000)
+  KeepTopNgenes = 3000, minExprGeneDet = 0.1, upperScale = 2,
+  lowerScale = 2.5)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}
