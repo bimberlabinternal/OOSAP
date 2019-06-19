@@ -336,9 +336,30 @@ WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
 #' @param sparce.matrix, A Seurat object.
 #' @return histo_numers
 #' @keywords 
+#' @export
 quickTabulate <- function(spMat){
   histo_numers <- matrix(c(0:max(spMat), rep(0, max(spMat)+1)), ncol = 2)
   histo_numers[1:max(spMat)+1, 2] <- tabulate(as.matrix(spMat))
   histo_numers[1, 2] <- sum(spMat == 0)
   return(histo_numers)
 }
+
+#' @title is.even
+#'
+#' @description A description
+#' @param x, numbers
+#' @keywords 
+#' @export
+is.even <- function(x) x %% 2 == 0
+
+#' @title is.odd
+#'
+#' @description A description
+#' @param x, numbers.
+#' @return histo_numers
+#' @keywords 
+#' @export
+is.odd <- function(x) x %% 2 != 0
+
+
+
