@@ -3,6 +3,7 @@
 export(AddClonesToPlot)
 export(AddModuleScoreAvg)
 export(AddTitleToMultiPlot)
+export(AvgCellExprs)
 export(CellCycleScoring)
 export(ClassifyCellsCustom)
 export(ColorTheme)
