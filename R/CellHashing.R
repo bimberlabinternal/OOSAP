@@ -329,11 +329,11 @@ GenerateQcPlots <- function(barcodeData){
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @import data.table
-GenerateCellHashCallsSeurat <- function(barcodeData) {
+GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
-    seuratObj <- DoHtoDemux(seuratObj)
+    seuratObj <- DoHtoDemux(seuratObj, positive.quantile = positive.quantile)
 
     return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode')))
   }, error = function(e){
@@ -451,13 +451,13 @@ DebugDemux <- function(seuratObj) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-DoHtoDemux <- function(seuratObj) {
+DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
 
   DebugDemux(seuratObj)
 
-  seuratObj <- HTODemux2(seuratObj, positive.quantile =  0.99)
+  seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile)
 
   HtoSummary(seuratObj, field1 = 'HTO_classification.global', field2 = 'hash.ID')
 
@@ -850,7 +850,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     queryName="outputfiles",
     viewName="",
     colSort="-rowid",
-    colSelect="readset",
+    colSelect="readset,library_id",
     colFilter=makeFilter(c("rowid", "EQUAL", loupeDataId)),
     containerFilter=NULL,
     colNameOpt="rname"
@@ -865,6 +865,8 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NA)
   }
 
+  libraryId <- rows[['library_id']]
+
   rows <- labkey.selectRows(
     folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
@@ -872,7 +874,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     viewName="",
     colSort="-rowid",
     colSelect="rowid,",
-    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls")),
+    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls"), c("libraryId", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
   )
