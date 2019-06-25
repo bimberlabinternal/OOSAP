@@ -334,8 +334,27 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99) {
 
   tryCatch({
     seuratObj <- DoHtoDemux(seuratObj, positive.quantile = positive.quantile)
+    dt <- data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
 
-    return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode')))
+    #attempt recovery:
+    if (length(seuratObj$HTO_classification.global == 'Negative') > 50) {
+      print('Attempting recovery of negatives')
+      seuratObj2 <- subset(seuratObj, subset = HTO_classification.global == 'Negative')
+      seuratObj2 <- CreateSeuratObject(seuratObj2@assays$HTO@counts, assay = 'HTO')
+      print(paste0('Initial negative cells : ', ncol(seuratObj2)))
+
+      seuratObj2 <- DoHtoDemux(seuratObj2, positive.quantile = positive.quantile)
+      seuratObj2 <- subset(seuratObj2, subset = HTO_classification.global == 'Singlet')
+      print(paste0('Total cells rescued by second HTODemux call: ', ncol(seuratObj2)))
+      if (ncol(seuratObj2) > 0) {
+        dt2 <- data.table(Barcode = as.factor(colnames(seuratObj2)), HTO_classification = seuratObj2$hash.ID, HTO_classification.all = seuratObj2$HTO_classification, HTO_classification.global = seuratObj2$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
+        dt[dt$Barcode %in% dt2$Barcode]$HTO_classification <- dt2$HTO_classification
+        dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.all <- dt2$HTO_classification.all
+        dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.global <- dt2$HTO_classification.global
+      }
+    }
+
+    return(dt)
   }, error = function(e){
     print(e)
     print('Error generating seurat calls, aborting')
