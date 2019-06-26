@@ -4,7 +4,12 @@
 \alias{GenerateCellHashCallsSeurat}
 \title{A Title}
 \usage{
+<<<<<<< HEAD
 GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99)
+=======
+GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99,
+  attemptRecovery = TRUE)
+>>>>>>> 83d4652b13485717ae4d00f543eed4bb745e281d
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

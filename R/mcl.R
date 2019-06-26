@@ -1,4 +1,4 @@
-
+#' @import Seurat
 
 
 # Functions related to Seurat but not directly in pipeline or in development
@@ -16,9 +16,6 @@
 #' @export
 QuickSerCombObjs <- function(save.fig.path="./Figs",
                              working.serobjs.path="./data/10X/ser/proc", returnComboObj=F){
-
-  require(Matrix)
-  require(Seurat)
 
   CleaningLS <- list()
   CleaningLS$SeurObjs <- list()
@@ -70,8 +67,6 @@ QuickSerCombObjs <- function(save.fig.path="./Figs",
     for(ij in 3:length(CleaningLS$SeurObjs)){
       #ij = 2
       TempB <- append(TempB, CleaningLS$SeurObjs[[ij]])
-
-
     }
 
 
@@ -110,12 +105,10 @@ QuickSerCombObjs <- function(save.fig.path="./Figs",
 #' @keywords SerIII_template
 #' @export
 ColorTheme <- function(){
-  require(RColorBrewer)
+  scaleyellowred <- grDevices::colorRampPalette(c("dodgerblue", "lightyellow", "red"), space = "rgb")(30)
 
-  scaleyellowred <- colorRampPalette(c("dodgerblue", "lightyellow", "red"), space = "rgb")(30)
-
-  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
-  col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+  qual_col_pals = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 'qual',]
+  col_vector = unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
   col_vector <- col_vector[-4]
 
   col_vector2 <- c("#38170B","#BF1B0B", "#FFC465", "#66ADE5", "#252A52",
@@ -260,8 +253,8 @@ PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, co
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
+#' @import data.table
 transposedt <- function(dt, varlabel="myVar") {
-  require(data.table)
   dtrows = names(dt)
   dtcols = as.list(c(dt[,1]))
   dtt = transpose(dt)
@@ -335,7 +328,6 @@ WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
 #' @description A description
 #' @param sparce.matrix, A Seurat object.
 #' @return histo_numers
-#' @keywords 
 quickTabulate <- function(spMat){
   histo_numers <- matrix(c(0:max(spMat), rep(0, max(spMat)+1)), ncol = 2)
   histo_numers[1:max(spMat)+1, 2] <- tabulate(as.matrix(spMat))
