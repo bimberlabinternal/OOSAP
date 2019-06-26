@@ -42,7 +42,7 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
 
   disp_table = disp_table %>% mutate(excess_disp =
                                        (dispersion_empirical - dispersion_fit) / dispersion_fit) %>%
-    arrange(plyr::desc(excess_disp))
+    arrange(dplyr::desc(excess_disp))
 
   top_subset_genes = as.character(head(disp_table, KeepTopNgenes)$gene_id)
 
