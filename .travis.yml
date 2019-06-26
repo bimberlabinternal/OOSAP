@@ -3,13 +3,17 @@
 language: R
 sudo: required
 cache: packages
-use_bioc: true
+bioc_required: yes
+use_bioc: yes
 
 os:
   - linux
   - osx
 
 r: bioc-release
+
+packages:
+  BiocManager
 
 bioc_packages:
   DropletUtils

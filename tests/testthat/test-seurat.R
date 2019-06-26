@@ -6,26 +6,10 @@ outDir <- './'
 outPrefix <- paste0(outDir, 'testData')
 resolutionToUse <- 0.6
 
-data <- list(
-  'Set1' = '../testdata/10XCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
-  'Set2' = '../testdata/10xCounts/CellRanger3/raw_feature_bc_matrix'
-)
-
-seuratObjs <- list()
-for (datasetName in names(data)) {
-  seuratObjs[[datasetName]] <- ReadAndFilter10xData(data[[datasetName]], datasetName)
-}
-
-test_that("object count correct", {
-  expect_equal(length(seuratObjs), 2)
-})
-
-
-seuratObj <- MergeSeuratObjs(seuratObjs, data)
-rm(seuratObjs)
+seuratObj <- ReadAndFilter10xData('../testdata/10XCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1')
 
 test_that("cell count correct", {
-  expect_equal(ncol(seuratObj), 7985)
+  expect_equal(ncol(seuratObj), 3353)
 })
 
 vgFile <- 'variableGenes.txt'
@@ -42,7 +26,7 @@ test_that("variable gene list not expected length", {
 seuratObj <- FindClustersAndDimRedux(seuratObj)
 
 test_that("cell count correct", {
-  expect_equal(ncol(seuratObj), 7985)
+  expect_equal(ncol(seuratObj), 3353)
 })
 
 unlink(vgFile)
@@ -52,7 +36,7 @@ md <- paste0(outPrefix, '.markers.rds')
 FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
-  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 1065)
+  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 269)
 })
 
 unlink(md)
@@ -70,3 +54,8 @@ unlink(sf)
 dr <- paste(outPrefix, ".DimReduxComps.csv", sep="")
 SaveDimRedux(seuratObj, file = dr)
 
+test_that("dim redux file not expected length", {
+  expect_equal(nrow(utils::read.table(dr, sep = '\t', header = T)), ncol(seuratObj))
+})
+
+unlink(dr)
