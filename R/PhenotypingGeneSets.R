@@ -169,7 +169,7 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
   for(AnnFile in AnnotationFiles){
     # AnnFile = AnnotationFiles[1]
     tempName = gsub(".txt", "", gsub("_","",gsub("annotations-", "", gsub(".tsv","",gsub("-","",basename(AnnFile))))))
-    GeneLists$Extra[[tempName]] <-  read.table(
+    GeneLists$Extra[[tempName]] <-  utils::read.table(
       AnnFile,
       sep="\t", header=TRUE, row.names = NULL, fill = TRUE )
   }
