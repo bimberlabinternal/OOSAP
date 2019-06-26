@@ -1509,3 +1509,31 @@ FilterCloneNames <- function(seuratObject, minValue) {
 
   return(seuratObject)
 }
+
+
+
+#' @title AvgCellExprs
+#'
+#' @param SeurObj, A Seurat object.
+#' @return A data.frame of avg expression per var
+#' @importFrom Matrix rowMeans
+#' @export
+AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes){
+  # seuratObj = SERObjLS$LymphAxLN
+  # Genes = MarkersOfInterest
+  
+  AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
+  
+  ClustLS <- list()
+  
+  for(lev in levels(AvlLevels)){
+    print(lev)
+    ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, 
+                                                                  features = Genes)[Genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
+  }
+  
+  ClustDF <- as.data.frame(ClustLS)
+  colnames(ClustDF) <- paste0("clus", levels(AvlLevels))
+  
+  return(ClustDF)
+}
