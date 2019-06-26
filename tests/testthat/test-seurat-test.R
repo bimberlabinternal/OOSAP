@@ -36,7 +36,7 @@ test_that("variable genes not saved", {
 })
 
 test_that("variable gene list not expected length", {
-  expect_equal(nrow(read.table(vgFile, sep = '\t', header = F)), 2000)
+  expect_equal(nrow(utils::read.table(vgFile, sep = '\t', header = F)), 2000)
 })
 
 seuratObj <- FindClustersAndDimRedux(seuratObj)
@@ -52,7 +52,7 @@ md <- paste0(outPrefix, '.markers.rds')
 FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
-  expect_equal(nrow(read.table(mf, sep = '\t', header = T)), 1065)
+  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 1065)
 })
 
 unlink(md)
@@ -62,7 +62,7 @@ sf <- paste0(outPrefix, '.summary.txt')
 WriteSummaryMetrics(seuratObj, file = sf)
 
 test_that("summary file not expected length", {
-  expect_equal(nrow(read.table(sf, sep = '\t', header = T)), 2)
+  expect_equal(nrow(utils::read.table(sf, sep = '\t', header = T)), 2)
 })
 
 unlink(sf)

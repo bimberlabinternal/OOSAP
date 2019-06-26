@@ -30,7 +30,7 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
     bData <- as.matrix(bData)
   } else {
     # older versions create a CSV file
-    bData <- read.table(bFile, sep = ',', header = T, row.names = 1)
+    bData <- utils::read.table(bFile, sep = ',', header = T, row.names = 1)
     bData <- bData[which(!(rownames(bData) %in% c('no_match', 'total_reads'))),]
   }
 
@@ -374,7 +374,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 
   if(!file.exists(barcodeCallFile)) stop("Barcode File Not found")
 
-  barcodeCallTable <- read.table(barcodeCallFile, sep = '\t', header = T)
+  barcodeCallTable <- utils::read.table(barcodeCallFile, sep = '\t', header = T)
   if (!is.null(barcodePrefix)) {
     barcodeCallTable$CellBarcode <- paste0(barcodePrefix, '_', barcodeCallTable$CellBarcode)
 
@@ -406,7 +406,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   df <- data.frame(CellBarcode = colnames(seuratObj)[datasetSelect])
   df$sortOrder = 1:nrow(df)
   df <- merge(df, barcodeCallTable, all.x = T, all.y = F, by = c('CellBarcode'))
-  df <- arrange(df, sortOrder)
+  df <- dplyr::arrange(df, sortOrder)
   df <- df[names(df) != 'sortOrder']
 
   if (sum(datasetSelect) != nrow(df)) {
@@ -772,7 +772,7 @@ simplifyHtoNames <- function(v) {
 GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, barcodeData) {
   categoryName <- "Cell Hashing Concordance"
 
-  whitelist <- read.table(whitelistFile, sep = '\t', header = F)
+  whitelist <- utils::read.table(whitelistFile, sep = '\t', header = F)
   names(whitelist) <- c('CellBarcode')
   df <- data.frame(Category = categoryName, MetricName = "InputBarcodes", Value = length(whitelist$CellBarcode))
 

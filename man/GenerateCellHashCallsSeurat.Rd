@@ -4,7 +4,7 @@
 \alias{GenerateCellHashCallsSeurat}
 \title{A Title}
 \usage{
-GenerateCellHashCallsSeurat(barcodeData)
+GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}

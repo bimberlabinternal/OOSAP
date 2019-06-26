@@ -4,7 +4,7 @@
 \alias{DoHtoDemux}
 \title{A Title}
 \usage{
-DoHtoDemux(seuratObj)
+DoHtoDemux(seuratObj, positive.quantile = 0.99)
 }
 \arguments{
 \item{SeurObj, }{A Seurat object.}
