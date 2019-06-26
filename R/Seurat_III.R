@@ -935,8 +935,16 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
       ix <- lineMagnitude(px, py, x1, y1)
       iy <- lineMagnitude(px, py, x2, y2)
       #TODO: giving warning b/c length of ix/iy can be >1.  maybe if needs any() or all()??
-      if (length(ix > 1) || length(iy) > 1) {
+      if (length(ix) > 1 || length(iy) > 1) {
         warning(paste0('length GT 1: ', length(ix), '/', length(iy)))
+        print('ix:')
+        print(ix)
+        print('iy:')
+        print(iy)
+        print(x1)
+        print(y1)
+        print(x2)
+        print(y2)
       }
 
       if (ix > iy)  ans <- iy
