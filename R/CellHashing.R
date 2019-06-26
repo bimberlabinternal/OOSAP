@@ -30,7 +30,7 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
     bData <- as.matrix(bData)
   } else {
     # older versions create a CSV file
-    bData <- read.table(bFile, sep = ',', header = T, row.names = 1)
+    bData <- utils::read.table(bFile, sep = ',', header = T, row.names = 1)
     bData <- bData[which(!(rownames(bData) %in% c('no_match', 'total_reads'))),]
   }
 
@@ -329,13 +329,38 @@ GenerateQcPlots <- function(barcodeData){
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @import data.table
-GenerateCellHashCallsSeurat <- function(barcodeData) {
+GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
-    seuratObj <- DoHtoDemux(seuratObj)
+    seuratObj <- DoHtoDemux(seuratObj, positive.quantile = positive.quantile)
+    dt <- data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
 
-    return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode')))
+    #attempt recovery:
+    if (attemptRecovery && length(seuratObj$HTO_classification.global == 'Negative') > 50) {
+      print('Attempting recovery of negatives')
+      seuratObj2 <- subset(seuratObj, subset = HTO_classification.global == 'Negative')
+      seuratObj2 <- CreateSeuratObject(seuratObj2@assays$HTO@counts, assay = 'HTO')
+      print(paste0('Initial negative cells : ', ncol(seuratObj2)))
+
+      tryCatch({
+        seuratObj2 <- DoHtoDemux(seuratObj2, positive.quantile = positive.quantile)
+        seuratObj2 <- subset(seuratObj2, subset = HTO_classification.global == 'Singlet')
+        print(paste0('Total cells rescued by second HTODemux call: ', ncol(seuratObj2)))
+        if (ncol(seuratObj2) > 0) {
+          dt2 <- data.table(Barcode = as.factor(colnames(seuratObj2)), HTO_classification = seuratObj2$hash.ID, HTO_classification.all = seuratObj2$HTO_classification, HTO_classification.global = seuratObj2$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
+          dt[dt$Barcode %in% dt2$Barcode]$HTO_classification <- dt2$HTO_classification
+          dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.all <- dt2$HTO_classification.all
+          dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.global <- dt2$HTO_classification.global
+        }
+      }, error = function(e){
+        print(e)
+        print('Error generating second round of seurat calls, aborting')
+        return(dt)
+      })
+    }
+
+    return(dt)
   }, error = function(e){
     print(e)
     print('Error generating seurat calls, aborting')
@@ -355,7 +380,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 
   if(!file.exists(barcodeCallFile)) stop("Barcode File Not found")
 
-  barcodeCallTable <- read.table(barcodeCallFile, sep = '\t', header = T)
+  barcodeCallTable <- utils::read.table(barcodeCallFile, sep = '\t', header = T)
   if (!is.null(barcodePrefix)) {
     barcodeCallTable$CellBarcode <- paste0(barcodePrefix, '_', barcodeCallTable$CellBarcode)
 
@@ -387,7 +412,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   df <- data.frame(CellBarcode = colnames(seuratObj)[datasetSelect])
   df$sortOrder = 1:nrow(df)
   df <- merge(df, barcodeCallTable, all.x = T, all.y = F, by = c('CellBarcode'))
-  df <- arrange(df, sortOrder)
+  df <- dplyr::arrange(df, sortOrder)
   df <- df[names(df) != 'sortOrder']
 
   if (sum(datasetSelect) != nrow(df)) {
@@ -451,13 +476,13 @@ DebugDemux <- function(seuratObj) {
 #' @description A description
 #' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
-DoHtoDemux <- function(seuratObj) {
+DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
 
   DebugDemux(seuratObj)
 
-  seuratObj <- HTODemux2(seuratObj, positive.quantile =  0.99)
+  seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile)
 
   HtoSummary(seuratObj, field1 = 'HTO_classification.global', field2 = 'hash.ID')
 
@@ -753,7 +778,7 @@ simplifyHtoNames <- function(v) {
 GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, barcodeData) {
   categoryName <- "Cell Hashing Concordance"
 
-  whitelist <- read.table(whitelistFile, sep = '\t', header = F)
+  whitelist <- utils::read.table(whitelistFile, sep = '\t', header = F)
   names(whitelist) <- c('CellBarcode')
   df <- data.frame(Category = categoryName, MetricName = "InputBarcodes", Value = length(whitelist$CellBarcode))
 
@@ -850,7 +875,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     queryName="outputfiles",
     viewName="",
     colSort="-rowid",
-    colSelect="readset",
+    colSelect="readset,library_id",
     colFilter=makeFilter(c("rowid", "EQUAL", loupeDataId)),
     containerFilter=NULL,
     colNameOpt="rname"
@@ -865,6 +890,8 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NA)
   }
 
+  libraryId <- rows[['library_id']]
+
   rows <- labkey.selectRows(
     folderPath="/Labs/Bimber/",
     schemaName="sequenceanalysis",
@@ -872,7 +899,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     viewName="",
     colSort="-rowid",
     colSelect="rowid,",
-    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls")),
+    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls"), c("libraryId", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
   )

@@ -36,9 +36,9 @@ tests <- list(
         htos = c(2:3, 8, 10, 12),
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
         CalledCells = 21263,
-        Singlet = 8155,
+        Singlet = 12176,
         MultiSeq = 1206,
-        Seurat = 9529,
+        Seurat = 13550,
         CallRows = 21263,
         DoRowFilter = T
     ),

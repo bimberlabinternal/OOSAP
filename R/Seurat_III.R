@@ -3,6 +3,12 @@
 
 Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
+utils::globalVariables(
+  names = c('nCount_RNA', 'nFeature_RNA', 'p.mito'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 
 #' @title Read and Filter 10X files.
 #'
@@ -377,7 +383,6 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
 }
 
 
-
 AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F, metaFeat = NULL){
   tcr <- ProcessAndAggregateTcrClonotypes(clonotypeFile)
 
@@ -406,7 +411,7 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
 
   merged <- merge(data.frame(barcode = gexBarcodes, sortOrder = 1:length(gexBarcodes)), tcr, by = c('barcode'), all.x = T)
   rownames(merged) <- merged$barcode
-  merged <- arrange(merged, sortOrder)
+  merged <- dplyr::arrange(merged, sortOrder)
   merged <- merged[colnames(merged) != 'sortOrder']
 
   # Check barcodes match before merge
@@ -530,7 +535,7 @@ DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
 #' @importFrom dplyr %>% coalesce group_by summarise
 #' @importFrom naturalsort naturalsort
 ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
-  tcr <- read.table(clonotypeFile, header=T, sep = ',')
+  tcr <- utils::read.table(clonotypeFile, header=T, sep = ',')
   tcr <- tcr[tcr$cdr3 != 'None',]
 
   # drop cellranger '-1' suffix
@@ -930,8 +935,16 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
       ix <- lineMagnitude(px, py, x1, y1)
       iy <- lineMagnitude(px, py, x2, y2)
       #TODO: giving warning b/c length of ix/iy can be >1.  maybe if needs any() or all()??
-      if (length(ix > 1) || length(iy) > 1) {
+      if (length(ix) > 1 || length(iy) > 1) {
         warning(paste0('length GT 1: ', length(ix), '/', length(iy)))
+        print('ix:')
+        print(ix)
+        print('iy:')
+        print(iy)
+        print(x1)
+        print(y1)
+        print(x2)
+        print(y2)
       }
 
       if (ix > iy)  ans <- iy
@@ -1104,7 +1117,7 @@ SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
 #' @keywords SerIII_template
 #' @export
 AddTitleToMultiPlot <- function(plotGrid, title, relHeights = c(0.1, 1)) {
-  return(plot_grid(ggdraw() + draw_label(title), plotGrid, ncol = 1, rel_heights = relHeights))
+  return(cowplot::plot_grid(cowplot::ggdraw() + cowplot::draw_label(title), plotGrid, ncol = 1, rel_heights = relHeights))
 }
 
 
@@ -1344,13 +1357,13 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
         SeuratObjs <- readRDS(SeurObj_RDS[xN])
 
         ### call fx here....
-        SeuratObjs <- ProcessSeurat1(SeuratObjs,
-                                            dispersion.cutoff = c(fvg.y.cutoff, Inf),
-                                            mean.cutoff = c(fvg.x.low.cutoff, fvg.x.high.cutoff),
-                                            saveFile = NULL, doCellFilter=T,
-                                            RemoveCellCycle = F,
-                                            nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
-                                            nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low)
+        #SeuratObjs <- ProcessSeurat1(SeuratObjs,
+        #                                    dispersion.cutoff = c(fvg.y.cutoff, Inf),
+        #                                    mean.cutoff = c(fvg.x.low.cutoff, fvg.x.high.cutoff),
+        #                                    saveFile = NULL, doCellFilter=T,
+        #                                    RemoveCellCycle = F,
+        #                                    nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
+        #                                    nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low)
 
         # nUMI.high = nUMI.high, nGene.high = nGene.high, pMito.high = pMito.high,
         # nUMI.low = nUMI.low, nGene.low = nGene.low, pMito.low = pMito.low
@@ -1388,7 +1401,7 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
 
         # print(JackStrawPlot(object = seuratObj, dims = 1:20))
 
-        SeuratObjs <- FindClustersAndDimRedux(seuratObj = SeuratObjs, dimsToUse=1:nDimPCA, doUMAP=doUMAP)
+        SeuratObjs <- FindClustersAndDimRedux(seuratObj = SeuratObjs, dimsToUse=1:nDimPCA)
 
         print("saving ...")
         saveRDS(SeuratObjs,
