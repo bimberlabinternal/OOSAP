@@ -9,7 +9,7 @@ os:
   - linux
   - osx
 
-r: release
+r: bioc-release
 
 bioc_packages:
   DropletUtils
