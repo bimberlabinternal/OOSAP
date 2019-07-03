@@ -227,3 +227,42 @@ is.even <- function(x) x %% 2 == 0
 #' @keywords 
 #' @export
 is.odd <- function(x) x %% 2 != 0
+
+
+#' @title PlotAvgExpr
+#'
+#' @description A description
+#' @param x, numbers.
+#' @return histo_numers
+#' @keywords 
+#' @export
+PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab", Ylab="Ylab"){
+  
+  X_avg$gene <- rownames(X_avg)
+  Y_avg$gene <- rownames(Y_avg)
+  
+  if(is.null(features)) features = rownames(Y_avg)
+  
+  avg.combo.cells <- merge(X_avg[features,], Y_avg[features,], by = "gene")
+  
+  colnames(avg.combo.cells) <- c("gene", "X", "Y")
+  
+  
+  avg.combo.cells$gene3 <- avg.combo.cells$gene
+  
+  avg.combo.cells$gene2 <- ifelse(avg.combo.cells$gene %in% GenesNames2Show, "show", "hide")
+  
+  avg.combo.cells[which(avg.combo.cells$gene2=="show"),]$gene3 <- avg.combo.cells[which(avg.combo.cells$gene2=="show"),]$gene
+  
+  avg.combo.cells[which(avg.combo.cells$gene2=="hide"),]$gene3 <- NA
+  
+  
+  ggplot(avg.combo.cells, aes(X, Y)) + geom_point() + 
+    geom_text(aes(label=gene3), size=3, colour="dodgerblue",
+              vjust=0, hjust=-0.1) +
+    ggtitle("Day 0 Vs Day 8 LymphAxLN : Tcell_Other") + xlab(Xlab) + ylab(Ylab) + 
+    theme_bw() +
+    geom_point(data=subset(avg.combo.cells, gene2 == "show"), aes(x=X, y=Y), colour="dodgerblue", size=2)
+  
+  
+}
