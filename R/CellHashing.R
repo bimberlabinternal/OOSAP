@@ -337,7 +337,7 @@ utils::globalVariables(
 
 
 utils::globalVariables(
-  names = c('HTO_classification.global', 'HTO', 'Count'),
+  names = c('HTO_Classification', 'HTO_classification.global', 'HTO', 'Count'),
   package = 'OOSAP',
   add = TRUE
 )
@@ -706,6 +706,13 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
     print('No rows, not saving ')
   }
 }
+
+
+utils::globalVariables(
+  names = c('HTO_Classification', 'TotalCounts'),
+  package = 'OOSAP',
+  add = TRUE
+)
 
 #' @title PrintFinalSummary
 #'
