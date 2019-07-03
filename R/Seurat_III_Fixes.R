@@ -283,7 +283,7 @@ HTODemux2 <- function(
   #work around so we don't average all the RNA levels which takes time
   average.expression <- AverageExpression(
     object = object,
-    assay = assay,
+    assays = c(assay),
     verbose = FALSE
   )[[assay]]
 

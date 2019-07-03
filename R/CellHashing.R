@@ -263,6 +263,12 @@ DoCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5)
   return(bData)
 }
 
+utils::globalVariables(
+  names = c('Barcode1'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title A Title
 #'
 #' @description A description
@@ -323,6 +329,19 @@ GenerateQcPlots <- function(barcodeData){
 
 }
 
+utils::globalVariables(
+  names = c('p_val_adj', 'avg_logFC', 'cluster'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
+
+utils::globalVariables(
+  names = c('HTO_classification.global', 'HTO', 'Count'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title A Title
 #'
 #' @description A description
@@ -367,6 +386,12 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, a
     return(NA)
   })
 }
+
+utils::globalVariables(
+  names = c('sortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
 
 #' @title AppendCellHashing
 #'
@@ -464,7 +489,7 @@ DebugDemux <- function(seuratObj) {
 
   average.expression <- AverageExpression(
     object = seuratObj,
-    assay = "HTO",
+    assays = c("HTO"),
     verbose = FALSE
   )[["HTO"]]
 

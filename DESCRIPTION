@@ -22,7 +22,17 @@ Imports:
     knitr,
     dtplyr,
     fitdistrplus,
-    Hmisc
+    Hmisc,
+    RColorBrewer,
+    methods,
+    monocle,
+    princurve,
+    rpart,
+    rpart.plot,
+    garnett,
+    glmnet,
+    ranger,
+    org.Hs.eg.db
 Suggests:
     ggvis,
     testthat (>= 2.1.0),

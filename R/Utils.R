@@ -1,7 +1,7 @@
 #' @importFrom grDevices colorRampPalette colors hcl recordPlot
 #' @importFrom graphics abline boxplot legend lines plot points segments
 #' @importFrom methods new
-#' @importFrom stats approxfun cmdscale dist filter kmeans lm na.omit prcomp quantile sd setNames wilcox.test
+#' @importFrom stats approxfun cmdscale dist kmeans lm na.omit prcomp quantile sd setNames wilcox.test
 #' @importFrom utils head read.csv read.table tail write.csv write.table
 
 
@@ -35,6 +35,11 @@ range01b <- function(x, MaxN = 10, MinN = -10){
 }
 
 
+utils::globalVariables(
+  names = c('MDS1', 'MDS2', 'geom_text_repel'),
+  package = 'OOSAP',
+  add = TRUE
+)
 
 #' @title A Title
 #'
@@ -202,7 +207,6 @@ WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
 #' @description A description
 #' @param sparce.matrix, A Seurat object.
 #' @return histo_numers
-#' @keywords 
 #' @export
 quickTabulate <- function(spMat){
   histo_numers <- matrix(c(0:max(spMat), rep(0, max(spMat)+1)), ncol = 2)
@@ -215,7 +219,6 @@ quickTabulate <- function(spMat){
 #'
 #' @description A description
 #' @param x, numbers
-#' @keywords 
 #' @export
 is.even <- function(x) x %% 2 == 0
 
@@ -224,6 +227,5 @@ is.even <- function(x) x %% 2 == 0
 #' @description A description
 #' @param x, numbers.
 #' @return histo_numers
-#' @keywords 
 #' @export
 is.odd <- function(x) x %% 2 != 0

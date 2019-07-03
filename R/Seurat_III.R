@@ -169,6 +169,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
+#' importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
   nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
 
@@ -382,7 +383,11 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
   return(seuratObject)
 }
 
-
+utils::globalVariables(
+  names = c('sortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
 AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F, metaFeat = NULL){
   tcr <- ProcessAndAggregateTcrClonotypes(clonotypeFile)
 

@@ -62,7 +62,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
     tempClassifier$coefnames[!(tempClassifier$coefnames %in% colnames(testing.data))]
 
 
-    y.hat <- predict(tempClassifier, newdata = testing.data[,])
+    y.hat <- stats::predict(tempClassifier, newdata = testing.data[,])
 
 
 
