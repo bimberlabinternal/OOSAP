@@ -17,3 +17,6 @@ packages:
 
 bioc_packages:
   DropletUtils
+
+r_github_packages:
+  cole-trapnell-lab/garnett

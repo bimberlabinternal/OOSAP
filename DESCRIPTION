@@ -38,4 +38,7 @@ Suggests:
     ggvis,
     testthat (>= 2.1.0),
     lintr
+Remotes:
+    cole-trapnell-lab/garnett,
+    bioc::release/DropletUtils
 RoxygenNote: 6.1.1
