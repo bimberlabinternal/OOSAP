@@ -32,7 +32,8 @@ Imports:
     garnett,
     glmnet,
     ranger,
-    org.Hs.eg.db
+    org.Hs.eg.db,
+    fastAdaboost
 Suggests:
     ggvis,
     testthat (>= 2.1.0),

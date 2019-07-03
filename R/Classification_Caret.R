@@ -1,7 +1,9 @@
-
-
-
-
+#' @import Seurat
+#' @import glmnet
+#' @import rpart
+#' @import rpart.plot
+#' @import ranger
+#' @importFrom stats predict
 
 #' @title A Title
 #'
@@ -189,27 +191,17 @@ MultiClassifier_Cells <- function (object_train,
                                   preProc = c( "scale", "center", "nzv", "zv"))
 {
 
-  
-  
-  library(fastAdaboost)
-  library(ranger)
-  require(Matrix)
-  library(rpart)
-  library(rpart.plot)
-  library(glmnet)
-  library(caret)
-  library(lattice)
 
   results_ls <- list()
   
   training.classes <- as.vector(x = Y_Train_True)
   #training.genes   <- #SetIfNull(x = training.genes, default = rownames(x = object_train@assays$RNA@data))
-  training.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
+  training.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
   
   
   testing.classes <- as.vector(x = Y_Test_True)
   testing.genes   <- training.genes #SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
-  testing.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
+  testing.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
   
 
 

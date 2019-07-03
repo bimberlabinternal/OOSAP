@@ -169,7 +169,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
-#' importFrom methods slot
+#' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
   nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
 
@@ -534,6 +534,12 @@ DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   return(outFile)
 }
 
+
+utils::globalVariables(
+    names = c('chain', 'cdr3', 'LabelCol', 'barcode', 'ChainCDR3s', 'TRA', 'TRB', 'TRD', 'TRG', 'TRAV', 'TRBV', 'TRDV', 'TRGV', 'CloneName'),
+    package = 'OOSAP',
+    add = TRUE
+)
 
 
 #' @import Rlabkey
@@ -1126,6 +1132,11 @@ AddTitleToMultiPlot <- function(plotGrid, title, relHeights = c(0.1, 1)) {
 }
 
 
+utils::globalVariables(
+  names = c('UMAP1', 'UMAP2'),
+  package = 'OOSAP',
+  add = TRUE
+)
 
 #' @title A Title
 #'

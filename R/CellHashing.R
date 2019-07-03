@@ -577,6 +577,12 @@ HtoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
   }
 }
 
+utils::globalVariables(
+  names = c('HTO_classification.global.MultiSeq', 'HTO_classification.global.Seurat', 'n', 'HTO_classification.MultiSeq', 'HTO_classification.Seurat'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title ProcessEnsemblHtoCalls
 #'
 #' @description A description
