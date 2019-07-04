@@ -13,7 +13,6 @@ utils::globalVariables(
 #' @title Read and Filter 10X files.
 #'
 #' @description Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords ReadAndFilter10X
 #' @export
@@ -62,7 +61,7 @@ CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, min
 
 #' @title A Title
 #'
-#' @param SeurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object
 #' @importFrom Matrix colSums
 PrintQcPlots <- function(seuratObj) {
@@ -119,7 +118,6 @@ PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, empty
 
 
 #' @title PerformEmptyDrops
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @importFrom DropletUtils emptyDrops
 PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
@@ -165,10 +163,10 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
+#' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
   nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
 
@@ -262,7 +260,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -348,7 +346,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seuratObject, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T, metaFeat = NULL){
@@ -382,7 +380,11 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
   return(seuratObject)
 }
 
-
+utils::globalVariables(
+  names = c('sortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
 AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F, metaFeat = NULL){
   tcr <- ProcessAndAggregateTcrClonotypes(clonotypeFile)
 
@@ -530,6 +532,12 @@ DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
 }
 
 
+utils::globalVariables(
+    names = c('chain', 'cdr3', 'LabelCol', 'barcode', 'ChainCDR3s', 'TRA', 'TRB', 'TRD', 'TRG', 'TRAV', 'TRBV', 'TRDV', 'TRGV', 'CloneName'),
+    package = 'OOSAP',
+    add = TRUE
+)
+
 
 #' @import Rlabkey
 #' @importFrom dplyr %>% coalesce group_by summarise
@@ -611,8 +619,10 @@ ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
 
 
 #' @title RemoveCellCycle
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @param seuratObj The seurat object
+#' @param runPCAonVariableGenes Whether to run PCR on variable genes
 #' @importFrom cowplot plot_grid
 RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   print("Performing cell cycle cleaning ...")
@@ -687,7 +697,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
 
 
 #' @title FindClustersAndDimRedux
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
@@ -1033,7 +1043,8 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
 
 #' @title WriteSummaryMetrics
 #' @export
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
+#' @param file The file where metrics will be written
 WriteSummaryMetrics <- function(seuratObj, file) {
   df <- data.frame(Category = "Seurat", MetricName = "TotalCells", Value = ncol(seuratObj))
   df <- rbind(df, data.frame(Category = "Seurat", MetricName = "TotalFeatures", Value = nrow(seuratObj)))
@@ -1045,8 +1056,10 @@ WriteSummaryMetrics <- function(seuratObj, file) {
 
 #' @title WriteCellBarcodes
 #' @description Writes a table of cell barcodes to the provided file
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @param seuratObj The seurat object
+#' @param The file to which barcodes will be written
 #' @export
 WriteCellBarcodes <- function(seuratObj, file) {
   df <- data.frame(CellBarcode = colnames(seuratObj))
@@ -1057,8 +1070,13 @@ WriteCellBarcodes <- function(seuratObj, file) {
 
 
 #' @title SaveDimRedux
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
+#' @param seuratObj The seurat object
+#' @param reductions Reductions to save
+#' @param file The output file
+#' @param maxPCAcomps The maximum number of PCs to save
+#' @param returnResults Whether to return results
 #' @export
 #' @import data.table
 SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
@@ -1112,15 +1130,22 @@ SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
+#' @param relHeights The relative heights, passed to plot_grid
+#' @param plotGrid The list of plots
+#' @param title The title for this plot
 #' @export
 AddTitleToMultiPlot <- function(plotGrid, title, relHeights = c(0.1, 1)) {
   return(cowplot::plot_grid(cowplot::ggdraw() + cowplot::draw_label(title), plotGrid, ncol = 1, rel_heights = relHeights))
 }
 
 
+utils::globalVariables(
+  names = c('UMAP1', 'UMAP2'),
+  package = 'OOSAP',
+  add = TRUE
+)
 
 #' @title A Title
 #'
@@ -1190,7 +1215,6 @@ gg_color_hue <- function(n) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 MakeSerObjs_10XFolders <- function(counts.path = NULL,
                                           min.cells = 0,
@@ -1292,7 +1316,6 @@ MakeSerObjs_10XFolders <- function(counts.path = NULL,
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
                                       ProjName="10X",
@@ -1444,7 +1467,10 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param object, A Seurat object.
+#' @param cells.1 group 1
+#' @param cells.2 group 2
+#' @param verbose Set true for a more verbose output
 #' @return A modified Seurat object.
 WilcoxDETest <- function(
   object,
@@ -1514,7 +1540,7 @@ FilterCloneNames <- function(seuratObject, minValue) {
 
 #' @title AvgCellExprs
 #'
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A data.frame of avg expression per var
 #' @importFrom Matrix rowMeans
 #' @export
@@ -1545,7 +1571,6 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes){
 #' @title QuickSerCombObjs
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export

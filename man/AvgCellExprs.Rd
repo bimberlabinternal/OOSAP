@@ -7,7 +7,7 @@
 AvgCellExprs(seuratObj, varName = "ClusterNames_0.2", Genes)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seurObj, }{A Seurat object.}
 }
 \value{
 A data.frame of avg expression per var

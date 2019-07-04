@@ -7,9 +7,6 @@
 PCAmyDF(dfx, labels, factorV, title = "PCA Plot", scale, center,
   col_vector, namePointBL = F)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

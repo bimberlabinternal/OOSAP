@@ -7,9 +7,6 @@
 GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99,
   attemptRecovery = TRUE)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

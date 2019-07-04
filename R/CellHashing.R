@@ -69,7 +69,6 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
 #' @title DoRowFiltering
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 DoRowFiltering <- function(bData, minRowSum = 5,
                            minRowMax = 20,
@@ -172,7 +171,6 @@ GenerateByRowSummary <- function(barcodeData) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 InferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, FindElbowMinY = NA) {
   print(paste0('Inferring thresholds for: ', dataLabel))
@@ -232,7 +230,6 @@ InferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, Find
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 DoCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5){
   thresholdsSum <- InferThresholds(colSums(bData), dataLabel = "Column Sums", minQuant = minQuant, FindElbowMinY = 5000)
@@ -263,10 +260,15 @@ DoCellFiltering <- function(bData, minQuant = 0.05, maxValueForColSumFilter = 5)
   return(bData)
 }
 
+utils::globalVariables(
+  names = c('Barcode1'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @importFrom knitr kable
 #' @import ggplot2
@@ -323,10 +325,22 @@ GenerateQcPlots <- function(barcodeData){
 
 }
 
+utils::globalVariables(
+  names = c('p_val_adj', 'avg_logFC', 'cluster'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
+
+utils::globalVariables(
+  names = c('HTO_Classification', 'HTO_classification.global', 'HTO', 'Count'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @import data.table
 GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE) {
@@ -368,10 +382,16 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, a
   })
 }
 
+utils::globalVariables(
+  names = c('sortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title AppendCellHashing
 #'
 #' @description Appends cell hashing calls to a seurat object
-#' @param SeurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @importFrom dplyr arrange
 AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) {
@@ -446,7 +466,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @importFrom cluster clara
 #' @return A modified Seurat object.
 DebugDemux <- function(seuratObj) {
@@ -464,7 +484,7 @@ DebugDemux <- function(seuratObj) {
 
   average.expression <- AverageExpression(
     object = seuratObj,
-    assay = "HTO",
+    assays = c("HTO"),
     verbose = FALSE
   )[["HTO"]]
 
@@ -474,7 +494,7 @@ DebugDemux <- function(seuratObj) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
 DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
@@ -492,7 +512,6 @@ DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @import data.table
 GenerateCellHashCallsMultiSeq <- function(barcodeData) {
@@ -512,7 +531,7 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
 DoMULTIseqDemux <- function(seuratObj) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
@@ -532,7 +551,7 @@ DoMULTIseqDemux <- function(seuratObj) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
 HtoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
   #report outcome
@@ -552,10 +571,15 @@ HtoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
   }
 }
 
+utils::globalVariables(
+  names = c('HTO_classification.global.MultiSeq', 'HTO_classification.global.Seurat', 'n', 'HTO_classification.MultiSeq', 'HTO_classification.Seurat'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title ProcessEnsemblHtoCalls
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 #' @import data.table
@@ -676,9 +700,15 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   }
 }
 
+
+utils::globalVariables(
+  names = c('HTO_Classification', 'TotalCounts'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title PrintFinalSummary
 #'
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @importFrom naturalsort naturalfactor
 #' @importFrom knitr kable
@@ -773,7 +803,6 @@ simplifyHtoNames <- function(v) {
 #' @title GenerateSummaryForExpectedBarcodes
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @export
 GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, barcodeData) {
   categoryName <- "Cell Hashing Concordance"
@@ -832,7 +861,7 @@ GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, ba
 #' @title DownloadAndAppendCellHashing
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param seurObject, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
@@ -864,7 +893,6 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
 #' @title FindMatchedCellHashing
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @import Rlabkey
 FindMatchedCellHashing <- function(loupeDataId){

@@ -8,7 +8,17 @@ SaveDimRedux(seuratObj, reductions = c("pca", "tsne", "umap"),
   file = NA, maxPCAcomps = 10, returnResults = F)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObj}{The seurat object}
+
+\item{reductions}{Reductions to save}
+
+\item{file}{The output file}
+
+\item{maxPCAcomps}{The maximum number of PCs to save}
+
+\item{returnResults}{Whether to return results}
+
+\item{seurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

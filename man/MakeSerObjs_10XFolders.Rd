@@ -8,9 +8,6 @@ MakeSerObjs_10XFolders(counts.path = NULL, min.cells = 0,
   min.genes = 0, ProjName = "10X", save.path = NULL,
   returnList = F, path.exclude = "raw", string.exclude = NULL)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

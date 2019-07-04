@@ -1,7 +1,6 @@
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -62,7 +61,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
     tempClassifier$coefnames[!(tempClassifier$coefnames %in% colnames(testing.data))]
 
 
-    y.hat <- predict(tempClassifier, newdata = testing.data[,])
+    y.hat <- stats::predict(tempClassifier, newdata = testing.data[,])
 
 
 
@@ -99,7 +98,6 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export

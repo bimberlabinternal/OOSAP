@@ -15,9 +15,6 @@ PredictSER(ProcSERobj.path = NULL, PatternOfProcSERobj = "_proc.rds",
   RhesusConvDavid = F, ENSMB.tag = "ENSMM", yhat.save.path = NA,
   cleanName = T)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

@@ -8,7 +8,7 @@ HTODemux2(object, assay = "HTO", positive.quantile = 0.99,
   nstarts = 100, kfunc = "clara", nsamples = 100, verbose = TRUE)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{object, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

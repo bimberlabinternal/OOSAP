@@ -7,7 +7,13 @@
 WilcoxDETest(object, cells.1, cells.2, verbose = TRUE, ...)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{object, }{A Seurat object.}
+
+\item{cells.1}{group 1}
+
+\item{cells.2}{group 2}
+
+\item{verbose}{Set true for a more verbose output}
 }
 \value{
 A modified Seurat object.

@@ -14,9 +14,6 @@ MultiClassifier_Cells(object_train, object_test, data2use = "data",
   crossValReps = 3, NcrossVal = 10, preProc = c("scale", "center",
   "nzv", "zv"))
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

@@ -7,9 +7,6 @@
 ProcessEnsemblHtoCalls(mc, sc, barcodeData,
   outFile = "combinedHtoCalls.txt", allCallsOutFile = NA)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

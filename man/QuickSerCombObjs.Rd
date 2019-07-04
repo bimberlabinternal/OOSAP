@@ -7,9 +7,6 @@
 QuickSerCombObjs(save.fig.path = "./Figs",
   working.serobjs.path = "./data/10X/ser/proc", returnComboObj = F)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

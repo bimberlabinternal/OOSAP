@@ -7,7 +7,7 @@
 HtoSummary(seuratObj, field1, field2, doHeatmap = T)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

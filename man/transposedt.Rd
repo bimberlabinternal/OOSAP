@@ -7,7 +7,7 @@
 transposedt(dt, varlabel = "myVar")
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{dt}{The datatable}
 }
 \value{
 A modified Seurat object.
