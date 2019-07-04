@@ -9,7 +9,6 @@
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -23,7 +22,6 @@ range01 <- function(x, MaxN = NULL, MinN = NULL){
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -44,7 +42,6 @@ utils::globalVariables(
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -81,7 +78,6 @@ MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector){
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -128,9 +124,9 @@ PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, co
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
+#' @param dt The datatable
 #' @export
 #' @import data.table
 transposedt <- function(dt, varlabel="myVar") {
@@ -149,7 +145,6 @@ transposedt <- function(dt, varlabel="myVar") {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -161,7 +156,6 @@ LogAdd <- function(x) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -177,7 +171,6 @@ SetIfNull <- function(x, default) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -191,7 +184,6 @@ UniformSampleDF_FacPor <- function(x, ClassF, p){
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export

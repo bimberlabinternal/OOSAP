@@ -20,20 +20,19 @@ Imports:
     cowplot,
     cluster,
     knitr,
-    dtplyr,
     fitdistrplus,
     Hmisc,
     RColorBrewer,
     methods,
     monocle,
-    princurve,
     rpart,
     rpart.plot,
     garnett,
     glmnet,
     ranger,
     org.Hs.eg.db,
-    fastAdaboost
+    fastAdaboost,
+    caret
 Suggests:
     ggvis,
     testthat (>= 2.1.0),

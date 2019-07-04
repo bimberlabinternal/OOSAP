@@ -3,12 +3,13 @@
 #' @import rpart
 #' @import rpart.plot
 #' @import ranger
+#' @import caret
 #' @importFrom stats predict
+#' @importFrom caret trainControl twoClassSummary confusionMatrix
 
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -33,7 +34,6 @@ GetTraingStats <- function(ClassifierSet=NA, AvailableTrainConfMatrix="", Availa
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -71,7 +71,6 @@ GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", Scale
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -158,7 +157,6 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @description This function takes in Seurat objects and performs machine learning; generalized for common use.
 #'     However as with any approach, especially in machine learning and statistical inference world, robust assessments are needed. 
 #'     This is a first step.
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords Machine Learning, Seurat, classification
 #' @importFrom fastAdaboost adaboost

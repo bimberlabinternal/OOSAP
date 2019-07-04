@@ -14,9 +14,6 @@ PreProcess_SerObjs(SerObj.path = NULL, SerObjRDSKey = "SeuratObj.rds",
   findPCAElbow = T, RemoveCellCycle = F,
   path2CCfiles = "./data/CellCycle", doUMAP = T)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

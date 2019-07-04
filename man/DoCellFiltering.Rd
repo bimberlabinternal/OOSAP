@@ -6,9 +6,6 @@
 \usage{
 DoCellFiltering(bData, minQuant = 0.05, maxValueForColSumFilter = 5)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

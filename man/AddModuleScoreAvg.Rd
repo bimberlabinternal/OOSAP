@@ -24,8 +24,6 @@ AddModuleScoreAvg(SeurObj, genes.list = NULL, genes.pool = NULL,
 \item{random.seed, }{random seed}
 
 \item{object, }{A Seurat object.}
-
-\item{use.k, }{use k ... decap}
 }
 \value{
 A modified Seurat object.

@@ -7,9 +7,6 @@
 GetEnsmbleVarImportance(ClassiferSet, AvailableClassifiers = "",
   ScaleVarImp = T)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

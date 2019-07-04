@@ -6,9 +6,6 @@
 \usage{
 UniformSampleDF_FacPor(x, ClassF, p)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

@@ -6,9 +6,6 @@
 \usage{
 GenerateQcPlots(barcodeData)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

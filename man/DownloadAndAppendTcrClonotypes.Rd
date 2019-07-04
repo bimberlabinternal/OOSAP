@@ -8,7 +8,7 @@ DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
   dropExisting = T, metaFeat = NULL)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObject, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

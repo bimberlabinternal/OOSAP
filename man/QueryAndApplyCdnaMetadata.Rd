@@ -10,7 +10,7 @@ QueryAndApplyCdnaMetadata(seuratObj, fieldSelect = c("rowid",
   "SubjectId", "SampleDate", "Stim"), overwriteExisting = F)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.
