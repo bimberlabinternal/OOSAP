@@ -168,7 +168,12 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
-  nameList <- ifelse(is.null(metadata), yes = names(seuratObjs), no = names(metadata))
+  nameList <- NULL
+  if (is.null(metadata)){
+    nameList <- names(seuratObjs)
+  } else {
+    nameList <- names(metadata)
+  }
 
   for (exptNum in nameList) {
     print(paste0('adding dataset: ', exptNum))
@@ -176,6 +181,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
     so <- seuratObjs[[exptNum]]
 
     if (!('BarcodePrefix' %in% names(so@meta.data))) {
+      print(paste0('Adding barcode prefix: ', prefix))
       so <- RenameCells(object = so, add.cell.id = prefix)
       so[['BarcodePrefix']] <- c(prefix)
     } else {
@@ -203,6 +209,8 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
 
   seuratObj <- NULL
   if (alignData && length(seuratObjs) > 1) {
+    CheckDuplicatedCellNames(seuratObjs)
+
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
     anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:MaxCCAspaceDim, scale = !PreProcSeur, verbose = F)
 
@@ -257,12 +265,36 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspac
 }
 
 
-#' @title A Title
+#' @title CheckDuplicatedCellNames
+#'
+#' @description A variant on Seurat CheckDuplicatedCellNames that reports the top duplicated barcoded for debugging
+#' @param object.list, A lists of Seurat objects
+#' @param stop, Boolean that determines if stop() or print() is used when duplicates are found
+#' @return NULL
+CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
+  cell.names <- unlist(
+  x = sapply(
+  X = 1:length(x = object.list),
+  FUN = function(x) Cells(object = object.list[[x]])
+  )
+  )
+
+  dups <- duplicated(x = cell.names)
+  if (any(dups)) {
+    if (stop){
+      stop(paste0('There were duplicated cell names: ',  paste0(head(unique(cell.names[dups])), collapse = ',')))
+    } else {
+      print('There were duplicated cell names')
+      print(head(unique(cell.names[dups])))
+    }
+  }
+}
+
+#' @title Run the primary seurat processing steps
 #'
 #' @description A description
 #' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
@@ -778,27 +810,37 @@ Find_Markers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = 
     seuratObj.markers <- NA
     for (test in testsToUse) {
       print(paste0('Running using test: ', test))
-      tMarkers <- FindAllMarkers(object = seuratObj, only.pos = onlypos, min.pct = 0.25, logfc.threshold = 0.25, verbose = F, test.use = test)
-      if (nrow(tMarkers) == 0) {
-        print('No genes returned, skipping')
-      } else {
-        tMarkers$test <- c(test)
-        tMarkers$cluster <- as.character(tMarkers$cluster)
-
-        toBind <- data.frame(test = tMarkers$test,
-                             cluster = tMarkers$cluster,
-                             gene = tMarkers$gene,
-                             avg_logFC = tMarkers$avg_logFC,
-                             pct.1 = tMarkers$pct.1,
-                             pct.2 = tMarkers$pct.2,
-                             p_val_adj = tMarkers$p_val_adj
-        )
-        if (all(is.na(seuratObj.markers))) {
-          seuratObj.markers <- toBind
+      tryCatch({
+        tMarkers <- FindAllMarkers(object = seuratObj, only.pos = onlypos, min.pct = 0.25, logfc.threshold = 0.25, verbose = F, test.use = test)
+        if (nrow(tMarkers) == 0) {
+          print('No genes returned, skipping')
         } else {
-          seuratObj.markers <- rbind(seuratObj.markers, toBind)
+          tMarkers$test <- c(test)
+          tMarkers$cluster <- as.character(tMarkers$cluster)
+
+          toBind <- data.frame(test = tMarkers$test,
+                               cluster = tMarkers$cluster,
+                               gene = tMarkers$gene,
+                               avg_logFC = tMarkers$avg_logFC,
+                               pct.1 = tMarkers$pct.1,
+                               pct.2 = tMarkers$pct.2,
+                               p_val_adj = tMarkers$p_val_adj
+          )
+          if (all(is.na(seuratObj.markers))) {
+            seuratObj.markers <- toBind
+          } else {
+            seuratObj.markers <- rbind(seuratObj.markers, toBind)
+          }
         }
-      }
+      }, error = function(e){
+        print(paste0('Error running test: ', test))
+        print(e)
+      })
+    }
+
+    if (is.na(seuratObj.markers)) {
+      print('All tests failed, no markers returned')
+      return()
     }
 
     if (!('cluster' %in% names(seuratObj.markers))) {
