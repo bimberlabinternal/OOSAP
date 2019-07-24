@@ -11,11 +11,6 @@ ClassifyCellsCustom(Classifier.rds.path = "", ClassifierNames = "",
 ClassifyCellsCustom(Classifier.rds.path = "", ClassifierNames = "",
   testing.data, log10T = T, returnTraining = F)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 

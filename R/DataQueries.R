@@ -28,7 +28,7 @@ GetCdnaRecords <- function(readsetId, type = 'GEX') {
 
 #' @title QueryAndApplyCdnaMetadata
 #'
-#' @param SeurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom dplyr %>% group_by_at summarise_at

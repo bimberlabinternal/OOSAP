@@ -6,9 +6,6 @@
 \usage{
 LengthCheck(values, cutoff = 0)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

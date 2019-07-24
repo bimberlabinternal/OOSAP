@@ -1,19 +1,11 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
+r: bioc-release
 sudo: required
-cache: packages
-bioc_required: yes
-use_bioc: yes
+cache:
+  packages: true
 
 os:
   - linux
   - osx
-
-r: bioc-release
-
-packages:
-  BiocManager
-
-bioc_packages:
-  DropletUtils

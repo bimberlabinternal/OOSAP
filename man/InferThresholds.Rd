@@ -7,9 +7,6 @@
 InferThresholds(data, dataLabel, minQuant = 0.05, plotFigs = T,
   FindElbowMinY = NA)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

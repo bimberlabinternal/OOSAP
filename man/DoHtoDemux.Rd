@@ -7,7 +7,7 @@
 DoHtoDemux(seuratObj, positive.quantile = 0.99)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

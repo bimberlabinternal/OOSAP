@@ -1,22 +1,18 @@
+#' @import Seurat
+#' @import org.Hs.eg.db
+#' @import garnett
+#' @import monocle
 
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param SerObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
 Garnett_Classification <- function(SerObj,
                                           marker_file_path = "./data/Garnett/pbmc_classification.txt",
                                           reutrnMonObj=F, returnTrainedClassifier=T){
-  library(Seurat)
-  library(ggplot2)
-  library(cowplot)
-  library(RColorBrewer)
-  library(monocle)
-  library(garnett)
-  library(org.Hs.eg.db)
-
   tempStorageLS <- list()
 
   tempStorageLS$MonComboObj <- importCDS(SerObj, import_all = TRUE)

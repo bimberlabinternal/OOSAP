@@ -12,7 +12,7 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   printDefaultPlots = T, npcs = 50)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

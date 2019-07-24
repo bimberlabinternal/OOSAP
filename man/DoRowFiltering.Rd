@@ -7,9 +7,6 @@
 DoRowFiltering(bData, minRowSum = 5, minRowMax = 20,
   minRowMean = 0.2, minMeanNonZeroCount = 2)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

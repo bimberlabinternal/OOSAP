@@ -7,7 +7,7 @@
 DebugDemux(seuratObj)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

@@ -20,11 +20,24 @@ Imports:
     cowplot,
     cluster,
     knitr,
-    dtplyr,
     fitdistrplus,
-    Hmisc
+    Hmisc,
+    RColorBrewer,
+    methods,
+    monocle,
+    rpart,
+    rpart.plot,
+    garnett,
+    glmnet,
+    ranger,
+    org.Hs.eg.db,
+    fastAdaboost,
+    caret
 Suggests:
     ggvis,
     testthat (>= 2.1.0),
     lintr
+Remotes:
+    cole-trapnell-lab/garnett,
+    bioc::release/DropletUtils
 RoxygenNote: 6.1.1

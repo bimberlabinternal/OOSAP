@@ -6,9 +6,6 @@
 \usage{
 Phenotyping_GeneList(QuickGO.path = "./data/QuickGO")
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

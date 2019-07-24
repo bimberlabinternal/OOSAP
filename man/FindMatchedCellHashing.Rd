@@ -6,9 +6,6 @@
 \usage{
 FindMatchedCellHashing(loupeDataId)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

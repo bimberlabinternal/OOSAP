@@ -7,9 +7,6 @@
 GetTraingStats(ClassifierSet = NA, AvailableTrainConfMatrix = "",
   AvailableTestConfMatrix = "")
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }
