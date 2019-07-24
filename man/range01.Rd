@@ -6,9 +6,6 @@
 \usage{
 range01(x, MaxN = NULL, MinN = NULL)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

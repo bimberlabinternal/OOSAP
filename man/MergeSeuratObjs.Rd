@@ -9,9 +9,6 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
   PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000,
   includeCellCycleGenes = T)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

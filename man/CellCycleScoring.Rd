@@ -12,8 +12,6 @@ CellCycleScoring(object, s.features, g2m.features, set.ident = FALSE)
 \item{g2m.features, }{A vector of genes associated to G2M-phases.}
 
 \item{set.ident, }{Boolean, if T sets cell cycle as identity.}
-
-\item{SeurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

@@ -6,9 +6,6 @@
 \usage{
 SetIfNull(x, default)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

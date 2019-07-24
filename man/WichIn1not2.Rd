@@ -6,9 +6,6 @@
 \usage{
 WichIn1not2(Clus1N = c(1), DataT = "", Clus2N = c(2))
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

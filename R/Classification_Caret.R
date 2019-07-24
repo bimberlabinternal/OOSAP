@@ -1,12 +1,15 @@
-
-
-
-
+#' @import Seurat
+#' @import glmnet
+#' @import rpart
+#' @import rpart.plot
+#' @import ranger
+#' @import caret
+#' @importFrom stats predict
+#' @importFrom caret trainControl twoClassSummary confusionMatrix
 
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -31,7 +34,6 @@ GetTraingStats <- function(ClassifierSet=NA, AvailableTrainConfMatrix="", Availa
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -69,7 +71,6 @@ GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", Scale
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -116,7 +117,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 
       tempClassifier <- MultiClassifier[[ClassifX]]
 
-      y.hat <- predict(tempClassifier, newdata = testing.data)
+      y.hat <- stats::predict(tempClassifier, newdata = testing.data)
 
 
       return(y.hat)
@@ -156,9 +157,10 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @description This function takes in Seurat objects and performs machine learning; generalized for common use.
 #'     However as with any approach, especially in machine learning and statistical inference world, robust assessments are needed. 
 #'     This is a first step.
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords Machine Learning, Seurat, classification
+#' @importFrom fastAdaboost adaboost
+#' @importFrom stats predict
 #' @export
 MultiClassifier_Cells <- function (object_train,
                                   object_test,
@@ -187,27 +189,17 @@ MultiClassifier_Cells <- function (object_train,
                                   preProc = c( "scale", "center", "nzv", "zv"))
 {
 
-  
-  
-  library(fastAdaboost)
-  library(ranger)
-  require(Matrix)
-  library(rpart)
-  library(rpart.plot)
-  library(glmnet)
-  library(caret)
-  library(lattice)
 
   results_ls <- list()
   
   training.classes <- as.vector(x = Y_Train_True)
   #training.genes   <- #SetIfNull(x = training.genes, default = rownames(x = object_train@assays$RNA@data))
-  training.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
+  training.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
   
   
   testing.classes <- as.vector(x = Y_Test_True)
   testing.genes   <- training.genes #SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
-  testing.data    <- as.data.frame(Matrix::t(GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
+  testing.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
   
 
 
@@ -251,10 +243,10 @@ MultiClassifier_Cells <- function (object_train,
   #                                na.action = na.omit)
   #
   #
-  #   newModel_yhat <- predict(newModel_classifier, testing.data)
+  #   newModel_yhat <- stats::predict(newModel_classifier, testing.data)
   #
   #
-  #   results_ls$Caret_newModel_train_yhat      <- predict(newModel_classifier, newdata=training.data[,which(colnames(training.data) !="Class")])
+  #   results_ls$Caret_newModel_train_yhat      <- stats::predict(newModel_classifier, newdata=training.data[,which(colnames(training.data) !="Class")])
   #
   #
   #   results_ls$Caret_newModel_classifier      <- newModel_classifier
@@ -289,8 +281,8 @@ MultiClassifier_Cells <- function (object_train,
   
   print("Transforming training and testing data with preprocessing values")
   
-  trainTransformed <- predict(preProcValues, training.data)
-  testTransformed <- predict(preProcValues, testing.data)
+  trainTransformed <- stats::predict(preProcValues, training.data)
+  testTransformed <- stats::predict(preProcValues, testing.data)
   
   #heatmap(as.matrix(testTransformed))
   results_ls$TrainingParameters        <- TrainingParameters
@@ -312,9 +304,9 @@ MultiClassifier_Cells <- function (object_train,
                                    na.action = na.omit, 
                                    metric = "ROC")
     
-    SVM_Lin_yhat <- predict(SVM_linear_classifier, testTransformed)
-    results_ls$Caret_LinSVM_train_yhat      <- predict(SVM_linear_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
-    #predict(SVM_linear_classifier, newdata=trainTransformed[,training.genes])
+    SVM_Lin_yhat <- stats::predict(SVM_linear_classifier, testTransformed)
+    results_ls$Caret_LinSVM_train_yhat      <- stats::predict(SVM_linear_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    #stats::predict(SVM_linear_classifier, newdata=trainTransformed[,training.genes])
     
     
     results_ls$Caret_LinSVM_classifier      <- SVM_linear_classifier
@@ -340,8 +332,8 @@ MultiClassifier_Cells <- function (object_train,
                                    na.action = na.omit, 
                                    metric = "ROC")
     
-    SVM_Radial_yhat <- predict(SVM_radial_classifier, testTransformed)
-    results_ls$Caret_radialSVM_train_yhat      <- predict(SVM_radial_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    SVM_Radial_yhat <- stats::predict(SVM_radial_classifier, testTransformed)
+    results_ls$Caret_radialSVM_train_yhat      <- stats::predict(SVM_radial_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_radialSVM_classifier      <- SVM_radial_classifier
@@ -373,10 +365,10 @@ MultiClassifier_Cells <- function (object_train,
                                 na.action = na.omit)
     
     
-    stepLDA_yhat <- predict(stepLDA_classifier, testTransformed)
+    stepLDA_yhat <- stats::predict(stepLDA_classifier, testTransformed)
     
     
-    results_ls$Caret_stepLDA_train_yhat      <- predict(stepLDA_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    results_ls$Caret_stepLDA_train_yhat      <- stats::predict(stepLDA_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_stepLDA_classifier      <- stepLDA_classifier
@@ -408,10 +400,10 @@ MultiClassifier_Cells <- function (object_train,
                                    na.action = na.omit)
     
     
-    glmStepAIC_yhat <- predict(glmStepAIC_classifier, testTransformed)
+    glmStepAIC_yhat <- stats::predict(glmStepAIC_classifier, testTransformed)
     
     
-    results_ls$Caret_glmStepAIC_train_yhat      <- predict(glmStepAIC_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    results_ls$Caret_glmStepAIC_train_yhat      <- stats::predict(glmStepAIC_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_glmStepAIC_classifier      <- glmStepAIC_classifier
@@ -452,10 +444,10 @@ MultiClassifier_Cells <- function (object_train,
     results_ls$Caret_rpart_treeViz <- recordPlot()
     
     
-    rpart_yhat <- predict(rpart_classifier, testTransformed)
+    rpart_yhat <- stats::predict(rpart_classifier, testTransformed)
     
     
-    results_ls$Caret_rpart_train_yhat      <- predict(rpart_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    results_ls$Caret_rpart_train_yhat      <- stats::predict(rpart_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_rpart_classifier      <- rpart_classifier
@@ -496,10 +488,10 @@ MultiClassifier_Cells <- function (object_train,
     results_ls$Caret_rpartGini_treeViz <- recordPlot()
     
     
-    rpartGini_yhat <- predict(rpartGini_classifier, testTransformed)
+    rpartGini_yhat <- stats::predict(rpartGini_classifier, testTransformed)
     
     
-    results_ls$Caret_rpartGini_train_yhat      <- predict(rpartGini_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    results_ls$Caret_rpartGini_train_yhat      <- stats::predict(rpartGini_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_rpartGini_classifier      <- rpartGini_classifier
@@ -533,9 +525,9 @@ MultiClassifier_Cells <- function (object_train,
                                    na.action = na.omit, 
                                    silent = T)
     
-    NaiveBayes_yhat <- predict(NaiveBayes_classifier, testTransformed)
+    NaiveBayes_yhat <- stats::predict(NaiveBayes_classifier, testTransformed)
     
-    results_ls$NaiveBayes_train_yhat      <- predict(NaiveBayes_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    results_ls$NaiveBayes_train_yhat      <- stats::predict(NaiveBayes_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     results_ls$NaiveBayes_classifier      <- NaiveBayes_classifier
     results_ls$NaiveBayes_test_yhat       <- NaiveBayes_yhat
@@ -561,8 +553,8 @@ MultiClassifier_Cells <- function (object_train,
                              na.action = na.omit, 
                              silent = T, metric = "ROC")
     
-    NNet_yhat <- predict(NNet_classifier, testTransformed)
-    results_ls$NNet_train_yhat      <- predict(NNet_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    NNet_yhat <- stats::predict(NNet_classifier, testTransformed)
+    results_ls$NNet_train_yhat      <- stats::predict(NNet_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$NNet_classifier      <- NNet_classifier
@@ -587,8 +579,8 @@ MultiClassifier_Cells <- function (object_train,
                                      #preProcess = preProc,
                                      na.action = na.omit, metric = "ROC", silent = T)
     
-    pcaNNetCaret_yhat <- predict(pcaNNetCaret_classifier, testTransformed)
-    results_ls$Caret_pcaNNet_train_yhat      <- predict(pcaNNetCaret_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    pcaNNetCaret_yhat <- stats::predict(pcaNNetCaret_classifier, testTransformed)
+    results_ls$Caret_pcaNNet_train_yhat      <- stats::predict(pcaNNetCaret_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_pcaNNet_classifier      <- pcaNNetCaret_classifier
@@ -614,8 +606,8 @@ MultiClassifier_Cells <- function (object_train,
                                       # preProcess = preProc,
                                       na.action = na.omit)
     
-    rangerRFCaret_yhat <- predict(rangerRFCaret_classifier, testTransformed)
-    results_ls$Caret_RFranger_train_yhat      <- predict(rangerRFCaret_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    rangerRFCaret_yhat <- stats::predict(rangerRFCaret_classifier, testTransformed)
+    results_ls$Caret_RFranger_train_yhat      <- stats::predict(rangerRFCaret_classifier, trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$Caret_RFranger_classifier      <- rangerRFCaret_classifier
@@ -664,8 +656,8 @@ MultiClassifier_Cells <- function (object_train,
     #   warning("ElasticNet classifier failed ")
     # } else {
     # 
-    #   ElasticNet_yhat <- predict(ElasticNet_classifier, testing.data)
-    #   results_ls$Caret_ElasticNet_train_yhat      <- predict(ElasticNet_classifier, newdata=training.data[,training.genes])
+    #   ElasticNet_yhat <- stats::predict(ElasticNet_classifier, testing.data)
+    #   results_ls$Caret_ElasticNet_train_yhat      <- stats::predict(ElasticNet_classifier, newdata=training.data[,training.genes])
     # 
     # 
     #   results_ls$Caret_ElasticNet_classifier      <- ElasticNet_classifier
@@ -689,8 +681,8 @@ MultiClassifier_Cells <- function (object_train,
     
     Adaboost_classifier <- fastAdaboost::adaboost(Class ~ ., trainTransformed, NcrossVal)
     
-    y_hat_Adaboost                      <- predict(Adaboost_classifier, newdata=testTransformed)
-    results_ls$Adaboost_train_yhat      <- predict(Adaboost_classifier, newdata=trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    y_hat_Adaboost                      <- stats::predict(Adaboost_classifier, newdata=testTransformed)
+    results_ls$Adaboost_train_yhat      <- stats::predict(Adaboost_classifier, newdata=trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     results_ls$Adaboost_classifier      <- Adaboost_classifier
     results_ls$Adaboost_test_yhat       <- y_hat_Adaboost
@@ -720,8 +712,8 @@ MultiClassifier_Cells <- function (object_train,
     
     
     
-    RRF_yhat <- predict(RRF_classifier, testTransformed)
-    results_ls$RRF_train_yhat      <- predict(RRF_classifier, data=trainTransformed[,which(colnames(trainTransformed) !="Class")])
+    RRF_yhat <- stats::predict(RRF_classifier, testTransformed)
+    results_ls$RRF_train_yhat      <- stats::predict(RRF_classifier, data=trainTransformed[,which(colnames(trainTransformed) !="Class")])
     
     
     results_ls$RRF_classifier      <- RRF_classifier

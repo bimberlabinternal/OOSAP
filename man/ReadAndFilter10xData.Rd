@@ -6,9 +6,6 @@
 \usage{
 ReadAndFilter10xData(dataDir, datasetName)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

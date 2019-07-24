@@ -7,5 +7,5 @@ RUN apt-get update -y \
 	&& rm -rf /var/lib/apt/lists/*
 RUN pip install numba==0.42.0 && pip install umap-learn && apt-get remove -y python-pip
 
-ADD scripts/install.R /
+RUN devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)
 RUN Rscript install.R && rm -rf /tmp/downloaded_packages/ /tmp/*.rds

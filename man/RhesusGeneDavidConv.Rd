@@ -7,9 +7,6 @@
 RhesusGeneDavidConv(ColNames2Conv, RhesusConvDavid.path,
   ENSMB.tag = "ENSMM", returnFull = F)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

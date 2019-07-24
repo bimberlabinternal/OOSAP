@@ -7,9 +7,6 @@
 GenerateSummaryForExpectedBarcodes(dt, whitelistFile, outputFile,
   barcodeData)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \description{
 A description
 }

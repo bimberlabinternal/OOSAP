@@ -7,7 +7,11 @@
 AddTitleToMultiPlot(plotGrid, title, relHeights = c(0.1, 1))
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{plotGrid}{The list of plots}
+
+\item{title}{The title for this plot}
+
+\item{relHeights}{The relative heights, passed to plot_grid}
 }
 \value{
 A modified Seurat object.

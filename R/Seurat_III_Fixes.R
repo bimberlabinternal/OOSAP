@@ -7,7 +7,6 @@
 #' @title Cell Cycle Scoring function.
 #'
 #' @description Old name: CellCycleScoring.
-#' @param SeurObj, A Seurat object.
 #' @param s.features, A vector of genes associated to S-phase.
 #' @param g2m.features, A vector of genes associated to G2M-phases.
 #' @param set.ident, Boolean, if T sets cell cycle as identity.
@@ -63,7 +62,6 @@ set.ident = FALSE) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -95,7 +93,6 @@ LengthCheck <- function(values, cutoff = 0) {
 #' @param n.bin, number of bins to evaluate score across; default 25.
 #' @param seed.use, seed use.
 #' @param ctrl.size, control gene set size.
-#' @param use.k, use k ... decap
 #' @param enrich.name, A name for the assesment
 #' @param random.seed, random seed
 #' @return A modified Seurat object.
@@ -230,7 +227,7 @@ random.seed = 1, returnScore = F) {
 #' @title A Title
 #'
 #' @description A description
-#' @param SeurObj, A Seurat object.
+#' @param object, A Seurat object.
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
 #' @export
@@ -283,7 +280,7 @@ HTODemux2 <- function(
   #work around so we don't average all the RNA levels which takes time
   average.expression <- AverageExpression(
     object = object,
-    assay = assay,
+    assays = c(assay),
     verbose = FALSE
   )[[assay]]
 

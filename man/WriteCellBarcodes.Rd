@@ -7,7 +7,11 @@
 WriteCellBarcodes(seuratObj, file)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObj}{The seurat object}
+
+\item{seurObj, }{A Seurat object.}
+
+\item{The}{file to which barcodes will be written}
 }
 \value{
 A modified Seurat object.

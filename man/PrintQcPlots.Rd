@@ -7,7 +7,7 @@
 PrintQcPlots(seuratObj)
 }
 \arguments{
-\item{SeurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object

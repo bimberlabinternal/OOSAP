@@ -6,9 +6,6 @@
 \usage{
 MDSmyDF(dfx, labelsDF, factorV, title = "MDS Plot", col_vector)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }

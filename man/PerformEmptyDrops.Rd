@@ -6,9 +6,6 @@
 \usage{
 PerformEmptyDrops(seuratRawData, emptyDropNIters, fdrThreshold = 0.01)
 }
-\arguments{
-\item{SeurObj, }{A Seurat object.}
-}
 \value{
 A modified Seurat object.
 }
