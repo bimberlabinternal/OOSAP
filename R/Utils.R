@@ -230,7 +230,7 @@ is.odd <- function(x) x %% 2 != 0
 #' @return histo_numers
 #' @keywords 
 #' @export
-PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab", Ylab="Ylab"){
+PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab", Ylab="Ylab", Title = "Title", HighColor = "dodgerblue"){
   
   X_avg$gene <- rownames(X_avg)
   Y_avg$gene <- rownames(Y_avg)
@@ -252,9 +252,9 @@ PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab
   
   
   ggplot(avg.combo.cells, aes(X, Y)) + geom_point() + 
-    geom_text(aes(label=gene3), size=3, colour="dodgerblue",
+    geom_text(aes(label=gene3), size=3, colour=HighColor,
               vjust=0, hjust=-0.1) +
-    ggtitle("Day 0 Vs Day 8 LymphAxLN : Tcell_Other") + xlab(Xlab) + ylab(Ylab) + 
+    ggtitle(Title) + xlab(Xlab) + ylab(Ylab) + 
     theme_bw() +
     geom_point(data=subset(avg.combo.cells, gene2 == "show"), aes(x=X, y=Y), colour="dodgerblue", size=2)
   
