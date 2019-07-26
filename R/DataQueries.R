@@ -120,7 +120,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
     stop('Length of original seurat object and metadata not equal. Something went wrong merging')
   }
 
-  if (sum(origBarcodes != df$Barcode) > 0) {
+  if (sum(origBarcodes != rownames(df)) > 0) {
     stop('BarcodePrefix does not match for all cells.  Something went wrong merging')
   }
 
