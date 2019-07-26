@@ -275,7 +275,7 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
   cell.names <- unlist(
   x = sapply(
   X = 1:length(x = object.list),
-  FUN = function(x) Cells(object = object.list[[x]])
+  FUN = function(x) Cells(object.list[[x]])
   )
   )
 
