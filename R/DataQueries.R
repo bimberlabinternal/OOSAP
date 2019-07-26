@@ -90,7 +90,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
     queryName="cdnas",
     viewName="",
     colSort="-rowid",
-    colFilter = makeFilter(c("readsetId", "IN", paste0(unique(outputFiles$Readset, collapse = ";")))),
+    colFilter = makeFilter(c("readsetId", "IN", paste0(unique(outputFiles$Readset), collapse = ";"))),
     colSelect=paste0(fieldSelect, collapse = ','),
     containerFilter=NULL,
     colNameOpt="rname"
