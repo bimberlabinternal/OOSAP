@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{ProcessSeurat1}
 \alias{ProcessSeurat1}
-\title{A Title}
+\title{Run the primary seurat processing steps}
 \usage{
 ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   doCellFilter = F, nUMI.high = 20000, nGene.high = 3000,
@@ -20,4 +20,3 @@ A modified Seurat object.
 \description{
 A description
 }
-\keyword{SerIII_template}
