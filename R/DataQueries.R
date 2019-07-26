@@ -26,12 +26,17 @@ GetCdnaRecords <- function(readsetId, type = 'GEX') {
   return(df)
 }
 
+utils::globalVariables(
+  names = c('SortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
 #' @title QueryAndApplyCdnaMetadata
 #'
 #' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
-#' @importFrom dplyr %>% group_by_at summarise_at
+#' @importFrom dplyr %>% group_by_at summarise_at arrange
 QueryAndApplyCdnaMetadata <- function(seuratObj,
                                       fieldSelect = c('rowid', 'sortid/population', 'sortid/stimid/animalId', 'sortid/stimid/date', 'sortid/stimid/stim'),
                                       fieldNames = c('cDNA ID', 'Population', 'SubjectId', 'SampleDate', 'Stim'), overwriteExisting = F) {
@@ -102,14 +107,20 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
     paste(sort(unique(x)), collapse=',')
   })
 
-  df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix))
-  names(df) <- c(htoLabel, 'BarcodePrefix')
+  origBarcodes <- colnames(seuratObj)
+  df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
+  names(df) <- c(htoLabel, 'BarcodePrefix', 'Barcode', 'SortOrder')
   df <- merge(df, rows, by = c(htoLabel, 'BarcodePrefix'), all.x = T)
+  df <- dplyr::arrange(df, SortOrder)
+  df <- df[colnames(df) != 'SortOrder']
+  rownames(df) <- df$Barcode
+  df <- df[colnames(df) != 'Barcode']
+
   if (nrow(df) != ncol(seuratObj)) {
     stop('Length of original seurat object and metadata not equal. Something went wrong merging')
   }
 
-  if (sum(seuratObj$BarcodePrefix != df$BarcodePrefix) > 0) {
+  if (sum(origBarcodes != rownames(df)) > 0) {
     stop('BarcodePrefix does not match for all cells.  Something went wrong merging')
   }
 
@@ -134,7 +145,9 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
     }
 
     print(paste0('Adding column: ', fieldName, ' (', fieldKey, ')'))
-    seuratObj[[fieldName]] <- df[[fieldName]]
+    v <- df[[fieldName]]
+    names(v) <- names(df)
+    seuratObj[[fieldName]] <- v
   }
 
   return(seuratObj)
