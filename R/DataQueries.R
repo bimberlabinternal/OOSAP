@@ -83,6 +83,11 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   )
   names(outputFiles) <- c('BarcodePrefix', readsetLabel)
   outputFiles$BarcodePrefix <- as.character(outputFiles$BarcodePrefix)
+  print(paste0('total outputfile rows: ', nrow(outputFiles)))
+  if (nrow(outputFiles) != length(unique(seuratObj$BarcodePrefix))) {
+    missing <- sort(c(setdiff(unique(seuratObj$BarcodePrefix), unique(outputFiles$BarcodePrefix)), setdiff(unique(outputFiles$BarcodePrefix), unique(seuratObj$BarcodePrefix))))
+    warning(paste0('Did not find output file record for all prefixes!  Missing: ', paste0(missing, collapse = ',')))
+  }
 
   rows <- labkey.selectRows(
     folderPath="/Labs/Bimber/",
@@ -96,6 +101,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
     colNameOpt="rname"
   )
   names(rows) <- fieldNames
+  print(paste0('total cDNA rows: ', nrow(rows)))
 
   rows <- merge(rows, outputFiles, by = c(readsetLabel), all.x = T)
   rows <- unique(rows)
