@@ -8,4 +8,15 @@ cache:
 
 os:
   - linux
-  - osx
+
+r_binary_packages:
+  - r-cran-data.table
+  - r-cran-cluster
+  - r-cran-caret
+  - testthat
+
+r_packages:
+  - knitr
+  - rmarkdown
+  - remotes
+  - utils
