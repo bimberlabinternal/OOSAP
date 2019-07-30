@@ -3,24 +3,25 @@
 language: R
 r: bioc-release
 cache:
-  packages: true
+  - packages
+  - ccache
 
 os:
   - linux
+
+# see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
+before_install:
+  - chmod +x ./travis-config.sh && ./travis-config.sh
 
 jobs:
   include:
     # Install some dependencies to speed build
     - stage: prepare cache
-      script: Rscript -e 'remotes::install_github(\'cole-trapnell-lab/garnett\')'
+      script: true
     - stage: test
       script: true
 
-# In theory this is faster than cran
-#addons:
-#  apt:
-#    packages:
-#      - r-cran-data.table
-#      - r-cran-cluster
-#      - r-cran-caret
-#      - testthat
+addons:
+  apt:
+    packages:
+      - ccache
