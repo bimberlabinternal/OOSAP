@@ -20,6 +20,10 @@ jobs:
     - stage: prepare cache
       script: true
     - stage: test
+      script:
+        - |
+          R CMD build .
+          travis_wait 30 R CMD check *tar.gz
 
 addons:
   apt:
