@@ -3,7 +3,7 @@ skip_on_cran()
 context("Seurat")
 
 data <- list(
-  'Set1' = '../testdata/10XCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
+  'Set1' = '../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293',
   'Set2' = '../testdata/10xCounts/CellRanger3/raw_feature_bc_matrix'
 )
 
