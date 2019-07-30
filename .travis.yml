@@ -13,13 +13,14 @@ os:
 before_install:
   - chmod +x ./travis-config.sh && ./travis-config.sh
 
-jobs:
-  include:
-    # Install some dependencies to speed build
-    - stage: prepare cache
-      script: true
-    - stage: test
-      script: true
+# see: https://docs.travis-ci.com/user/build-stages/warm-cache/
+# https://travis-ci.community/t/is-there-a-way-not-to-install-r-packages-suggested-by-dependencies/3870/3
+#jobs:
+#  include:
+#    # Install some dependencies to speed build
+#    - stage: prepare cache
+#      script: true
+#    - stage: test
 
 addons:
   apt:
