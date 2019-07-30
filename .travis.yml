@@ -17,10 +17,10 @@ jobs:
       script: true
 
 # In theory this is faster than cran
-addons:
-  apt:
-    packages:
-      - r-cran-data.table
-      - r-cran-cluster
-      - r-cran-caret
-      - testthat
+#addons:
+#  apt:
+#    packages:
+#      - r-cran-data.table
+#      - r-cran-cluster
+#      - r-cran-caret
+#      - testthat
