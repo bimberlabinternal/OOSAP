@@ -4,7 +4,7 @@ outDir <- './'
 outPrefix <- paste0(outDir, 'testData')
 resolutionToUse <- 0.6
 
-seuratObj <- ReadAndFilter10xData('../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1')
+seuratObj <- ReadAndFilter10xData('../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1', emptyDropNIters=5000)
 
 test_that("cell count correct", {
   expect_equal(ncol(seuratObj), 3353)

@@ -17,7 +17,7 @@ utils::globalVariables(
 #' @keywords ReadAndFilter10X
 #' @export
 #' @importFrom Seurat Read10X
-ReadAndFilter10xData <- function(dataDir, datasetName) {
+ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
   if (!file.exists(dataDir)){
     stop(paste0("File does not exist: ", dataDir))
   }
@@ -27,7 +27,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName) {
   }
 
   seuratRawData <- Read10X(data.dir = dataDir)
-  seuratRawData <- PerformEmptyDropletFiltering(seuratRawData)
+  seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters)
 
   seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
   PrintQcPlots(seuratObj)
