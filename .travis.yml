@@ -9,14 +9,17 @@ cache:
 os:
   - linux
 
+jobs:
+  include:
+    - stage: prepare cache
+      script: true
+    - stage: test
+
 r_binary_packages:
   - r-cran-data.table
   - r-cran-cluster
   - r-cran-caret
   - testthat
 
-r_packages:
-  - knitr
-  - rmarkdown
-  - remotes
-  - utils
+r_github_packages:
+  - bimberlabinternal/OOSAP
