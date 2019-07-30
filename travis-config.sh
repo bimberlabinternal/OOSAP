@@ -6,9 +6,10 @@
 echo 'Running travis setup'
 
 mkdir $HOME/.R
-Rscript -e "getOption("Ncpus", 1L)"
-CORES=`Rscript -e "parallel::detectCores()"`
-echo "Cores: $CORES"
+Rscript -e "getOption('Ncpus', 1L)"
+#CORES=`Rscript -e "parallel::detectCores()"`
+#echo "Cores: $CORES"
+CORES=2
 
 echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)\nMAKE=make -j4' > $HOME/.R/Makevars
 echo "options(Ncpus = ${CORES})" >> ~/.Rprofile
