@@ -2,7 +2,6 @@
 
 language: R
 r: bioc-release
-sudo: required
 cache:
   packages: true
 
@@ -14,12 +13,6 @@ jobs:
     - stage: prepare cache
       script: true
     - stage: test
-
-r_binary_packages:
-  - r-cran-data.table
-  - r-cran-cluster
-  - r-cran-caret
-  - testthat
 
 r_github_packages:
   - bimberlabinternal/OOSAP
