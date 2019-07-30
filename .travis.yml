@@ -10,9 +10,17 @@ os:
 
 jobs:
   include:
+    # Install some dependencies to speed build
     - stage: prepare cache
-      script: true
+      script: Rscript -e 'remotes::install_github(\'cole-trapnell-lab/garnett\')'
     - stage: test
+      script: true
 
-r_github_packages:
-  - bimberlabinternal/OOSAP
+# In theory this is faster than cran
+addons:
+  apt:
+    packages:
+      - r-cran-data.table
+      - r-cran-cluster
+      - r-cran-caret
+      - testthat
