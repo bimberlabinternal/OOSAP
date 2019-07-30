@@ -1,5 +1,3 @@
-skip_on_cran()
-
 context("Seurat")
 
 outDir <- './'
