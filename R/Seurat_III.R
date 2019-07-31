@@ -59,10 +59,10 @@ CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, min
 
 
 
-#' @title A Title
+#' @title PrintQcPlots
 #'
 #' @param seuratObj, A Seurat object.
-#' @return A modified Seurat object
+#' @return Plot
 #' @importFrom Matrix colSums
 PrintQcPlots <- function(seuratObj) {
   print(VlnPlot(object = seuratObj, features = c("nFeature_RNA", "nCount_RNA", "p.mito"), ncol = 3))
@@ -81,7 +81,10 @@ PrintQcPlots <- function(seuratObj) {
 }
 
 
-
+#' @title PerformEmptyDropletFiltering
+#'
+#' @param seuratRawData, raw data
+#' @return Plot
 #' @importFrom DropletUtils barcodeRanks
 PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
   br.out <- DropletUtils::barcodeRanks(seuratRawData)
@@ -142,13 +145,15 @@ PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01)
 }
 
 
-
+#' @title HasStepRun
+#' @return A modified Seurat object.
 HasStepRun <- function(seuratObj, name) {
   return(!is.null(seuratObj@misc[[paste0(name, 'Run')]]))
 }
 
 
-
+#' @title MarkStepRun
+#' @return A modified Seurat object.
 MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
   seuratObj@misc[paste0(name, 'Run')] <- T
   if (!is.null(saveFile)){
@@ -160,14 +165,16 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 
 
 
-#' @title A Title
+#' @title MergeSeuratObjs
 #'
-#' @description A description
+#' @description Merges a list of Seurat objects.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @keywords merge
 #' @export
 #' @importFrom methods slot
-MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, includeCellCycleGenes = T){
+MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, MaxCCAspaceDim = 20, MaxPCs2Weight = 20, 
+                            projectName = NULL, PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000, 
+                            includeCellCycleGenes = T){
   nameList <- NULL
   if (is.null(metadata)){
     nameList <- names(seuratObjs)
@@ -375,9 +382,8 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 }
 
 
-#' @title A Title
-#'
-#' @description A description
+#' @title DownloadAndAppendTcrClonotypes
+#' @description Download And Append TCR Clonotypes data from Prime-Seq
 #' @param seuratObject, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
@@ -417,6 +423,9 @@ utils::globalVariables(
   package = 'OOSAP',
   add = TRUE
 )
+
+#' @title AppendTcrClonotypes
+#' @description AppendTcrClonotypes data from Prime-Seq
 AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F, metaFeat = NULL){
   tcr <- ProcessAndAggregateTcrClonotypes(clonotypeFile)
 
@@ -477,7 +486,8 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
   return(seuratObject)
 }
 
-
+#' @title FindMatchedVloupe
+#' @description Find Matched Vloupe
 #' @import Rlabkey
 FindMatchedVloupe <- function(loupeDataId) {
   rows <- labkey.selectRows(
@@ -520,7 +530,8 @@ FindMatchedVloupe <- function(loupeDataId) {
   return(rows[['rowid']])
 }
 
-
+#' @title DownloadCellRangerClonotypes
+#' @description Download CellRanger Clonotypes
 #' @import Rlabkey
 DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
@@ -570,7 +581,8 @@ utils::globalVariables(
     add = TRUE
 )
 
-
+#' @title ProcessAndAggregateTcrClonotypes
+#' @description Process And Aggregate TCR Clonotypes
 #' @import Rlabkey
 #' @importFrom dplyr %>% coalesce group_by summarise
 #' @importFrom naturalsort naturalsort
@@ -1169,11 +1181,9 @@ SaveDimRedux <- function(seuratObj, reductions=c("pca", "tsne", "umap"),
 
 
 
-#' @title A Title
+#' @title AddTitleToMultiPlot
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @description Add Title To MultiPlot
 #' @param relHeights The relative heights, passed to plot_grid
 #' @param plotGrid The list of plots
 #' @param title The title for this plot
@@ -1189,8 +1199,7 @@ utils::globalVariables(
   add = TRUE
 )
 
-#' @title A Title
-#'
+#' @title AddTitleToMultiPlot
 #' @import ggplot2
 ggUMAP <- function(object,
                           colFac = NULL,
@@ -1254,9 +1263,8 @@ gg_color_hue <- function(n) {
 
 
 
-#' @title A Title
-#'
-#' @description A description
+#' @title MakeSerObjs_10XFolders
+#' @description Make Seurat Objs from 10XFolders
 #' @return A modified Seurat object.
 MakeSerObjs_10XFolders <- function(counts.path = NULL,
                                           min.cells = 0,
@@ -1355,9 +1363,8 @@ MakeSerObjs_10XFolders <- function(counts.path = NULL,
 
 
 
-#' @title A Title
-#'
-#' @description A description
+#' @title PreProcess_SerObjs
+#' @description PreProcess Seurat Objs
 #' @return A modified Seurat object.
 PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
                                       ProjName="10X",
@@ -1506,40 +1513,12 @@ PreProcess_SerObjs <- function(SerObj.path = NULL, SerObjRDSKey="SeuratObj.rds",
 
 
 
-#' @title A Title
-#'
-#' @description A description
-#' @param object, A Seurat object.
-#' @param cells.1 group 1
-#' @param cells.2 group 2
-#' @param verbose Set true for a more verbose output
-#' @return A modified Seurat object.
-WilcoxDETest <- function(
-  object,
-  cells.1,
-  cells.2,
-  verbose = TRUE,
-  ...
-) {
-  group.info <- data.frame(row.names = c(cells.1, cells.2))
-  group.info[cells.1, "group"] <- "Group1"
-  group.info[cells.2, "group"] <- "Group2"
-  group.info[, "group"] <- factor(x = group.info[, "group"])
-  object <- object[, rownames(x = group.info), drop = FALSE]
-  my.sapply <- ifelse(
-    test = verbose && PlanThreads() == 1,
-    yes = pbsapply,
-    no = future_sapply
-  )
-  p_val <- my.sapply(
-    X = 1:nrow(x = object),
-    FUN = function(x) {
-      return(wilcox.test(object[x, ] ~ group.info[, "group"], ...)$p.value)
-    }
-  )
-  return(data.frame(p_val, row.names = rownames(x = object)))
-}
+#WilcoxDETest is Seurat:::WilcoxDETest
 
+
+
+#' @title GetXYDataFromPlot
+#' @description Get XY Data From Plot
 #' @export
 GetXYDataFromPlot <- function(plot, cellNames) {
   xynames <- Seurat:::GetXYAesthetics(plot = plot)
@@ -1551,6 +1530,8 @@ GetXYDataFromPlot <- function(plot, cellNames) {
   return(plot.data)
 }
 
+#' @title AddClonesToPlot
+#' @description Add Clones To Plot
 #' @export
 #' @import ggplot2
 AddClonesToPlot <- function(seuratObject, plot, colorShapes = "black") {
@@ -1568,6 +1549,8 @@ AddClonesToPlot <- function(seuratObject, plot, colorShapes = "black") {
   return(plot)
 }
 
+#' @title FilterCloneNames
+#' @description Filter Clone Names
 #' @export
 FilterCloneNames <- function(seuratObject, minValue) {
   ct <- table(seuratObject$CloneNames)
@@ -1611,7 +1594,6 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes){
 ## Make Combo Seur Obj From Several Pre-processed SerObj.rds
 
 #' @title QuickSerCombObjs
-#'
 #' @description A description
 #' @return A modified Seurat object.
 #' @keywords SerIII_template
@@ -1695,4 +1677,145 @@ QuickSerCombObjs <- function(save.fig.path="./Figs",
     if(returnComboObj) SeurComboObj <- readRDS(CombObj.path)
   }
   if(returnComboObj) return(SeurComboObj)
+}
+
+
+
+#' @title AddModuleScoreAvg
+#'
+#' @description Instead of the status quo score of Seurat which is 1 score 1 gene, this function takes a list of genes and computes per set, the average of the individual scores.
+#' @param object, A Seurat object.
+#' @param genes.list, Gene list to obtain a score for
+#' @param genes.pool, Gene list to base as the pool; NULL = all.
+#' @param n.bin, number of bins to evaluate score across; default 25.
+#' @param seed.use, seed use.
+#' @param ctrl.size, control gene set size.
+#' @param enrich.name, A name for the assesment
+#' @param random.seed, random seed
+#' @return A modified Seurat object.
+#' @keywords Seurat, average, gene
+#' @export
+#' @importFrom Hmisc cut2
+#' @importFrom Matrix colMeans rowMeans
+AddModuleScoreAvg <- function(
+  #May-2019 version
+  
+  #this is a modified version of the AddModuleScore
+  #returnScore = F/T controls the output.
+  #if T, just the scores are returned,
+  #if F, the scores are put in the Seurat obj and the Seurat SeurObj is returned.
+  #Also this FX is modified to work for Seurat V3
+  SeurObj,
+  genes.list = NULL,
+  genes.pool = NULL,
+  n.bin = 25,
+  seed.use = 1,
+  ctrl.size = 100,
+  enrich.name = "Cluster",
+  random.seed = 1, returnScore = F) {
+  
+  
+  set.seed(seed = random.seed)
+  genes.old <- genes.list
+  
+  
+  if (is.null(x = genes.list)) {
+    stop("Missing input gene list")
+  }
+  
+  genes.list <- lapply(
+    X = genes.list,
+    FUN = function(x) {
+      return(intersect(x = x, y = rownames(SeurObj)))
+    }
+  )
+  
+  cluster.length <- length(x = genes.list)
+  
+  if (!all(Seurat:::LengthCheck(values = genes.list))) {
+    warning(paste(
+      'Could not find enough genes in the SeurObj from the following gene lists:',
+      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
+      'Attempting to match case...'
+    ))
+    
+    genes.list <- lapply(
+      X = genes.old,
+      FUN = CaseMatch, match = rownames(SeurObj)
+    )
+  }
+  
+  if (!all(Seurat:::LengthCheck(values = genes.list))) {
+    stop(paste(
+      'The following gene lists do not have enough genes present in the SeurObj:',
+      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
+      'exiting...'
+    ))
+  }
+  if (is.null(x = genes.pool)) {
+    genes.pool = rownames(SeurObj)
+  }
+  data.avg <- Matrix::rowMeans(SeurObj@assays$RNA@data[genes.pool, ])
+  data.avg <- data.avg[order(data.avg)]
+  data.cut <- as.numeric(x = Hmisc::cut2(
+    x = data.avg,
+    m = round(x = length(x = data.avg) / n.bin)
+  ))
+  names(x = data.cut) <- names(x = data.avg)
+  ctrl.use <- vector(mode = "list", length = cluster.length)
+  for (i in 1:cluster.length) {
+    genes.use <- genes.list[[i]]
+    for (j in 1:length(x = genes.use)) {
+      ctrl.use[[i]] <- c(
+        ctrl.use[[i]],
+        names(x = sample(
+          x = data.cut[which(x = data.cut == data.cut[genes.use[j]])],
+          size = ctrl.size,
+          replace = FALSE
+        ))
+      )
+    }
+  }
+  
+  ctrl.use <- lapply(X = ctrl.use, FUN = unique)
+  ctrl.scores <- matrix(
+    data = numeric(length = 1L),
+    nrow = length(x = ctrl.use),
+    ncol = ncol(x = SeurObj@assays$RNA@data)
+  )
+  
+  for (i in 1:length(ctrl.use)) {
+    genes.use <- ctrl.use[[i]]
+    ctrl.scores[i, ] <- Matrix::colMeans(x = SeurObj@assays$RNA@data[genes.use, ])
+  }
+  genes.scores <- matrix(
+    data = numeric(length = 1L),
+    nrow = cluster.length,
+    ncol = ncol(x = SeurObj@assays$RNA@data)
+  )
+  for (i in 1:cluster.length) {
+    genes.use <- genes.list[[i]]
+    data.use <- SeurObj@assays$RNA@data[genes.use, , drop = FALSE]
+    genes.scores[i, ] <- Matrix::colMeans(x = data.use)
+  }
+  genes.scores.use <- genes.scores - ctrl.scores
+  rownames(x = genes.scores.use) <- paste0(enrich.name, 1:cluster.length)
+  genes.scores.use <- as.data.frame(x = t(x = genes.scores.use))
+  rownames(x = genes.scores.use) <- colnames(x = SeurObj@assays$RNA@data)
+  
+  for (colName in colnames(genes.scores.use)) {
+    SeurObj[[colName]] <- genes.scores.use[colnames(SeurObj), colName]
+  }
+  
+  gc(verbose = FALSE)
+  
+  if(!returnScore){
+    
+    return(SeurObj)
+    
+  } else {
+    SeurObj@meta.data$cID <- rownames(SeurObj@meta.data)
+    
+    return(SeurObj@meta.data[, c("cID", colnames(genes.scores.use))] )
+  }
 }

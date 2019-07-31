@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{PreProcess_SerObjs}
 \alias{PreProcess_SerObjs}
-\title{A Title}
+\title{PreProcess_SerObjs}
 \usage{
 PreProcess_SerObjs(SerObj.path = NULL, SerObjRDSKey = "SeuratObj.rds",
   ProjName = "10X", save.path = NULL, save.fig.path = NULL,
@@ -18,5 +18,5 @@ PreProcess_SerObjs(SerObj.path = NULL, SerObjRDSKey = "SeuratObj.rds",
 A modified Seurat object.
 }
 \description{
-A description
+PreProcess Seurat Objs
 }

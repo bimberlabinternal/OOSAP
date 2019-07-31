@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III_Fixes.R
 \name{HTODemux2}
 \alias{HTODemux2}
-\title{A Title}
+\title{HTODemux2}
 \usage{
 HTODemux2(object, assay = "HTO", positive.quantile = 0.99,
   nstarts = 100, kfunc = "clara", nsamples = 100, verbose = TRUE)

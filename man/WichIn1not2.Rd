@@ -2,14 +2,15 @@
 % Please edit documentation in R/Utils.R
 \name{WichIn1not2}
 \alias{WichIn1not2}
-\title{A Title}
+\title{WichIn1not2}
 \usage{
 WichIn1not2(Clus1N = c(1), DataT = "", Clus2N = c(2))
 }
 \value{
-A modified Seurat object.
+unique genes to the comparison
 }
 \description{
-A description
+compares unique association between two labels from A dataftrame usually from GO annotation with a column named cluster
 }
-\keyword{SerIII_template}
+\keyword{cluster,}
+\keyword{gene,}

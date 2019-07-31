@@ -2,14 +2,16 @@
 % Please edit documentation in R/Utils.R
 \name{MDSmyDF}
 \alias{MDSmyDF}
-\title{A Title}
+\title{MDSmyDF}
 \usage{
-MDSmyDF(dfx, labelsDF, factorV, title = "MDS Plot", col_vector)
+MDSmyDF(dfx, labelsDF, factorV, title = "MDS Plot", col_vector,
+  returnMDS = F)
 }
 \value{
-A modified Seurat object.
+MDS plot of data or data
 }
 \description{
-A description
+Compute Multidimensional scaling on a dataframe
 }
-\keyword{SerIII_template}
+\keyword{MDS,}
+\keyword{ggplot2}

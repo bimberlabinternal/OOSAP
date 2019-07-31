@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{DownloadAndAppendTcrClonotypes}
 \alias{DownloadAndAppendTcrClonotypes}
-\title{A Title}
+\title{DownloadAndAppendTcrClonotypes}
 \usage{
 DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
   dropExisting = T, metaFeat = NULL)
@@ -14,5 +14,5 @@ DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
 A modified Seurat object.
 }
 \description{
-A description
+Download And Append TCR Clonotypes data from Prime-Seq
 }

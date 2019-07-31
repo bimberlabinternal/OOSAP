@@ -2,14 +2,14 @@
 % Please edit documentation in R/Utils.R
 \name{range01b}
 \alias{range01b}
-\title{A Title}
+\title{Range01b}
 \usage{
 range01b(x, MaxN = 10, MinN = -10)
 }
 \value{
-A modified Seurat object.
+A numeric vector
 }
 \description{
-A description
+Scales the range of input to be between 0 and 1, w/ a prior Min Max
 }
-\keyword{SerIII_template}
+\keyword{range}

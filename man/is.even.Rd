@@ -10,5 +10,5 @@ is.even(x)
 \item{x, }{numbers}
 }
 \description{
-A description
+logical returns T if even
 }

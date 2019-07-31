@@ -13,5 +13,5 @@ is.odd(x)
 histo_numers
 }
 \description{
-A description
+logical returns T if odd
 }

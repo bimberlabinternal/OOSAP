@@ -6,12 +6,11 @@
 
 
 
-#' @title A Title
+#' @title Range01
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description Scales the range of input to be between 0 and 1
+#' @return A numeric vector
+#' @keywords range
 range01 <- function(x, MaxN = NULL, MinN = NULL){
   if(is.null(MaxN)) MaxN = max(x)
   if(is.null(MinN)) MinN = min(x)
@@ -19,17 +18,14 @@ range01 <- function(x, MaxN = NULL, MinN = NULL){
   (x - MinN)/(MaxN - MinN)
 }
 
-#' @title A Title
+#' @title Range01b
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description Scales the range of input to be between 0 and 1, w/ a prior Min Max 
+#' @return A numeric vector
+#' @keywords range
 range01b <- function(x, MaxN = 10, MinN = -10){
-  if(is.null(MaxN)) MaxN = max(x)
-  if(is.null(MinN)) MinN = min(x)
+  range01(x, MaxN = MaxN, MinN = MinN)
   
-  (x - MinN)/(MaxN - MinN)
 }
 
 
@@ -39,16 +35,16 @@ utils::globalVariables(
   add = TRUE
 )
 
-#' @title A Title
+#' @title MDSmyDF
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector){
+#' @description Compute Multidimensional scaling on a dataframe
+#' @return MDS plot of data or data
+#' @keywords MDS, ggplot2
+MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector, returnMDS = F){
   
   
-  if(length(factorV) == nrow(dfx)){
+  if(length(factorV) != nrow(dfx)) stop("rotate t() your dataX")
+  
     mds <- cmdscale(as.matrix(dist(dfx)))
     colnames(mds) <- c("MDS1", "MDS2")
     
@@ -64,23 +60,22 @@ MDSmyDF <- function(dfx, labelsDF, factorV, title = "MDS Plot", col_vector){
       scale_color_manual(values = col_vector, name="Samples")
     
     # the graphic with ggrepel
-    p1 + geom_text_repel(aes(y = MDS2 + 0.25), label = factorV) +
+    p1 <- p1 + geom_text_repel(aes(y = MDS2 + 0.25), label = factorV) +
       ggtitle(paste("MDS of:",title ,sep=" "))+
       theme(plot.title = element_text(hjust = 0.5))
     
-  } else {
-    print("rotate t() your dataX")
-  }
+  
+  if(returnMDS) return(mds) else p1
   
   
 }
 
-#' @title A Title
+#' @title PCAmyDF
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description Compute PCA on a dataframe
+#' @return PCA plot of data or data
+#' @keywords PCA, ggplot2
+#' @import ggplot2
 PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, col_vector, namePointBL = F) {
   if(class(labels) == "function") {
     print("no labels, using factor as names")
@@ -121,15 +116,14 @@ PCAmyDF <- function (dfx, labels, factorV, title = "PCA Plot", scale, center, co
   
 }
 
-#' @title A Title
+#' @title transposedt
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @description Transpose a data.table
+#' @return A transposed data.table
+#' @keywords transpose, t
 #' @param dt The datatable
-#' @export
 #' @import data.table
-transposedt <- function(dt, varlabel="myVar") {
+TransposeDT <- function(dt, varlabel="myVar") {
   dtrows = names(dt)
   dtcols = as.list(c(dt[,1]))
   dtt = transpose(dt)
@@ -142,23 +136,21 @@ transposedt <- function(dt, varlabel="myVar") {
 
 
 
-#' @title A Title
+#' @title LogAdd
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description Sum a vector of log valued
+#' @return A vector.
+#' @keywords log, sum
 LogAdd <- function(x) {
   mpi <- max(x)
   return(mpi + log(x = sum(exp(x = x - mpi))))
 }
 
-#' @title A Title
+#' @title SetIfNull
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description checks is.null, used in various Seurat based functions.
+#' @return A vector x
+#' @keywords is.null, Seurat
 SetIfNull <- function(x, default) {
   if(is.null(x = x)){
     return(default)
@@ -168,12 +160,11 @@ SetIfNull <- function(x, default) {
 }
 
 
-#' @title A Title
+#' @title UniformSampleDF_FacPor
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description uniformly sample a dataframe based on factor and porportion
+#' @return index of the uniformly sampled samples
+#' @keywords sample, uniform
 UniformSampleDF_FacPor <- function(x, ClassF, p){
   nr <- NROW(x)
   size <- (nr * p) %/% length(unique(ClassF))
@@ -181,12 +172,11 @@ UniformSampleDF_FacPor <- function(x, ClassF, p){
   unlist(idx)
 }
 
-#' @title A Title
+#' @title WichIn1not2
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
+#' @description compares unique association between two labels from A dataftrame usually from GO annotation with a column named cluster
+#' @return unique genes to the comparison
+#' @keywords cluster, gene, 
 WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
   Gs1 <- subset(DataT, cluster %in% Clus1N)$gene 
   Gs2 <- subset(DataT, cluster %in% Clus2N)$gene
@@ -195,11 +185,9 @@ WichIn1not2 <- function(Clus1N = c(1), DataT = "", Clus2N = c(2)){
 }
 
 #' @title quickTabulate
-#'
-#' @description A description
-#' @param sparce.matrix, A Seurat object.
+#' @description tablulates a matrix
+#' @param spMat, A sparse matrix
 #' @return histo_numers
-#' @export
 quickTabulate <- function(spMat){
   histo_numers <- matrix(c(0:max(spMat), rep(0, max(spMat)+1)), ncol = 2)
   histo_numers[1:max(spMat)+1, 2] <- tabulate(as.matrix(spMat))
@@ -209,14 +197,14 @@ quickTabulate <- function(spMat){
 
 #' @title is.even
 #'
-#' @description A description
+#' @description logical returns T if even
 #' @param x, numbers
 #' @export
 is.even <- function(x) x %% 2 == 0
 
 #' @title is.odd
 #'
-#' @description A description
+#' @description logical returns T if odd
 #' @param x, numbers.
 #' @return histo_numers
 #' @export
@@ -225,7 +213,7 @@ is.odd <- function(x) x %% 2 != 0
 
 #' @title PlotAvgExpr
 #'
-#' @description A description
+#' @description Plots average expression of each cluster/group for all associated cells
 #' @param x, numbers.
 #' @return histo_numers
 #' @export
@@ -258,4 +246,75 @@ PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab
     geom_point(data=subset(avg.combo.cells, gene2 == "show"), aes(x=X, y=Y), colour="dodgerblue", size=2)
   
   
+}
+
+
+
+#' @title RunUMAP.Matrix
+#' @description Return UMAP 2D with similar parameters as Seurat
+#' @param DGEmat, A matrix rows are cells
+#' @return 2D UMAP rows are cellss
+#' @keywords 
+#' @export
+#' @import reticulate
+RunUMAP.Matrix <- function(
+  #originally from Seurat pacakge, 
+  DGEmat,
+  assay = NULL,
+  n.neighbors = 30L,
+  n.components = 2L,
+  metric = "correlation",
+  n.epochs = NULL,
+  learning.rate = 1.0,
+  min.dist = 0.3,
+  spread = 1.0,
+  set.op.mix.ratio = 1.0,
+  local.connectivity = 1L,
+  repulsion.strength = 1,
+  negative.sample.rate = 5,
+  a = NULL,
+  b = NULL,
+  seed.use = 42,
+  metric.kwds = NULL,
+  angular.rp.forest = FALSE,
+  reduction.key = 'UMAP_',
+  verbose = TRUE,
+  ...
+) {
+  
+  if (!py_module_available(module = 'umap')) {
+    stop("Cannot find UMAP, please install through pip (e.g. pip install umap-learn).")
+  }
+  
+  if (!is.null(x = seed.use)) {
+    set.seed(seed = seed.use)
+    py_set_seed(seed = seed.use)
+  }
+  if (typeof(x = n.epochs) == "double") {
+    n.epochs <- as.integer(x = n.epochs)
+  }
+  umap_import <- import(module = "umap", delay_load = TRUE)
+  umap <- umap_import$UMAP(
+    n_neighbors = as.integer(x = n.neighbors),
+    n_components = as.integer(x = n.components),
+    metric = metric,
+    n_epochs = n.epochs,
+    learning_rate = learning.rate,
+    min_dist = min.dist,
+    spread = spread,
+    set_op_mix_ratio = set.op.mix.ratio,
+    local_connectivity = local.connectivity,
+    repulsion_strength = repulsion.strength,
+    negative_sample_rate = negative.sample.rate,
+    a = a,
+    b = b,
+    metric_kwds = metric.kwds,
+    angular_rp_forest = angular.rp.forest,
+    verbose = verbose
+  )
+  umap_output <- umap$fit_transform(as.matrix(x = DGEmat))
+  colnames(x = umap_output) <- paste0(reduction.key, 1:ncol(x = umap_output))
+  rownames(x = umap_output) <- rownames(DGEmat)
+  
+  return(umap_output)
 }

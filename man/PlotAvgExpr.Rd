@@ -15,5 +15,7 @@ PlotAvgExpr(GenesNames2Show, X_avg, Y_avg, features = NULL,
 histo_numers
 }
 \description{
-A description
+
+Plots average expression of each cluster/group for all associated cells
+
 }

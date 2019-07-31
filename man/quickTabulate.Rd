@@ -7,11 +7,11 @@
 quickTabulate(spMat)
 }
 \arguments{
-\item{sparce.matrix, }{A Seurat object.}
+\item{spMat, }{A sparse matrix}
 }
 \value{
 histo_numers
 }
 \description{
-A description
+tablulates a matrix
 }
