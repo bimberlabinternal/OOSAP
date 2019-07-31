@@ -252,13 +252,12 @@ PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab
 
 
 #' @title RunUMAP.Matrix
-#'
 #' @description Return UMAP 2D with similar parameters as Seurat
 #' @param DGEmat, A matrix rows are cells
 #' @return 2D UMAP rows are cellss
 #' @keywords 
 #' @export
-#' @importFrom reticulate
+#' @import reticulate
 RunUMAP.Matrix <- function(
   #originally from Seurat pacakge, 
   DGEmat,

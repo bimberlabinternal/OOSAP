@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{AddTitleToMultiPlot}
 \alias{AddTitleToMultiPlot}
-\title{A Title}
+\title{AddTitleToMultiPlot}
 \usage{
 AddTitleToMultiPlot(plotGrid, title, relHeights = c(0.1, 1))
 }
@@ -13,10 +13,6 @@ AddTitleToMultiPlot(plotGrid, title, relHeights = c(0.1, 1))
 
 \item{relHeights}{The relative heights, passed to plot_grid}
 }
-\value{
-A modified Seurat object.
-}
 \description{
-A description
+Add Title To MultiPlot
 }
-\keyword{SerIII_template}

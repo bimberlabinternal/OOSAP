@@ -2,15 +2,16 @@
 % Please edit documentation in R/Utils.R
 \name{PCAmyDF}
 \alias{PCAmyDF}
-\title{A Title}
+\title{PCAmyDF}
 \usage{
 PCAmyDF(dfx, labels, factorV, title = "PCA Plot", scale, center,
   col_vector, namePointBL = F)
 }
 \value{
-A modified Seurat object.
+PCA plot of data or data
 }
 \description{
-A description
+Compute PCA on a dataframe
 }
-\keyword{SerIII_template}
+\keyword{PCA,}
+\keyword{ggplot2}

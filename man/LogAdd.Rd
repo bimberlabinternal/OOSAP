@@ -2,14 +2,15 @@
 % Please edit documentation in R/Utils.R
 \name{LogAdd}
 \alias{LogAdd}
-\title{A Title}
+\title{LogAdd}
 \usage{
 LogAdd(x)
 }
 \value{
-A modified Seurat object.
+A vector.
 }
 \description{
-A description
+Sum a vector of log valued
 }
-\keyword{SerIII_template}
+\keyword{log,}
+\keyword{sum}

@@ -2,12 +2,12 @@
 % Please edit documentation in R/Seurat_III.R
 \name{ggUMAP}
 \alias{ggUMAP}
-\title{A Title}
+\title{AddTitleToMultiPlot}
 \usage{
 ggUMAP(object, colFac = NULL, col_vector = NULL, ptSize = 0.15,
   ptAlpha = 0.5, add2title = "", legendTitle = "",
   cells.use = NULL)
 }
 \description{
-A Title
+AddTitleToMultiPlot
 }

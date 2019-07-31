@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{PrintQcPlots}
 \alias{PrintQcPlots}
-\title{A Title}
+\title{PrintQcPlots}
 \usage{
 PrintQcPlots(seuratObj)
 }
@@ -10,8 +10,8 @@ PrintQcPlots(seuratObj)
 \item{seuratObj, }{A Seurat object.}
 }
 \value{
-A modified Seurat object
+Plot
 }
 \description{
-A Title
+PrintQcPlots
 }

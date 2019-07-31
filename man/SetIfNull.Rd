@@ -2,14 +2,15 @@
 % Please edit documentation in R/Utils.R
 \name{SetIfNull}
 \alias{SetIfNull}
-\title{A Title}
+\title{SetIfNull}
 \usage{
 SetIfNull(x, default)
 }
 \value{
-A modified Seurat object.
+A vector x
 }
 \description{
-A description
+checks is.null, used in various Seurat based functions.
 }
-\keyword{SerIII_template}
+\keyword{Seurat}
+\keyword{is.null,}

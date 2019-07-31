@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{MakeSerObjs_10XFolders}
 \alias{MakeSerObjs_10XFolders}
-\title{A Title}
+\title{MakeSerObjs_10XFolders}
 \usage{
 MakeSerObjs_10XFolders(counts.path = NULL, min.cells = 0,
   min.genes = 0, ProjName = "10X", save.path = NULL,
@@ -12,5 +12,5 @@ MakeSerObjs_10XFolders(counts.path = NULL, min.cells = 0,
 A modified Seurat object.
 }
 \description{
-A description
+Make Seurat Objs from 10XFolders
 }

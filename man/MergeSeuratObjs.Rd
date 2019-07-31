@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{MergeSeuratObjs}
 \alias{MergeSeuratObjs}
-\title{A Title}
+\title{MergeSeuratObjs}
 \usage{
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
   MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL,
@@ -13,6 +13,6 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
 A modified Seurat object.
 }
 \description{
-A description
+Merges a list of Seurat objects.
 }
-\keyword{SerIII_template}
+\keyword{merge}

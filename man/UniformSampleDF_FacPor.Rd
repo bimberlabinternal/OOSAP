@@ -2,14 +2,15 @@
 % Please edit documentation in R/Utils.R
 \name{UniformSampleDF_FacPor}
 \alias{UniformSampleDF_FacPor}
-\title{A Title}
+\title{UniformSampleDF_FacPor}
 \usage{
 UniformSampleDF_FacPor(x, ClassF, p)
 }
 \value{
-A modified Seurat object.
+index of the uniformly sampled samples
 }
 \description{
-A description
+uniformly sample a dataframe based on factor and porportion
 }
-\keyword{SerIII_template}
+\keyword{sample,}
+\keyword{uniform}
