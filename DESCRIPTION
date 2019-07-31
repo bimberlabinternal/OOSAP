@@ -8,6 +8,8 @@ Description: The goal of this package is bringing together tools and pipelines f
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.5.0)
 Imports:
     Seurat,
     Rlabkey,
