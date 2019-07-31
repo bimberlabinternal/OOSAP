@@ -1696,3 +1696,144 @@ QuickSerCombObjs <- function(save.fig.path="./Figs",
   }
   if(returnComboObj) return(SeurComboObj)
 }
+
+
+
+#' @title AddModuleScoreAvg
+#'
+#' @description Instead of the status quo score of Seurat which is 1 score 1 gene, this function takes a list of genes and computes per set, the average of the individual scores.
+#' @param object, A Seurat object.
+#' @param genes.list, Gene list to obtain a score for
+#' @param genes.pool, Gene list to base as the pool; NULL = all.
+#' @param n.bin, number of bins to evaluate score across; default 25.
+#' @param seed.use, seed use.
+#' @param ctrl.size, control gene set size.
+#' @param enrich.name, A name for the assesment
+#' @param random.seed, random seed
+#' @return A modified Seurat object.
+#' @keywords SerIII_AddModuleScore
+#' @export
+#' @importFrom Hmisc cut2
+#' @importFrom Matrix colMeans rowMeans
+AddModuleScoreAvg <- function(
+  #May-2019 version
+  
+  #this is a modified version of the AddModuleScore
+  #returnScore = F/T controls the output.
+  #if T, just the scores are returned,
+  #if F, the scores are put in the Seurat obj and the Seurat SeurObj is returned.
+  #Also this FX is modified to work for Seurat V3
+  SeurObj,
+  genes.list = NULL,
+  genes.pool = NULL,
+  n.bin = 25,
+  seed.use = 1,
+  ctrl.size = 100,
+  enrich.name = "Cluster",
+  random.seed = 1, returnScore = F) {
+  
+  
+  set.seed(seed = random.seed)
+  genes.old <- genes.list
+  
+  
+  if (is.null(x = genes.list)) {
+    stop("Missing input gene list")
+  }
+  
+  genes.list <- lapply(
+    X = genes.list,
+    FUN = function(x) {
+      return(intersect(x = x, y = rownames(SeurObj)))
+    }
+  )
+  
+  cluster.length <- length(x = genes.list)
+  
+  if (!all(Seurat:::LengthCheck(values = genes.list))) {
+    warning(paste(
+      'Could not find enough genes in the SeurObj from the following gene lists:',
+      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
+      'Attempting to match case...'
+    ))
+    
+    genes.list <- lapply(
+      X = genes.old,
+      FUN = CaseMatch, match = rownames(SeurObj)
+    )
+  }
+  
+  if (!all(Seurat:::LengthCheck(values = genes.list))) {
+    stop(paste(
+      'The following gene lists do not have enough genes present in the SeurObj:',
+      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
+      'exiting...'
+    ))
+  }
+  if (is.null(x = genes.pool)) {
+    genes.pool = rownames(SeurObj)
+  }
+  data.avg <- Matrix::rowMeans(SeurObj@assays$RNA@data[genes.pool, ])
+  data.avg <- data.avg[order(data.avg)]
+  data.cut <- as.numeric(x = Hmisc::cut2(
+    x = data.avg,
+    m = round(x = length(x = data.avg) / n.bin)
+  ))
+  names(x = data.cut) <- names(x = data.avg)
+  ctrl.use <- vector(mode = "list", length = cluster.length)
+  for (i in 1:cluster.length) {
+    genes.use <- genes.list[[i]]
+    for (j in 1:length(x = genes.use)) {
+      ctrl.use[[i]] <- c(
+        ctrl.use[[i]],
+        names(x = sample(
+          x = data.cut[which(x = data.cut == data.cut[genes.use[j]])],
+          size = ctrl.size,
+          replace = FALSE
+        ))
+      )
+    }
+  }
+  
+  ctrl.use <- lapply(X = ctrl.use, FUN = unique)
+  ctrl.scores <- matrix(
+    data = numeric(length = 1L),
+    nrow = length(x = ctrl.use),
+    ncol = ncol(x = SeurObj@assays$RNA@data)
+  )
+  
+  for (i in 1:length(ctrl.use)) {
+    genes.use <- ctrl.use[[i]]
+    ctrl.scores[i, ] <- Matrix::colMeans(x = SeurObj@assays$RNA@data[genes.use, ])
+  }
+  genes.scores <- matrix(
+    data = numeric(length = 1L),
+    nrow = cluster.length,
+    ncol = ncol(x = SeurObj@assays$RNA@data)
+  )
+  for (i in 1:cluster.length) {
+    genes.use <- genes.list[[i]]
+    data.use <- SeurObj@assays$RNA@data[genes.use, , drop = FALSE]
+    genes.scores[i, ] <- Matrix::colMeans(x = data.use)
+  }
+  genes.scores.use <- genes.scores - ctrl.scores
+  rownames(x = genes.scores.use) <- paste0(enrich.name, 1:cluster.length)
+  genes.scores.use <- as.data.frame(x = t(x = genes.scores.use))
+  rownames(x = genes.scores.use) <- colnames(x = SeurObj@assays$RNA@data)
+  
+  for (colName in colnames(genes.scores.use)) {
+    SeurObj[[colName]] <- genes.scores.use[colnames(SeurObj), colName]
+  }
+  
+  gc(verbose = FALSE)
+  
+  if(!returnScore){
+    
+    return(SeurObj)
+    
+  } else {
+    SeurObj@meta.data$cID <- rownames(SeurObj@meta.data)
+    
+    return(SeurObj@meta.data[, c("cID", colnames(genes.scores.use))] )
+  }
+}
