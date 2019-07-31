@@ -8,6 +8,8 @@ Description: The goal of this package is bringing together tools and pipelines f
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.5.0)
 Imports:
     Seurat,
     Rlabkey,
@@ -35,8 +37,7 @@ Imports:
     caret
 Suggests:
     ggvis,
-    testthat (>= 2.1.0),
-    lintr
+    testthat (>= 2.1.0)
 Remotes:
     cole-trapnell-lab/garnett,
     bioc::release/DropletUtils

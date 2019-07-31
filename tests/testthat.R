@@ -1,7 +1,7 @@
 library(testthat)
 library(OOSAP)
 
-test_check("OOSAP")
+test_check("OOSAP", reporter = "progress")
 
 # if (requireNamespace("lintr", quietly = TRUE)) {
 #     context("lints")

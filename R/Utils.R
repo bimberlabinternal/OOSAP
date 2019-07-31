@@ -216,7 +216,6 @@ is.odd <- function(x) x %% 2 != 0
 #' @description Plots average expression of each cluster/group for all associated cells
 #' @param x, numbers.
 #' @return histo_numers
-#' @keywords 
 #' @export
 PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab", Ylab="Ylab", Title = "Title", HighColor = "dodgerblue"){
   

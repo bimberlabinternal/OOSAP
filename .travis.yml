@@ -2,10 +2,37 @@
 
 language: R
 r: bioc-release
-sudo: required
 cache:
-  packages: true
+  - packages
+  - ccache
 
 os:
   - linux
-  - osx
+
+# see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
+before_install:
+  - chmod +x ./travis-config.sh && ./travis-config.sh
+
+# https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
+r_build_args: --no-build-vignettes --no-manual
+r_check_args: --no-build-vignettes --no-manual --timings
+
+
+# see: https://docs.travis-ci.com/user/build-stages/warm-cache/
+# https://travis-ci.community/t/is-there-a-way-not-to-install-r-packages-suggested-by-dependencies/3870/3
+jobs:
+  include:
+    - stage: prepare cache
+      script: true
+    - stage: test
+      script:
+        - |
+          R CMD build .
+          travis_wait 30 R CMD check *tar.gz
+          cat ./OOSAP.Rcheck/tests/testthat.Rout
+
+addons:
+  apt:
+    packages:
+      - ccache
+      - r-cran-data.table
