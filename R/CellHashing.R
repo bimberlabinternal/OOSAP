@@ -368,8 +368,7 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, a
           dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.global <- dt2$HTO_classification.global
         }
       }, error = function(e){
-        print(e)
-        print('Error generating second round of seurat calls, aborting')
+        print('Error generating second round of seurat calls, using first round')
         return(dt)
       })
     }

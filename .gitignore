@@ -5,6 +5,7 @@
 .Rproj.user
 .Rhistory
 ..Rcheck*
+OOSAP.Rcheck*
 OOSAP**.tar.gz
 OOSAP**.zip
 OOSAP.Rproj

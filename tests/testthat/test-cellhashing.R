@@ -1,5 +1,3 @@
-skip_on_cran()
-
 context("CellHashing")
 
 DoTest <- function(barcodeFile, callsFile, summaryFile, whitelistFile, doRowFilter = F) {

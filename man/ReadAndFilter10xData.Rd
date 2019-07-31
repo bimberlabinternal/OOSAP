@@ -4,7 +4,7 @@
 \alias{ReadAndFilter10xData}
 \title{Read and Filter 10X files.}
 \usage{
-ReadAndFilter10xData(dataDir, datasetName)
+ReadAndFilter10xData(dataDir, datasetName, emptyDropNIters = 10000)
 }
 \value{
 A modified Seurat object.

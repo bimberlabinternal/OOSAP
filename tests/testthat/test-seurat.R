@@ -1,12 +1,10 @@
-skip_on_cran()
-
 context("Seurat")
 
 outDir <- './'
 outPrefix <- paste0(outDir, 'testData')
 resolutionToUse <- 0.6
 
-seuratObj <- ReadAndFilter10xData('../testdata/10XCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1')
+seuratObj <- ReadAndFilter10xData('../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1', emptyDropNIters=5000)
 
 test_that("cell count correct", {
   expect_equal(ncol(seuratObj), 3353)
@@ -33,7 +31,7 @@ unlink(vgFile)
 
 mf <- paste0(outPrefix, '.markers.txt')
 md <- paste0(outPrefix, '.markers.rds')
-FindMarkers(seuratObj, resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
+Find_Markers(seuratObj, resolutionToUse = resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
   expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 269)
