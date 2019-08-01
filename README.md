@@ -7,7 +7,7 @@ OHSU-ONPRC Single-cell Analysis Package
 The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
 
 ## Table of Contents
-* [Instalation](#installation)
+* [Installation](#installation)
 * [Development Guidelines](#developers)
 
 ### <a name="installation">Installation</a>
