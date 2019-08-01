@@ -1,40 +1,29 @@
 [![Build Status](https://travis-ci.com/bimberlabinternal/OOSAP.svg?branch=Dev)](https://travis-ci.com/bimberlabinternal/OOSAP)
 
-# OOSAP :: alpha - development
+# OOSAP
 
-OHSU-ONPRC Single-cell Analysis Package (alpha 1)
+OHSU-ONPRC Single-cell Analysis Package
 
-The goal of this package is bringing together tools and piplines for the analysis of single-cell RNASeq data.
+The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
 
-## Installation
+### Installation
 
 ```{r }
-# install.packages("devtools")
 
-library(devtools)
+# Install requirements.  Other dependencies will be downloaded automatically
+install.packages("devtools", 'remotes')
 
-#Latest stable version:
+#Latest version:
 install_github("bimberlabinternal/OOSAP")
 
-#Or development:
-install_github("bimberlabinternal/OOSAP@Dev")
+#Or a specific release :
+install_github("bimberlabinternal/OOSAP", tag = "1.0")
+
+```
+Pre-packaged Docker images with all needed dependencies installed can be found on our [dockerhub repository](https://hub.docker.com/r/bimberlab/oosap): 
 
 ```
 
-### Developmental progress
+docker pull bimberlab/oosap
 
-TODO:
-    
-    Make function and object names uniform across pacakge.
-    limit exported functions to pipeline starting points.
-    Clean up and speed up functions.
-    Move towards S4 S3 structure.
-    Create test cases to demo main functions.
-    finalize documentation.
-    
-
-
-Latest Updates:
-
-    May/28/2019 Merged with B.B. Seurat Fxs. _SERIII prefix removed. Minor documentation added.
-    May/25/2019 All functions in current pipeline moved to this package.
+```
