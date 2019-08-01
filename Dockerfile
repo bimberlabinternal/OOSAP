@@ -5,7 +5,6 @@ RUN apt-get update -y \
 		python-pip \
     && pip install numba==0.42.0 \
     && pip install umap-learn \
-    && apt-get remove -y python-pip \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
