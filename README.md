@@ -1,40 +1,49 @@
 [![Build Status](https://travis-ci.com/bimberlabinternal/OOSAP.svg?branch=Dev)](https://travis-ci.com/bimberlabinternal/OOSAP)
 
-# OOSAP :: alpha - development
+# OOSAP
 
-OHSU-ONPRC Single-cell Analysis Package (alpha 1)
+OHSU-ONPRC Single-cell Analysis Package
 
-The goal of this package is bringing together tools and piplines for the analysis of single-cell RNASeq data.
+The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
 
-## Installation
+## Table of Contents
+* [Installation](#installation)
+* [Development Guidelines](#developers)
+
+### <a name="installation">Installation</a>
 
 ```{r }
-# install.packages("devtools")
 
-library(devtools)
+# Install requirements.  Other dependencies will be downloaded automatically
+install.packages("devtools", 'remotes')
 
-#Latest stable version:
+#Latest version:
 install_github("bimberlabinternal/OOSAP")
 
-#Or development:
-install_github("bimberlabinternal/OOSAP@Dev")
+#Or a specific release :
+install_github("bimberlabinternal/OOSAP", tag = "1.0")
+
+```
+Pre-packaged Docker images with all needed dependencies installed can be found on our [dockerhub repository](https://hub.docker.com/r/bimberlab/oosap): 
 
 ```
 
-### Developmental progress
+docker pull bimberlab/oosap
 
-TODO:
-    
-    Make function and object names uniform across pacakge.
-    limit exported functions to pipeline starting points.
-    Clean up and speed up functions.
-    Move towards S4 S3 structure.
-    Create test cases to demo main functions.
-    finalize documentation.
-    
+```
 
+### <a name="developers">Development Guidelines</a>
 
-Latest Updates:
+* New development should occur on a branch, and go through a Pull Request before merging into Dev.  [See here for information on the pull request workflow](https://guides.github.com/introduction/flow/).  Ideally PRs would be reviewed by another person.  For the PR, please review the set of changed files carefully to make sure you are only merging the changes you intend.   
 
-    May/28/2019 Merged with B.B. Seurat Fxs. _SERIII prefix removed. Minor documentation added.
-    May/25/2019 All functions in current pipeline moved to this package.
+* New functions should have [Roxygen2 documentation](https://kbroman.org/pkg_primer/pages/docs.html).
+
+* As part of each PR, you should run 'devtools::document()' to update documentation and include these changes with your commits.
+
+* It is a good idea to run 'R CMD check' locally to make sure your changes will pass.  [See here for more information](http://r-pkgs.had.co.nz/check.html)
+
+* Code should only be merged after the Travis CI build and tests pass.  The Dev branch should always be stable.
+
+* New features should ideally have at least a basic test (see [R testthat](http://r-pkgs.had.co.nz/tests.html)).  There is existing test data in ./tests/testdata.  This can be expanded, but please be conscious about file size and try to reuse data across tests if appropriate.
+
+  
