@@ -22,7 +22,7 @@ SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
   
   if(is.null(SeurObj) & is.null(SeurObjPath)) stop("Seurat object not def, SeurObjPath or SeurObj needed.")
   
-  if((!is.null(SavePath)) & (!dir.exists(SavePath)) ) stop("Save path does not exist")
+  if((!is.null(SavePath)) & (!dir.exists(dirname(SavePath))) ) stop("Save path does not exist")
   
     
    
