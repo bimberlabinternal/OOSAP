@@ -31,11 +31,11 @@ GetTraingStats <- function(ClassifierSet=NA, AvailableTrainConfMatrix="", Availa
 }
 
 
-#' @title A Title
+#' @title GetEnsmbleVarImportance
 #'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
+#' @description Given a list of classifiers, retyrb a df of VarImportance
+#' @return A list
+#' @keywords caret
 #' @export
 GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", ScaleVarImp=T){
 
@@ -157,7 +157,7 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", te
 #' @description This function takes in Seurat objects and performs machine learning; generalized for common use.
 #'     However as with any approach, especially in machine learning and statistical inference world, robust assessments are needed. 
 #'     This is a first step.
-#' @return A modified Seurat object.
+#' @return A list of resuts
 #' @keywords Machine Learning, Seurat, classification
 #' @importFrom fastAdaboost adaboost
 #' @importFrom stats predict

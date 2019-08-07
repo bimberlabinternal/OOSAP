@@ -1569,10 +1569,9 @@ FilterCloneNames <- function(seuratObject, minValue) {
 #' @return A data.frame of avg expression per var
 #' @importFrom Matrix rowMeans
 #' @export
-AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes){
-  # seuratObj = SERObjLS$LymphAxLN
-  # Genes = MarkersOfInterest
-  
+AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes, Slot = "scale.data"){
+  #Slot : Specific information to pull (i.e. counts, data, scale.data, ...)
+ 
   AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
   
   ClustLS <- list()
@@ -1580,7 +1579,7 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", Genes){
   for(lev in levels(AvlLevels)){
     print(lev)
     ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, 
-                                                                  features = Genes)[Genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
+                                                                  features = Genes, slot = Slot)[Genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
   }
   
   ClustDF <- as.data.frame(ClustLS)
