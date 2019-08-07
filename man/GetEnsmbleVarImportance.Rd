@@ -2,15 +2,15 @@
 % Please edit documentation in R/Classification_Caret.R
 \name{GetEnsmbleVarImportance}
 \alias{GetEnsmbleVarImportance}
-\title{A Title}
+\title{GetEnsmbleVarImportance}
 \usage{
 GetEnsmbleVarImportance(ClassiferSet, AvailableClassifiers = "",
   ScaleVarImp = T)
 }
 \value{
-A modified Seurat object.
+A list
 }
 \description{
-A description
+Given a list of classifiers, retyrb a df of VarImportance
 }
-\keyword{SerIII_template}
+\keyword{caret}
