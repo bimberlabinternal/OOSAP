@@ -5,14 +5,14 @@
 #' @description Compute SingleR classification on a Seurat object from path or direcly
 #' @param SeurObjPath, path to Seurat object
 #' @param SeurObj a Seurat object, but if path given, path is prioritized. 
-#' @return SingleR object
+#' @return SingleR object or Seurat object
 #' @keywords SingleR Classification
 #' @export
 #' @import Seurat SingleR
 SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T, 
                             Annotation = NULL, ProjName = NULL , 
                             MinGenes = 500, Species = "Human", NumCores = 4, 
-                            ClusteringName = NULL, SavePath = NULL){
+                            ClusteringName = NULL, SavePath = NULL, ReturnSeurObj = F){
   
   # SeurObjPath = "./data/296-6-GEX.seurat.rds"; SeurObj = NULL; PlotFigs = T
   # Annotation = NULL; ProjName = NULL; MinGenes = 500; Species = "Human"; NumCores = 4
@@ -68,11 +68,26 @@ SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
   
   if(!is.null(SavePath)) saveRDS(singler, SavePath)
   
-  return(singler)
+  
+  if(ReturnSeurObj){
+    
+    SeurObj$SingleR_Laels1 <- "unk"
+    SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Laels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
+    
+    table(SeurObj$SingleR_Laels1)
+    
+    
+    
+    
+    SeurObj$SingleR_Laels2 <- "unk"
+    SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Laels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
+    
+    return(SeurObj)
+  } else {
+    return(singler)
+  }
   
   
-  
-  
-  
+
   
 }

@@ -7,7 +7,7 @@
 SingleRmySerObj(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
   Annotation = NULL, ProjName = NULL, MinGenes = 500,
   Species = "Human", NumCores = 4, ClusteringName = NULL,
-  SavePath = NULL)
+  SavePath = NULL, ReturnSeurObj = F)
 }
 \arguments{
 \item{SeurObjPath, }{path to Seurat object}
@@ -15,7 +15,7 @@ SingleRmySerObj(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
 \item{SeurObj}{a Seurat object, but if path given, path is prioritized.}
 }
 \value{
-SingleR object
+SingleR object or Seurat object
 }
 \description{
 Compute SingleR classification on a Seurat object from path or direcly
