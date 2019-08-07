@@ -36,12 +36,14 @@ Imports:
     org.Hs.eg.db,
     fastAdaboost,
     reticulate,
-    caret
+    caret,
+    SingleR
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
     bioc::release/monocle,
     cole-trapnell-lab/garnett,
-    bioc::release/DropletUtils
+    bioc::release/DropletUtils,
+    dviraran/SingleR
 RoxygenNote: 6.1.1

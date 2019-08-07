@@ -1,0 +1,78 @@
+
+
+#' @title SingleR my Seurat Object
+#'
+#' @description Compute SingleR classification on a Seurat object from path or direcly
+#' @param SeurObjPath, path to Seurat object
+#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
+#' @return SingleR object
+#' @keywords SingleR Classification
+#' @export
+#' @import Seurat SingleR
+SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T, 
+                            Annotation = NULL, ProjName = NULL , 
+                            MinGenes = 500, Species = "Human", NumCores = 4, 
+                            ClusteringName = NULL, SavePath = NULL){
+  
+  # SeurObjPath = "./data/296-6-GEX.seurat.rds"; SeurObj = NULL; PlotFigs = T
+  # Annotation = NULL; ProjName = NULL; MinGenes = 500; Species = "Human"; NumCores = 4
+  
+  #Annotation can be any Idents from Metadata
+  #ClusteringName input cluster id for each of the cells with at least min.genes, if NULL uses SingleR clusterings.
+  
+  if(is.null(SeurObj) & is.null(SeurObjPath)) stop("Seurat object not def, SeurObjPath or SeurObj needed.")
+  
+  if((!is.null(SavePath)) & (!dir.exists(SavePath)) ) stop("Save path does not exist")
+  
+    
+   
+    
+    
+  
+  if(!is.null(SeurObjPath)) SeurObj <- readRDS(SeurObjPath)
+  
+  dim(SeurObj)
+  
+  if(PlotFigs) DimPlot(SeurObj) + theme_bw()
+  
+  if(is.null(ProjName)) ProjName = SeurObj@project.name
+  
+  
+  # SeuratMeta <- as.data.frame(SeurObj@meta.data)
+  # if(!is.null(Annotation))
+  
+  Counts.Mat <- as.matrix(SeurObj@assays$RNA@counts)
+  
+  
+  if(length(grep("MTOR", rownames(SeurObj)))>0 | length(grep("CD1", rownames(SeurObj)))>0 | length(grep("ENS", rownames(SeurObj)))>0){
+    print("genes in rownames, good!")
+  } else {
+    Counts.Mat <- t(Counts.Mat)
+  }
+  
+  singler = CreateSinglerObject(counts = Counts.Mat,
+                                annot = Annotation,
+                                project.name = ProjName,
+                                min.genes = MinGenes,
+                                species = Species, 
+                                citation = "",
+                                ref.list = list(), 
+                                normalize.gene.length = F, 
+                                variable.genes = "de", # or sd
+                                fine.tune = T, 
+                                do.signatures = T, 
+                                clusters = ClusteringName, 
+                                do.main.types = T, 
+                                reduce.file.size = T, 
+                                numCores = NumCores)
+  
+  if(!is.null(SavePath)) saveRDS(singler, SavePath)
+  
+  return(singler)
+  
+  
+  
+  
+  
+  
+}

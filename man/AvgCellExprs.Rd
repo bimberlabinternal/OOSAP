@@ -4,7 +4,8 @@
 \alias{AvgCellExprs}
 \title{AvgCellExprs}
 \usage{
-AvgCellExprs(seuratObj, varName = "ClusterNames_0.2", Genes)
+AvgCellExprs(seuratObj, varName = "ClusterNames_0.2", Genes,
+  Slot = "scale.data")
 }
 \arguments{
 \item{seurObj, }{A Seurat object.}
