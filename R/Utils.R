@@ -211,6 +211,12 @@ is.even <- function(x) x %% 2 == 0
 is.odd <- function(x) x %% 2 != 0
 
 
+utils::globalVariables(
+  names = c('X', 'Y', 'gene2', 'gene3'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title PlotAvgExpr
 #'
 #' @description Plots average expression of each cluster/group for all associated cells

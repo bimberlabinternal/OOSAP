@@ -84,6 +84,13 @@ HTODemux2 <- function(
     #values_negative=values[setdiff(object@cell.names,WhichCells(object,which.max(average.expression[iter,])))]
 
     minNonZero <- which.min(x = average.expression[iter,average.expression[iter, ] > 0])
+
+    #This will occur when there are only 2 possible HTOs
+    if (minNonZero == max(average.expression)){
+      print('Min. non-zero value is the same as max value, using 0.01')
+      minNonZero <- 0.01
+    }
+
     values.use <- values[WhichCells(
       object = object,
       idents = levels(x = Idents(object = object))[[minNonZero]]
