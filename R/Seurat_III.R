@@ -1,7 +1,7 @@
+#' @include LabKeySettings.R
+#' @include Seurat_III_Fixes.R
 #' @import Seurat
 #' @import Rlabkey
-
-Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 utils::globalVariables(
   names = c('nCount_RNA', 'nFeature_RNA', 'p.mito'),
@@ -491,7 +491,8 @@ AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePr
 #' @import Rlabkey
 FindMatchedVloupe <- function(loupeDataId) {
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -512,7 +513,8 @@ FindMatchedVloupe <- function(loupeDataId) {
   }
 
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -536,7 +538,8 @@ FindMatchedVloupe <- function(loupeDataId) {
 DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -560,8 +563,8 @@ DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   remotePath <- paste0(dirname(remotePath), '/all_contig_annotations.csv')
 
   success <- labkey.webdav.get(
-    baseUrl="https://prime-seq.ohsu.edu",
-    folderPath=paste0("/Labs/Bimber/",wb),
+    baseUrl=lkBaseUrl,
+    folderPath=paste0(lkDefaultFolder,wb),
     remoteFilePath = remotePath,
     overwrite = overwrite,
     localFilePath = outFile
@@ -596,7 +599,8 @@ ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
   #Download named clonotypes and merge:
   # Add clone names:
   labelDf <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="tcrdb",
     queryName="clones",
     showHidden=TRUE,

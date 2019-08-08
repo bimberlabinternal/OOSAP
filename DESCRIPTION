@@ -44,3 +44,16 @@ Remotes:
     cole-trapnell-lab/garnett,
     bioc::release/DropletUtils
 RoxygenNote: 6.1.1
+Collate: 
+    'LabKeySettings.R'
+    'CellHashing.R'
+    'Utils.R'
+    'Classification_Caret.R'
+    'Classification_Garnett.R'
+    'Classification_Seurat.R'
+    'DataQueries.R'
+    'Monocle_III.R'
+    'PhenotypingGeneSets.R'
+    'Seurat_III_Fixes.R'
+    'Seurat_III.R'
+    'mcl.R'

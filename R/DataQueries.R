@@ -1,6 +1,5 @@
+#' @include LabKeySettings.R
 #' @import Rlabkey
-
-Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 #' @title GetCdnaRecords
 #'
@@ -13,7 +12,8 @@ GetCdnaRecords <- function(readsetId, type = 'GEX') {
   )
 
   df <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="tcrdb",
     queryName="clones",
     showHidden=TRUE,
@@ -71,7 +71,8 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
 
   #Download info, based on BarcodePrefix:
   outputFiles <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -90,7 +91,8 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   }
 
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="tcrdb",
     queryName="cdnas",
     viewName="",
@@ -159,5 +161,258 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   return(seuratObj)
 }
 
+GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
+  metrics <- labkey.selectRows(
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
+    schemaName="sequenceanalysis",
+    queryName="quality_metrics",
+    viewName="",
+    colSort="-rowid",
+    colFilter=makeFilter(
+      c("category", "IN", "Cell Hashing;Cell Hashing Concordance"),
+      c("workbook/workbookId", "IN", paste0(workbooks, collapse = ';'))
+    ),
+    containerFilter=NULL,
+    colNameOpt="rname"
+  )
 
+  summary <- data.frame(
+    Name = character(),
+    HTO_Reads = integer(),
+    GEX_Reads = integer(),
+    GEX_FractionOfInputCalled = numeric(),
+    GEX_InputBarcodes = numeric(),
+    GEX_TotalCalledNotInInput = numeric(),
+    TCR_FractionOfInputCalled = numeric(),
+    TCR_InputBarcodes = numeric(),
+    TCR_TotalCalledNotInInput = numeric(),
+    GEX_WhitelistFile = integer(),
+    TCR_WhitelistFile = integer(),
+    HTO_Top_BarcodesFile = integer()
+  )
+
+  for (wb in workbooks){
+    print(paste0('processing: ', wb))
+    localPath <- file.path(savePath, wb)
+    if (!dir.exists(localPath)){
+      dir.create(localPath)
+    }
+
+    cDNAs <- labkey.selectRows(
+      baseUrl=lkBaseUrl,
+      folderPath=paste0(lkDefaultFolder, wb),
+      schemaName="tcrdb",
+      queryName="cdnas",
+      viewName="",
+      colSort="-rowid",
+      colSelect = 'rowid,readsetid,readsetid/name,hashingreadsetid,enrichedreadsetid,hashingreadsetid/totalforwardReads,readsetid/totalforwardReads',
+      containerFilter=NULL,
+      colNameOpt="rname"
+    )
+    print(paste0('total cDNA records: ', nrow(cDNAs)))
+
+    callFiles <- labkey.selectRows(
+      baseUrl=lkBaseUrl,
+      folderPath=paste0(lkDefaultFolder, '/', wb),
+      schemaName="sequenceanalysis",
+      queryName="outputfiles",
+      viewName="",
+      colSort="-rowid",
+      colSelect="rowid,name,description,readset,readset/name,category,dataid/RowId,workbook,dataid/WebDavUrlRelative,dataid/WebDavUrlRelative,created",
+      colFilter=makeFilter(c("category", "IN", "Cell Hashing Calls (VDJ);Cell Hashing Calls;10x GEX Cell Hashing Calls")),
+      containerFilter=NULL,
+      colNameOpt="rname"
+    )
+
+    uniqueRs <- c()
+    for (i in 1:nrow(cDNAs)) {
+      row <- cDNAs[i,]
+      if (row$readsetid %in% uniqueRs) {
+        next
+      }
+
+      uniqueRs <- c(uniqueRs, row$readsetid)
+
+      n <- gsub(x = row[['readsetid_name']], pattern = '-GEX', replacement = '')
+      toAdd <- data.frame(Name = n, HTO_Reads = row[['hashingreadsetid_totalforwardreads']], GEX_Reads = row[['readsetid_totalforwardreads']])
+
+      #metrics:
+      htoMetrics <- metrics[metrics$readset == row[['hashingreadsetid']],]
+      if (nrow(htoMetrics) > 0) {
+        m <- htoMetrics[htoMetrics$metricname == 'Singlet',]
+        if (nrow(m) > 0) {
+          m <- m[m$dataid == max(m$dataid),]
+
+          toAdd$HTO_Singlet <- m$metricvalue
+        }
+      } else {
+        toAdd$HTO_Singlet <- NA
+      }
+      toAdd <- AppendMetrics(row, toAdd, metrics, 'GEX', 'readsetid')
+      toAdd <- AppendMetrics(row, toAdd, metrics, 'TCR', 'enrichedreadsetid')
+
+      #call files:
+      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_WhitelistFile', savePath)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_WhitelistFile', savePath)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['hashingreadsetid']], toAdd, 'HTO_Top_BarcodesFile', savePath)
+      summary <- rbind(summary, toAdd)
+    }
+  }
+
+  return(summary)
+}
+
+AppendMetrics <- function(row, toAdd, metrics, type, field) {
+  for (name in c('FractionOfInputCalled', 'InputBarcodes', 'TotalCalledNotInInput')) {
+    toAdd[[paste0(type, '_', name)]] <- NA
+  }
+
+  xMetrics <- metrics[metrics$readset == row[[field]],]
+  if (nrow(xMetrics) > 0) {
+    latest <- xMetrics[xMetrics$dataid == max(xMetrics$dataid),]
+
+    for (name in c('FractionOfInputCalled', 'InputBarcodes', 'TotalCalledNotInInput')) {
+      toAdd[[paste0(type, '_', name)]] <- latest[latest$metricname == name,]$metricvalue
+    }
+  }
+
+  return(toAdd)
+}
+
+DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPath) {
+  toAdd[fieldName] <- NA
+
+  cf <- callFiles[callFiles$readset == readsetId,]
+  if (nrow(cf) > 1) {
+    print(paste0('Multiple call files, using latest: ', toAdd$Name, ' ', fieldName))
+  }
+
+  #use the most recent (highest rowId)
+  if (nrow(cf) > 0) {
+    row <- cf[cf$rowid == max(cf$rowid),]
+
+    fn <- paste0(row['readset_name'], '.', row['readset'], '.', row['rowid'], '.', row$category, '.txt')
+    fn <- gsub('\\(', '_', fn)
+    fn <- gsub('\\)', '_', fn)
+    fn <- gsub(' ', '_', fn)
+    fn <- gsub('__', '_', fn)
+
+    remotePath <- row[['dataid_webdavurlrelative']]
+    if (row$category %in% c('10x GEX Cell Hashing Calls', 'Cell Hashing Calls (VDJ)', 'Seurat Cell Hashing Calls')) {
+      remotePath <- paste0(dirname(remotePath), '/validCellIndexes.csv')
+    }
+
+    lp <- paste0(localPath, '/', wb, '/', fn)
+    success <- labkey.webdav.get(
+      baseUrl=lkBaseUrl,
+      folderPath=paste0(lkDefaultFolder, wb),
+      remoteFilePath = remotePath,
+      overwrite = T,
+      localFilePath = lp
+    )
+
+    if (!success) {
+      warning(paste0('Unable to download whitelist for readset: ', row['readset_name'], ' from: ', remotePath))
+    }
+
+    toAdd[fieldName] <- lp
+  }
+
+  return(toAdd)
+}
+
+ProcessSet <- function(df, set1, set2, type1, type2) {
+  for (name1 in names(set1)) {
+    h <- set1[[name1]]
+
+    for (name2 in names(set2)) {
+      g <- set2[[name2]]
+      i <- length(intersect(h, g))
+
+      df <- rbind(df, data.frame(dataset1 = name1, type1 = type1, dataset2 = name2, type2 = type2, intersect = i, length1 = length(h), length2 = length(g)))
+    }
+  }
+
+  return(df)
+}
+
+utils::globalVariables(
+  names = c('dataset1', 'type1', 'type2', 'max_intersect', 'max_intersect_by_type'),
+  package = 'OOSAP',
+  add = TRUE
+)
+#' @title CompareCellBarcodeSets
+#'
+#' @description This iterates the provided workbooks, identifying every 10x cDNA library and the GEX/TCR/HTO libraries.  It generates summaries of the cell barcode intersect between them, which can help debug sample swaps.
+#' @param workbooks A vector of workbook IDs
+#' @export
+#' @importFrom dplyr %>% mutate group_by
+CompareCellBarcodeSets <- function(workbooks, savePath = './') {
+  summary <- GenerateDataToCompareBarcodeSets(workbooks, savePath)
+
+  htoBC <- list()
+  gexBC <- list()
+  tcrBC <- list()
+
+  for (i in 1:nrow(summary)) {
+    row <- summary[i,]
+    name <- as.character(row$Name)
+
+    if (!is.na(row$HTO_Top_BarcodesFile) & !is.na(row$GEX_WhitelistFile) & !is.na(row$TCR_WhitelistFile)){
+      bc <- read.table(row$HTO_Top_BarcodesFile, header = T, sep = '\t')
+      htoBC[[name]] <- bc$CellBarcode
+
+      bc <- read.table(row$GEX_WhitelistFile, header = F, sep = '\t')$V1
+      gexBC[[name]] <- bc
+
+      bc <- read.table(row$TCR_WhitelistFile, header = F, sep = '\t')$V1
+      tcrBC[[name]] <- bc
+
+    } else {
+      print(paste0('missing one ore more files: ', name, ':'))
+      if (is.na(row$HTO_Top_BarcodesFile)){
+        print('HTO missing')
+      }
+
+      if (is.na(row$GEX_WhitelistFile)){
+        print('GEX missing')
+      }
+
+      if (is.na(row$TCR_WhitelistFile)){
+        print('TCR missing')
+      }
+    }
+  }
+
+  df <- data.frame(dataset1 = character(), type1 = character(), dataset2 = character(), type2 = character(), intersect = integer(), length1 = integer(), length2 = integer())
+
+  df <- ProcessSet(df, htoBC, gexBC, 'HTO', 'GEX')
+  df <- ProcessSet(df, htoBC, tcrBC, 'HTO', 'TCR')
+
+  df <- ProcessSet(df, gexBC, htoBC, 'GEX', 'HTO')
+  df <- ProcessSet(df, gexBC, tcrBC, 'GEX', 'TCR')
+
+  df <- ProcessSet(df, tcrBC, htoBC, 'TCR', 'HTO')
+  df <- ProcessSet(df, tcrBC, gexBC, 'TCR', 'GEX')
+
+  df$fraction <- df$intersect / df$length1
+  df <- df[order(df$dataset1, df$type1, df$type2, -df$intersect),]
+  df <- df %>% group_by(dataset1, type1, type2) %>% mutate(max_intersect_by_type = max(intersect))
+  df <- df %>% group_by(dataset1, type1) %>% mutate(max_intersect = max(intersect))
+
+  write.table(df, file = file.path(savePath, 'cell_barcode_comparisons.txt'), sep = '\t', row.names = F, quote = F)
+
+  self <- df[df$dataset1 == df$dataset2, c('dataset1', 'type1', 'type2', 'intersect', 'fraction')]
+  names(self) <- c('dataset1', 'type1', 'type2', 'self_intersect', 'self_intersect_fraction')
+
+  df2 <- df[df$intersect == df$max_intersect_by_type,]
+  write.table(df2, file = 'top_intersect_by_type.txt', sep = '\t', row.names = F, quote = F)
+
+  df3 <- df2[df2$dataset1 != df2$dataset2,]
+  df3 <- merge(df3, self, by = c('dataset1', 'type1', 'type2'), all.x = T, all.y = F)
+  #filter ties:
+  df3 <- df3[df3$intersect != df3$self_intersect,]
+  write.table(df3, file = file.path(savePath, 'conflicting_intersect.txt'), sep = '\t', row.names = F, quote = F)
+}
 
