@@ -74,13 +74,18 @@ SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
     SeurObj$SingleR_Laels1 <- "unk"
     SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Laels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
     
-    table(SeurObj$SingleR_Laels1)
+    # table(SeurObj$SingleR_Laels1)
     
     
     
     
     SeurObj$SingleR_Laels2 <- "unk"
     SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Laels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
+    
+    
+    SeurObj$SingleR_LaelsOther <- "unk"
+    SeurObj@meta.data[names(singler$other),]$SingleR_LaelsOther <- singler$other
+    
     
     return(SeurObj)
   } else {
@@ -116,16 +121,16 @@ SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath
   SeurObj$SingleR_Laels1 <- "unk"
   SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Laels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
   
-  table(SeurObj$SingleR_Laels1)
-  
-  
+  # table(SeurObj$SingleR_Laels1)
   
   
   SeurObj$SingleR_Laels2 <- "unk"
   SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Laels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
   
- 
-
+  SeurObj$SingleR_LaelsOther <- "unk"
+  SeurObj@meta.data[names(singler$other),]$SingleR_LaelsOther <- singler$other
+  
+  
   return(SeurObj)
   
 
@@ -141,7 +146,8 @@ SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath
 DimPlot_SingleRClassLabs <- function(SeurObj){
   cowplot::plot_grid(
   DimPlot(SeurObj, group.by = "SingleR_Laels1") + theme_bw() + ggtitle("SingleR_Laels1") +theme(legend.position="bottom"),
-  DimPlot(SeurObj, group.by = "SingleR_Laels2") + theme_bw() + ggtitle("SingleR_Laels2") +theme(legend.position="bottom"), 
+  DimPlot(SeurObj, group.by = "SingleR_Laels2") + theme_bw() + ggtitle("SingleR_Laels2") +theme(legend.position="bottom"),
+  DimPlot(SeurObj, group.by = "SingleR_LaelsOther") + theme_bw() + ggtitle("SingleR_LaelsOther") +theme(legend.position="bottom"), 
   ncol = 1)
   
 }
@@ -176,6 +182,18 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
             legend.title = element_blank(),
             axis.text.x = element_text(angle = 90)) +
       ggtitle("SingleR predicted classification labels #2:: TestisII \n Total Contribution") + 
+      ylab("Number of cells"),
+    
+    
+    ggplot(melt(table(SeurObj$SingleR_LaelsOther)), aes(x=Var1, y = value, fill=Var1))  + 
+      geom_bar(stat="identity", position="dodge", width = 0.7) + 
+      # scale_fill_manual(values=col_vector) +
+      theme_bw() + 
+      theme(legend.position="bottom",
+            legend.direction="horizontal",
+            legend.title = element_blank(),
+            axis.text.x = element_text(angle = 90)) +
+      ggtitle("SingleR predicted classification labels other:: TestisII \n Total Contribution") + 
       ylab("Number of cells"),
     ncol = 1)
   
