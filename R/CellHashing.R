@@ -1,7 +1,7 @@
+#' @include LabKeySettings.R
 #' @import Seurat
 #' @import Rlabkey
 
-Rlabkey::labkey.setDefaults(baseUrl = "https://prime-seq.ohsu.edu")
 
 
 
@@ -897,7 +897,8 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
 FindMatchedCellHashing <- function(loupeDataId){
   #Note: the seurat object gets associated with the GEX readset, so look based on this:
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -920,7 +921,8 @@ FindMatchedCellHashing <- function(loupeDataId){
   libraryId <- rows[['library_id']]
 
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -945,7 +947,8 @@ FindMatchedCellHashing <- function(loupeDataId){
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
-    folderPath="/Labs/Bimber/",
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     viewName="",
@@ -968,7 +971,8 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   remotePath <- rows[['dataid_webdavurlrelative']]
 
   success <- labkey.webdav.get(
-    folderPath=paste0("/Labs/Bimber/",wb),
+    baseUrl=lkBaseUrl,
+    folderPath=paste0(lkDefaultFolder,wb),
     remoteFilePath = remotePath,
     overwrite = overwrite,
     localFilePath = outFile

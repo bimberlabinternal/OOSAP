@@ -211,6 +211,12 @@ is.even <- function(x) x %% 2 == 0
 is.odd <- function(x) x %% 2 != 0
 
 
+utils::globalVariables(
+  names = c('X', 'Y', 'gene2', 'gene3'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
 #' @title PlotAvgExpr
 #'
 #' @description Plots average expression of each cluster/group for all associated cells
@@ -254,7 +260,6 @@ PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab
 #' @description Return UMAP 2D with similar parameters as Seurat
 #' @param DGEmat, A matrix rows are cells
 #' @return 2D UMAP rows are cellss
-#' @keywords 
 #' @export
 #' @import reticulate
 RunUMAP.Matrix <- function(
