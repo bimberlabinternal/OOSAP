@@ -11,7 +11,7 @@ test_that("cell count correct", {
 })
 
 vgFile <- 'variableGenes.txt'
-seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile)
+seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile, doCellFilter = T)
 
 test_that("variable genes not saved", {
   expect_equal(file.exists(vgFile), T)

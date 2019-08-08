@@ -2,7 +2,7 @@
 % Please edit documentation in R/CellHashing.R
 \name{GenerateQcPlots}
 \alias{GenerateQcPlots}
-\title{A Title}
+\title{GenerateQcPlots}
 \usage{
 GenerateQcPlots(barcodeData)
 }
@@ -10,5 +10,5 @@ GenerateQcPlots(barcodeData)
 A modified Seurat object.
 }
 \description{
-A description
+Generate QC plots for HTO/barcode data
 }
