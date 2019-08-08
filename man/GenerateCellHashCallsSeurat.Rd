@@ -2,14 +2,14 @@
 % Please edit documentation in R/CellHashing.R
 \name{GenerateCellHashCallsSeurat}
 \alias{GenerateCellHashCallsSeurat}
-\title{A Title}
+\title{GenerateCellHashCallsSeurat}
 \usage{
 GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99,
   attemptRecovery = TRUE)
 }
 \value{
-A modified Seurat object.
+A data table of results
 }
 \description{
-A description
+Generates final cell hashing calls using Seurat3 HTODemux
 }

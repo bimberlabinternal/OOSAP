@@ -312,9 +312,16 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
-    seuratObj <- subset(x = seuratObj, subset = nCount_RNA > nGene.low & nCount_RNA < nGene.high)
-    seuratObj <- subset(x = seuratObj, subset = nFeature_RNA > nUMI.low & nFeature_RNA < nUMI.high)
-    seuratObj <- subset(x = seuratObj, subset = p.mito > pMito.low & p.mito < pMito.high)
+
+    #See: https://github.com/satijalab/seurat/issues/1053#issuecomment-454512002
+    expr <- Seurat::FetchData(object = seuratObj, vars = 'nCount_RNA')
+    seuratObj <- seuratObj[, which(x = expr > nGene.low & expr < nGene.high)]
+
+    expr <- Seurat::FetchData(object = seuratObj, vars = 'nFeature_RNA')
+    seuratObj <- seuratObj[, which(x = expr > nUMI.low & expr < nUMI.high)]
+
+    expr <- Seurat::FetchData(object = seuratObj, vars = 'p.mito')
+    seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
 
     print(paste0('Initial cells: ', seuratObj@misc$OriginalCells, ', after filter: ', length(colnames(x = seuratObj))))
 

@@ -266,11 +266,12 @@ utils::globalVariables(
   add = TRUE
 )
 
-#' @title A Title
+#' @title GenerateQcPlots
 #'
-#' @description A description
+#' @description Generate QC plots for HTO/barcode data
 #' @return A modified Seurat object.
 #' @importFrom knitr kable
+#' @export
 #' @import ggplot2
 GenerateQcPlots <- function(barcodeData){
   print('Generating QC Plots')
@@ -338,10 +339,10 @@ utils::globalVariables(
   add = TRUE
 )
 
-#' @title A Title
+#' @title GenerateCellHashCallsSeurat
 #'
-#' @description A description
-#' @return A modified Seurat object.
+#' @description Generates final cell hashing calls using Seurat3 HTODemux
+#' @return A data table of results
 #' @import data.table
 GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
@@ -525,6 +526,27 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData) {
     print('Error generating multiseq calls, aborting')
     return(NA)
   })
+}
+
+#' @title GenerateCellHashingCalls
+#'
+#' @description A description
+#' @return A data table of results.
+#' @import data.table
+GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
+  sc <- NA
+  if (useSeurat) {
+    sc <- GenerateCellHashCallsSeurat(barcodeData, positive.quantile = positive.quantile, attemptRecovery = attemptRecovery )
+  }
+
+  mc <- NA
+  if (useMultiSeq) {
+    mc <- GenerateCellHashCallsMultiSeq(barcodeData)
+  }
+
+  dt <- ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = outFile, allCallsOutFile = allCallsOutFile)
+
+  return(dt)
 }
 
 #' @title A Title
