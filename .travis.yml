@@ -28,8 +28,9 @@ jobs:
       script:
         - |
           R CMD build .
-          travis_wait 60 R CMD check *tar.gz
-          cat ./OOSAP.Rcheck/tests/testthat.Rout
+          travis_wait 30 R CMD check *tar.gz
+          if [ -e ./OOSAP.Rcheck/tests/00check.log ];then cat ./OOSAP.Rcheck/tests/00check.log; fi
+          if [ -e ./OOSAP.Rcheck/tests/testthat.Rout ];then cat ./OOSAP.Rcheck/tests/testthat.Rout; fi
 
 addons:
   apt:

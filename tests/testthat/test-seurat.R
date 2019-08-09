@@ -11,7 +11,7 @@ test_that("cell count correct", {
 })
 
 vgFile <- 'variableGenes.txt'
-seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile)
+seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile, doCellFilter = T)
 
 test_that("variable genes not saved", {
   expect_equal(file.exists(vgFile), T)
@@ -23,8 +23,8 @@ test_that("variable gene list not expected length", {
 
 seuratObj <- FindClustersAndDimRedux(seuratObj)
 
-test_that("cell count correct", {
-  expect_equal(ncol(seuratObj), 3353)
+test_that("cell count correct after filter", {
+  expect_equal(ncol(seuratObj), 1557)
 })
 
 unlink(vgFile)
@@ -34,7 +34,7 @@ md <- paste0(outPrefix, '.markers.rds')
 Find_Markers(seuratObj, resolutionToUse = resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
-  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 269)
+  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 238)
 })
 
 unlink(md)
