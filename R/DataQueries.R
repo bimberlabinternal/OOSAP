@@ -179,6 +179,7 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
 
   summary <- data.frame(
     Name = character(),
+    GEX_ReadsetId = integer(),
     HTO_Reads = integer(),
     GEX_Reads = integer(),
     GEX_FractionOfInputCalled = numeric(),
@@ -187,9 +188,12 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
     TCR_FractionOfInputCalled = numeric(),
     TCR_InputBarcodes = numeric(),
     TCR_TotalCalledNotInInput = numeric(),
-    GEX_WhitelistFile = integer(),
-    TCR_WhitelistFile = integer(),
-    HTO_Top_BarcodesFile = integer()
+    GEX_WhitelistFile = character(),
+    TCR_WhitelistFile = character(),
+    HTO_Top_BarcodesFile = character(),
+    GEX_CallsFile = character(),
+    TCR_CallsFile = character(),
+    ExpectedHTOs = character()
   )
 
   for (wb in workbooks){
@@ -206,7 +210,7 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
       queryName="cdnas",
       viewName="",
       colSort="-rowid",
-      colSelect = 'rowid,readsetid,readsetid/name,hashingreadsetid,enrichedreadsetid,hashingreadsetid/totalforwardReads,readsetid/totalforwardReads',
+      colSelect = 'rowid,readsetid,readsetid/name,hashingreadsetid,enrichedreadsetid,hashingreadsetid/totalforwardReads,readsetid/totalforwardReads,sortId/hto',
       containerFilter=NULL,
       colNameOpt="rname"
     )
@@ -225,6 +229,7 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
       colNameOpt="rname"
     )
 
+    htoSummary <- cDNAs %>% group_by(readsetid) %>% summarise(ExpectedHTOs = paste0(sort(unique(sortid_hto)), collapse = ","))
     uniqueRs <- c()
     for (i in 1:nrow(cDNAs)) {
       row <- cDNAs[i,]
@@ -235,7 +240,7 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
       uniqueRs <- c(uniqueRs, row$readsetid)
 
       n <- gsub(x = row[['readsetid_name']], pattern = '-GEX', replacement = '')
-      toAdd <- data.frame(Name = n, HTO_Reads = row[['hashingreadsetid_totalforwardreads']], GEX_Reads = row[['readsetid_totalforwardreads']])
+      toAdd <- data.frame(Name = n, GEX_ReadsetId = row[['readsetid']], HTO_Reads = row[['hashingreadsetid_totalforwardreads']], GEX_Reads = row[['readsetid_totalforwardreads']])
 
       #metrics:
       htoMetrics <- metrics[metrics$readset == row[['hashingreadsetid']],]
@@ -253,9 +258,16 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
       toAdd <- AppendMetrics(row, toAdd, metrics, 'TCR', 'enrichedreadsetid')
 
       #call files:
-      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_WhitelistFile', savePath)
-      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_WhitelistFile', savePath)
-      toAdd <- DownloadCallFile(wb, callFiles, row[['hashingreadsetid']], toAdd, 'HTO_Top_BarcodesFile', savePath)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_WhitelistFile', savePath, T)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_WhitelistFile', savePath, T)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['hashingreadsetid']], toAdd, 'HTO_Top_BarcodesFile', savePath, F)
+
+      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_CallsFile', savePath, F)
+      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_CallsFile', savePath, F)
+
+      #now merge HTOs:
+      toAdd <- merge(toAdd, htoSummary, by.x = c('GEX_ReadsetId'), by.y = c('readsetid'), all.x = T)
+
       summary <- rbind(summary, toAdd)
     }
   }
@@ -280,7 +292,7 @@ AppendMetrics <- function(row, toAdd, metrics, type, field) {
   return(toAdd)
 }
 
-DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPath) {
+DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPath, downloadWhitelist) {
   toAdd[fieldName] <- NA
 
   cf <- callFiles[callFiles$readset == readsetId,]
@@ -292,28 +304,37 @@ DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPa
   if (nrow(cf) > 0) {
     row <- cf[cf$rowid == max(cf$rowid),]
 
-    fn <- paste0(row['readset_name'], '.', row['readset'], '.', row['rowid'], '.', row$category, '.txt')
+    suffix <- '.calls'
+    if (downloadWhitelist) {
+      suffix <- '.validCellIndexes'
+    }
+
+    fn <- paste0(row['readset_name'], '.', row['readset'], '.', row['rowid'], '.', row$category, suffix, '.txt')
     fn <- gsub('\\(', '_', fn)
     fn <- gsub('\\)', '_', fn)
     fn <- gsub(' ', '_', fn)
     fn <- gsub('__', '_', fn)
 
     remotePath <- row[['dataid_webdavurlrelative']]
-    if (row$category %in% c('10x GEX Cell Hashing Calls', 'Cell Hashing Calls (VDJ)', 'Seurat Cell Hashing Calls')) {
+    if (downloadWhitelist) {
       remotePath <- paste0(dirname(remotePath), '/validCellIndexes.csv')
     }
 
     lp <- paste0(localPath, '/', wb, '/', fn)
-    success <- labkey.webdav.get(
-      baseUrl=lkBaseUrl,
-      folderPath=paste0(lkDefaultFolder, wb),
-      remoteFilePath = remotePath,
-      overwrite = T,
-      localFilePath = lp
-    )
+    if (file.exists(lp)) {
+      print(paste0('file exists, reusing: ', lp))
+    } else {
+      success <- labkey.webdav.get(
+        baseUrl=lkBaseUrl,
+        folderPath=paste0(lkDefaultFolder, wb),
+        remoteFilePath = remotePath,
+        overwrite = T,
+        localFilePath = lp
+      )
 
-    if (!success) {
-      warning(paste0('Unable to download whitelist for readset: ', row['readset_name'], ' from: ', remotePath))
+      if (!success) {
+        warning(paste0('Unable to download whitelist for readset: ', row['readset_name'], ' from: ', remotePath))
+      }
     }
 
     toAdd[fieldName] <- lp
@@ -414,5 +435,80 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
   #filter ties:
   df3 <- df3[df3$intersect != df3$self_intersect,]
   write.table(df3, file = file.path(savePath, 'conflicting_intersect.txt'), sep = '\t', row.names = F, quote = F)
+
+  #Now look for instances where the raw HTO calls find more HTOs than either TCR or GEX
+  dfSummary <- NA
+  for (i in 1:nrow(summary)) {
+    row <- summary[i,]
+    name <- as.character(row$Name)
+
+    if (is.na(row$HTO_Top_BarcodesFile)){
+      print(paste0('No HTO call file for: ', name))
+    }
+
+    df <- data.frame(HTO = character(), Type = character(), Count.HTO = integer(), Fraction.HTO = numeric(), Count.Compare = integer(), Fraction.Compare = numeric(), Difference = numeric())
+    #GEX:
+    dfG <- CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$GEX_CallsFile, 'GEX')
+    if (!all(is.na(dfG))){
+      df <- rbind(df, dfG)
+    }
+
+    #TCR
+    dfT <- CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$TCR_CallsFile, 'TCR')
+    if (!all(is.na(dfT))){
+      df <- rbind(df, dfT)
+    }
+
+    if (all(is.na(dfSummary))) {
+      dfSummary <- df
+    } else {
+      dfSummary <- rbind(dfSummary, df)
+    }
+  }
+
+  dfSummary <- merge(dfSummary, summary[c('Name', 'ExpectedHTOs')], all.x = T, by.x = c('Dataset'), by.y = c('Name'))
+  dfSummary$Unexpected <- apply(dfSummary, 1, function(r){
+    htos <- unlist(strsplit(r['ExpectedHTOs'], ','))
+
+    return(!(r['HTO'] %in% htos))
+  })
+
+
+  write.table(dfSummary, file = file.path(savePath, paste0('htoCompare.txt')), sep = '\t', row.names = F, quote = F)
+  write.table(dfSummary[dfSummary$Unexpected & dfSummary$Fraction.HTO > 0.025,], file = file.path(savePath, paste0('UnexpectedHTOs.txt')), sep = '\t', row.names = F, quote = F)
+
+  return(dfSummary)
+}
+
+CompareHtosByCall <- function(name, htoCallFile, compareFile, type) {
+  if (is.na(compareFile)){
+    print(paste0('Missing ', type, ' call file for: ', name))
+    return(NA)
+  }
+
+  t1 <- read.table(htoCallFile, header = T, sep = '\t')
+  t1 <- t1 %>% group_by(HTO) %>% summarise(Count = n())
+  t1 <- t1[!(t1$HTO %in% c('Doublet', 'Negative')),]
+  t1$Fraction <- t1$Count / sum(t1$Count)
+
+  t2 <- read.table(compareFile, header = T, sep = '\t')
+  t2 <- t2 %>% group_by(HTO) %>% summarise(Count = n())
+  t2 <- t2[!(t2$HTO %in% c('Doublet', 'Negative')),]
+  t2$Fraction <- t2$Count / sum(t2$Count)
+
+  df <- merge(x = t1, y = t2, by = 'HTO', all = T, suffixes = c('.HTO', '.Compare'))
+  df$Count.HTO[is.na(df$Count.HTO)] <- 0
+  df$Fraction.HTO[is.na(df$Fraction.HTO)] <- 0
+
+  df$Count.Compare[is.na(df$Count.Compare)] <- 0
+  df$Fraction.Compare[is.na(df$Fraction.Compare)] <- 0
+
+  df$Type <- type
+  df$Difference <- abs(df$Fraction.HTO - df$Fraction.Compare)
+  df$Dataset <- name
+
+  df <- df[c('Dataset', 'HTO', 'Type', 'Count.HTO', 'Fraction.HTO', 'Count.Compare', 'Fraction.Compare', 'Difference')]
+
+  return(df)
 }
 
