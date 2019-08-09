@@ -29,8 +29,11 @@ jobs:
         - |
           R CMD build .
           travis_wait 30 R CMD check *tar.gz
-          if [ -e ./OOSAP.Rcheck/tests/00check.log ];then cat ./OOSAP.Rcheck/tests/00check.log; fi
-          if [ -e ./OOSAP.Rcheck/tests/testthat.Rout ];then cat ./OOSAP.Rcheck/tests/testthat.Rout; fi
+      after_script:
+          - |
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00check.log ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00check.log; fi
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out; fi
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout; fi
 
 addons:
   apt:

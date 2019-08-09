@@ -34,7 +34,7 @@ md <- paste0(outPrefix, '.markers.rds')
 Find_Markers(seuratObj, resolutionToUse = resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))
 
 test_that("marker list not expected length", {
-  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 238)
+  expect_equal(nrow(utils::read.table(mf, sep = '\t', header = T)), 201)
 })
 
 unlink(md)
@@ -57,3 +57,17 @@ test_that("dim redux file not expected length", {
 })
 
 unlink(dr)
+
+# Test SingleR:
+singleRFile <- paste0(outPrefix, '.singleR.rds')
+seuratObj <- SingleRmySerObj(SeurObj = seuratObj, SavePath = singleRFile, ReturnSeurObj = T)
+
+test_that("cell type counts not as expected", {
+  expect_equal(94, sum(seuratObj$SingleR_Labels1 == 'NK_cell'))
+  expect_equal(13, sum(seuratObj$SingleR_Labels1 == 'T_cell:CD4+_central_memory'))
+
+  expect_equal(465, sum(seuratObj$SingleR_Labels2 == 'CD8+ Tcm'))
+  expect_equal(911, sum(seuratObj$SingleR_Labels2 == 'CD8+ Tem'))
+})
+
+unlink(singleRFile)

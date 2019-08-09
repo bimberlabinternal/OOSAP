@@ -9,20 +9,22 @@
 #' @return SingleR object or Seurat object
 #' @keywords SingleR Classification
 #' @export
-#' @import Seurat SingleR
-generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = ProjName, MinGenes = MinGenes, Species = Species, 
+#' @import Seurat
+#' @import SingleR
+generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = ProjName, MinGenes = MinGenes, Species = Species,
                             ClusteringName = ClusteringName, NumCores = NumCores, NormGeneLength = F, VarGeneMethod = "de",
                             FineTune = T, DoSig = T, MainTypes=T, RedFS = T){
   
   Counts.Mat <- as.matrix(SeurObj@assays$RNA@counts)
-  
-  
+
+  #Attempt to force-loading of the annotations.  for some reason this must be defined in the global scope?  could have something to do with lazy data loading?
+  hpca <<- SingleR::hpca
+
   # if(length(grep("MTOR", rownames(SeurObj)))>0 | length(grep("CD1", rownames(SeurObj)))>0 | length(grep("ENS", rownames(SeurObj)))>0){
   #   print("genes in rownames, good!")
   # } else {
   #   Counts.Mat <- t(Counts.Mat)
   # }
-  
   singler = CreateSinglerObject(counts = Counts.Mat,
                                 annot = Annotation,
                                 project.name = ProjName,
@@ -38,7 +40,10 @@ generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = 
                                 do.main.types = MainTypes, 
                                 reduce.file.size = RedFS, 
                                 numCores = NumCores)
-  
+
+  #cleanup global variable
+  rm(hpca)
+
   return(singler)
   
   
@@ -53,7 +58,8 @@ generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = 
 #' @return SingleR object or Seurat object
 #' @keywords SingleR Classification
 #' @export
-#' @import Seurat SingleR
+#' @import Seurat
+#' @import SingleR
 SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T, 
                             Annotation = NULL, ProjName = NULL , 
                             MinGenes = 500, Species = "Human", NumCores = 4, 
@@ -97,23 +103,15 @@ SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
   
   
   if(ReturnSeurObj){
-    
-    SeurObj$SingleR_Laels1 <- "unk"
-    SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Laels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
-    
-    # table(SeurObj$SingleR_Laels1)
-    
-    
-    
-    
-    SeurObj$SingleR_Laels2 <- "unk"
-    SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Laels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
-    
-    
-    SeurObj$SingleR_LaelsOther <- "unk"
-    SeurObj@meta.data[names(singler$other),]$SingleR_LaelsOther <- singler$other
-    
-    
+    SeurObj$SingleR_Labels1 <- "unk"
+    SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
+
+    SeurObj$SingleR_Labels2 <- "unk"
+    SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
+
+    SeurObj$SingleR_LabelsOther <- "unk"
+    SeurObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
+
     return(SeurObj)
   } else {
     return(singler)
@@ -137,7 +135,8 @@ SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
 #' @return modified Seurat object
 #' @keywords SingleR Classification 
 #' @export
-#' @import Seurat SingleR
+#' @import Seurat
+#' @importFrom cowplot plot_grid
 SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath = NULL){
   
   if(is.null(SeurObj) & is.null(SeurObjPath)) stop("Seurat object not def, SeurObjPath or SeurObj needed.")
@@ -145,18 +144,14 @@ SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath
   
   if(!is.null(SingleRPath)) singler <- readRDS(SingleRPath) else stop("SingleR path NULL")
   
-  SeurObj$SingleR_Laels1 <- "unk"
-  SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Laels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
+  SeurObj$SingleR_Labels1 <- "unk"
+  SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
   
-  # table(SeurObj$SingleR_Laels1)
+  SeurObj$SingleR_Labels2 <- "unk"
+  SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
   
-  
-  SeurObj$SingleR_Laels2 <- "unk"
-  SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Laels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
-  
-  SeurObj$SingleR_LaelsOther <- "unk"
-  SeurObj@meta.data[names(singler$other),]$SingleR_LaelsOther <- singler$other
-  
+  SeurObj$SingleR_LabelsOther <- "unk"
+  SeurObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
   
   return(SeurObj)
   
@@ -169,12 +164,13 @@ SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath
 #' @param SeurObj a Seurat object, but if path given, path is prioritized. 
 #' @keywords Dimplot SingleR Classification 
 #' @export
-#' @import Seurat SingleR cowplot
+#' @import Seurat
+#' @importFrom cowplot plot_grid
 DimPlot_SingleRClassLabs <- function(SeurObj){
   cowplot::plot_grid(
-  DimPlot(SeurObj, group.by = "SingleR_Laels1") + theme_bw() + ggtitle("SingleR_Laels1") +theme(legend.position="bottom"),
-  DimPlot(SeurObj, group.by = "SingleR_Laels2") + theme_bw() + ggtitle("SingleR_Laels2") +theme(legend.position="bottom"),
-  DimPlot(SeurObj, group.by = "SingleR_LaelsOther") + theme_bw() + ggtitle("SingleR_LaelsOther") +theme(legend.position="bottom"), 
+  DimPlot(SeurObj, group.by = "SingleR_Labels1") + theme_bw() + ggtitle("SingleR_Labels1") +theme(legend.position="bottom"),
+  DimPlot(SeurObj, group.by = "SingleR_Labels2") + theme_bw() + ggtitle("SingleR_Labels2") +theme(legend.position="bottom"),
+  DimPlot(SeurObj, group.by = "SingleR_LabelsOther") + theme_bw() + ggtitle("SingleR_LabelsOther") +theme(legend.position="bottom"), 
   ncol = 1)
   
 }
@@ -185,10 +181,11 @@ DimPlot_SingleRClassLabs <- function(SeurObj){
 #' @param SeurObj a Seurat object, but if path given, path is prioritized. 
 #' @keywords Tabulate SingleR Classification 
 #' @export
-#' @import Seurat SingleR cowplot
+#' @import Seurat
+#' @importFrom cowplot plot_grid
 Tabulate_SingleRClassLabs <- function(SeurObj){
   cowplot::plot_grid(
-    ggplot(melt(table(SeurObj$SingleR_Laels1)), aes(x=Var1, y = value, fill=Var1))  + 
+    ggplot(melt(table(SeurObj$SingleR_Labels1)), aes(x=Var1, y = value, fill=Var1))  + 
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
@@ -200,7 +197,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
       ylab("Number of cells"),
     
     
-    ggplot(melt(table(SeurObj$SingleR_Laels2)), aes(x=Var1, y = value, fill=Var1))  + 
+    ggplot(melt(table(SeurObj$SingleR_Labels2)), aes(x=Var1, y = value, fill=Var1))  + 
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
@@ -212,7 +209,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
       ylab("Number of cells"),
     
     
-    ggplot(melt(table(SeurObj$SingleR_LaelsOther)), aes(x=Var1, y = value, fill=Var1))  + 
+    ggplot(melt(table(SeurObj$SingleR_LabelsOther)), aes(x=Var1, y = value, fill=Var1))  + 
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
