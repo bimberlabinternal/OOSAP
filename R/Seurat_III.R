@@ -1584,3 +1584,97 @@ AddModuleScoreAvg <- function(
     return(SeurObj@meta.data[, c("cID", colnames(genes.scores.use))] )
   }
 }
+
+
+#' @title PlotImmuneMarkers
+#'
+#' @description Generate a set of Seurat FeaturePlots for common immune cell markers
+#' @export
+#' @import Seurat
+PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
+  PlotMarkerSet(seuratObj, reduction, 'CD8/CD4 Markers', c('CD8A', 'CD8B', 'CD4', 'IL7R'))
+
+  #Eff v. Mem:
+  #IL7R = CD127
+  #IL2RA = CD25
+  #PTPRC = CD45
+  #SELL = CD62-L / CD-197
+  PlotMarkerSeries(seuratObj, reduction, c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4'), 'Effector vs. Memory')
+
+  #CD8 Activation
+  PlotMarkerSeries(seuratObj, reduction, c('CCL4', 'IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L2'), 'CD8 Activation Markers')
+
+  PlotMarkerSeries(seuratObj, reduction, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
+
+  PlotMarkerSet(seuratObj, reduction, 'B-cell Markers', c('MS4A1', 'CD79A', 'CD74', 'DRA'))
+
+  PlotMarkerSet(seuratObj, reduction, 'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
+
+  PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3'))
+
+  #LILR/KIR:
+  PlotMarkerSeries(seuratObj, reduction, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR'), 'KIR/LILR')
+
+  PlotMarkerSeries(seuratObj, reduction, c('FCGR1A','FCGR2B','FCGR3'), 'FCGR')
+
+  #Cytokines
+  cytokines <- c('IL1A','IL1B','IL1R1','IL1R2','IL1RAP','IL1RAPL1','IL1RAPL2','IL1RL1','IL1RL2','IL1RN','IL2','IL2RA','IL2RB','IL2RG','IL3','IL3RA','IL4','IL4I1','IL4R','IL5','IL5RA','IL6','IL6R','IL6ST','IL7','IL7R','IL9','IL10','IL10RA','IL11','IL12A','IL12B','IL12RB1','IL12RB2','IL13','IL13RA2','IL15','IL15Ra','IL16','IL17A','IL17B','IL17C','IL17D','IL17F','IL17RA','IL17RB','IL17RC','IL17RD','IL17RE','IL18BP','IL18R1','IL18RAP','IL19','IL20','IL20RA','IL20RB','IL21','IL21R','IL22','IL22RA2','IL23A','IL24','IL25','IL26','IL27','IL27RA','IL31','IL31RA','IL33','IL34','IL36A','IL36B','IL36G','IL37','ILDR1','ILDR2','ILF2','ILF3','ILK','ILKAP','ILVBL')
+  PlotMarkerSeries(seuratObj, reduction, cytokines, 'Cytokines/Receptors')
+
+  klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2')
+  PlotMarkerSeries(seuratObj, reduction, klrs, 'KLRs')
+
+  #chemokines
+  chemokines <- c('CCL1','CCL2','CCL4','CCL4L2','CCL5','CCL8','CCL11','CCL13','CCL14','CCL16','CCL17','CCL18','CCL19','CCL20','CCL21','CCL22','CCL23','CCL24','CCL25','CCL26','CCL27','CCL28')
+  chemokines <- c(chemokines, c('CCR1','CCR2','CCR3','CCR4','CCR5','CCR6','CCR7','CCR8','CCR9','CCR10','CCRL2'))
+  chemokines <- c(chemokines, c('CXCL1','CXCL3','CXCL9','CXCL10','CXCL13','CXCL14','CXCL16','CXCR1','CXCR2','CXCR3','CXCR4','CXCR5','CXCR6','XCR1'))
+
+  PlotMarkerSeries(seuratObj, reduction, chemokines, 'Chemokines/Receptors')
+}
+
+PlotMarkerSeries <- function(seuratObj, reduction, features, title, setSize = 4) {
+  featuresToPlot <- unique(intersect(features, row.names(seuratObj)))
+  featuresToPlot <- RemoveUnchangedOrZero(seuratObj = seuratObj, reduction = reduction, features = featuresToPlot)
+  steps <- ceiling(length(featuresToPlot) / setSize) - 1
+
+  for (i in 0:steps) {
+    start <- (i * 4) + 1
+    end <- min((start + 3), length(featuresToPlot))
+    genes <- featuresToPlot[start:end]
+
+
+    PlotMarkerSet(seuratObj, reduction, title, genes)
+  }
+}
+
+RemoveUnchangedOrZero <- function(seuratObj, reduction, features) {
+  ret <- c()
+  #Remove zeros or unchanged:
+  for (feature in features) {
+    dims <- paste0(Key(object = seuratObj[[reduction]]), c(1,2))
+    data <- FetchData(object = seuratObj, vars = c(dims, features), cells = colnames(x = seuratObj))
+    if (!all(data[, feature] == data[, feature][1])) {
+      ret <- c(ret, feature)
+    }
+  }
+
+  return(ret)
+}
+
+
+PlotMarkerSet <- function(seuratObj, reduction, title, features) {
+  featuresToPlot <- intersect(features, row.names(seuratObj))
+  featuresToPlot <- RemoveUnchangedOrZero(seuratObj, reduction, featuresToPlot)
+
+  if (length(features) != length(featuresToPlot)){
+    missing <- features[!(features %in% featuresToPlot)]
+    print(paste0('The following features were requested, but not present: ', paste0(missing, collapse = ',')))
+  }
+
+  if (length(featuresToPlot) == 0){
+    print('None of the requested features were present, skipping')
+    return()
+  }
+
+  print(AddTitleToMultiPlot(FeaturePlot(seuratObj, features = featuresToPlot, reduction = reduction), title))
+}
