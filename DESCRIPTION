@@ -59,4 +59,5 @@ Collate:
     'PhenotypingGeneSets.R'
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
+    'SingleR_Seurat.R'
     'mcl.R'

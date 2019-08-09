@@ -7,5 +7,5 @@
 PlotImmuneMarkers(seuratObj, reduction = "tsne")
 }
 \description{
-Generate a set of plots for common immune cell markers
+Generate a set of Seurat FeaturePlots for common immune cell markers
 }
