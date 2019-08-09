@@ -532,6 +532,7 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData) {
 #'
 #' @description A description
 #' @return A data table of results.
+#' @export
 #' @import data.table
 GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
   sc <- NA
