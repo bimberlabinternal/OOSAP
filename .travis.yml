@@ -31,8 +31,10 @@ jobs:
           travis_wait 30 R CMD check *tar.gz
       after_failure:
           - |
-            if [ -e ./OOSAP.Rcheck/tests/00check.log ];then cat ./OOSAP.Rcheck/tests/00check.log; fi
-            if [ -e ./OOSAP.Rcheck/tests/testthat.Rout ];then cat ./OOSAP.Rcheck/tests/testthat.Rout; fi
+            echo ${TRAVIS_BUILD_DIR}
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/00check.log ];then cat ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/00check.log; fi
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/00install.out ];then cat ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/00install.out; fi
+            if [ -e ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/tests/testthat.Rout ];then cat ${TRAVIS_BUILD_DIR}/OOSAP/OOSAP.Rcheck/tests/testthat.Rout; fi
 
 addons:
   apt:
