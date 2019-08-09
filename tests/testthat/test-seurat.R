@@ -58,8 +58,6 @@ test_that("dim redux file not expected length", {
 
 unlink(dr)
 
-saveRDS(seuratObj, file = paste0(outPrefix, '.seurat.rds'))
-
 # Test SingleR:
 singleRFile <- paste0(outPrefix, '.singleR.rds')
 seuratObj <- SingleRmySerObj(SeurObj = seuratObj, SavePath = singleRFile, ReturnSeurObj = T)
