@@ -11,7 +11,6 @@
 #' @export
 #' @import Seurat
 #' @import SingleR
-#' @importFrom SingleR hpca
 generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = ProjName, MinGenes = MinGenes, Species = Species,
                             ClusteringName = ClusteringName, NumCores = NumCores, NormGeneLength = F, VarGeneMethod = "de",
                             FineTune = T, DoSig = T, MainTypes=T, RedFS = T){
