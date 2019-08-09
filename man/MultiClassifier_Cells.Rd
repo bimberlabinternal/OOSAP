@@ -15,7 +15,7 @@ MultiClassifier_Cells(object_train, object_test, data2use = "data",
   "nzv", "zv"))
 }
 \value{
-A modified Seurat object.
+A list of resuts
 }
 \description{
 This function takes in Seurat objects and performs machine learning; generalized for common use.

@@ -35,14 +35,17 @@ Imports:
     ranger,
     org.Hs.eg.db,
     fastAdaboost,
-    caret
+    reticulate,
+    caret,
+    SingleR
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
     bioc::release/monocle,
     cole-trapnell-lab/garnett,
-    bioc::release/DropletUtils
+    bioc::release/DropletUtils,
+    dviraran/SingleR
 RoxygenNote: 6.1.1
 Collate: 
     'LabKeySettings.R'
