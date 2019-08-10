@@ -3,7 +3,7 @@ RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
 		python-pip \
-    && pip install --upgrade pip wheel \
+    && pip install wheel \
     && pip install numba==0.42.0 \
     && pip install umap-learn \
 	&& apt-get clean \
