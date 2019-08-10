@@ -2,6 +2,7 @@ from bioconductor/release_core2
 RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
+		libpython-dev \
 		python-pip \
     && pip install wheel \
     && pip install numba==0.42.0 \
