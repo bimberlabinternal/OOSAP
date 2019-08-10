@@ -391,7 +391,7 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
       tcrBC[[name]] <- bc
 
     } else {
-      print(paste0('missing one ore more files: ', name, ':'))
+      print(paste0('missing one or more files: ', name, ':'))
       if (is.na(row$HTO_Top_BarcodesFile)){
         print('HTO missing')
       }
@@ -444,6 +444,7 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 
     if (is.na(row$HTO_Top_BarcodesFile)){
       print(paste0('No HTO call file for: ', name))
+      next
     }
 
     df <- data.frame(HTO = character(), Type = character(), Count.HTO = integer(), Fraction.HTO = numeric(), Count.Compare = integer(), Fraction.Compare = numeric(), Difference = numeric())
