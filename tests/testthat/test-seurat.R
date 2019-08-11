@@ -59,8 +59,7 @@ test_that("dim redux file not expected length", {
 unlink(dr)
 
 # Test SingleR:
-singleRFile <- paste0(outPrefix, '.singleR.rds')
-seuratObj <- SingleRmySerObj(SeurObj = seuratObj, SavePath = singleRFile, ReturnSeurObj = T)
+seuratObj <- SingleRmySerObj(seuratObj = seuratObj)
 
 test_that("cell type counts not as expected", {
   expect_equal(94, sum(seuratObj$SingleR_Labels1 == 'NK_cell'))
@@ -69,5 +68,3 @@ test_that("cell type counts not as expected", {
   expect_equal(465, sum(seuratObj$SingleR_Labels2 == 'CD8+ Tcm'))
   expect_equal(911, sum(seuratObj$SingleR_Labels2 == 'CD8+ Tem'))
 })
-
-unlink(singleRFile)

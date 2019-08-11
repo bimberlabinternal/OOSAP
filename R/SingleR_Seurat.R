@@ -4,158 +4,72 @@
 #' @title generate SingleR object
 #'
 #' @description Compute SingleR classification on a Seurat object
-#' @param SeurObjPath, path to Seurat object
-#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
-#' @return SingleR object or Seurat object
+#' @param seuratObj A Seurat object
+#' @param dataset The dataset (see singleR docs) to use as a reference
+#' @param assay The assay in the seurat object to use
+#' @return SingleR object
 #' @keywords SingleR Classification
-#' @export
 #' @import Seurat
 #' @import SingleR
-generateSingleR <- function(SeurObj = NULL, Annotation = Annotation, ProjName = ProjName, MinGenes = MinGenes, Species = Species,
-                            ClusteringName = ClusteringName, NumCores = NumCores, NormGeneLength = F, VarGeneMethod = "de",
-                            FineTune = T, DoSig = T, MainTypes=T, RedFS = T){
-  
-  Counts.Mat <- as.matrix(SeurObj@assays$RNA@counts)
+GenerateSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL){
+    data <- GetAssayData(object = seuratObj, slot = 'counts', assay = assay)
+    ref <- SingleR::getReferenceDataset(dataset)
+    pred <- SingleR(test=data, ref=ref, labels=ref$label)
 
-  #Attempt to force-loading of the annotations.  for some reason this must be defined in the global scope?  could have something to do with lazy data loading?
-  hpca <<- SingleR::hpca
-
-  # if(length(grep("MTOR", rownames(SeurObj)))>0 | length(grep("CD1", rownames(SeurObj)))>0 | length(grep("ENS", rownames(SeurObj)))>0){
-  #   print("genes in rownames, good!")
-  # } else {
-  #   Counts.Mat <- t(Counts.Mat)
-  # }
-  singler = CreateSinglerObject(counts = Counts.Mat,
-                                annot = Annotation,
-                                project.name = ProjName,
-                                min.genes = MinGenes,
-                                species = Species, 
-                                citation = "",
-                                ref.list = list(), 
-                                normalize.gene.length = NormGeneLength, 
-                                variable.genes = "de", # or sd
-                                fine.tune = FineTune, 
-                                do.signatures = DoSig, 
-                                clusters = ClusteringName, 
-                                do.main.types = MainTypes, 
-                                reduce.file.size = RedFS, 
-                                numCores = NumCores)
-
-  #cleanup global variable
-  rm(hpca)
-
-  return(singler)
-  
-  
+    return(pred)
 }
 
 
 #' @title SingleR my Seurat Object
 #'
 #' @description Compute SingleR classification on a Seurat object from path or direcly
-#' @param SeurObjPath, path to Seurat object
-#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
-#' @return SingleR object or Seurat object
+#' @param seuratObj A Seurat object
+#' @param dataset The dataset (see singleR docs) to use as a reference
+#' @param assay The assay in the seurat object to use
+#' @param singleRSavePath If provided, the singleR object will be saved here
+#' @return The modified Seurat object
 #' @keywords SingleR Classification
 #' @export
 #' @import Seurat
 #' @import SingleR
-SingleRmySerObj <- function(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T, 
-                            Annotation = NULL, ProjName = NULL , 
-                            MinGenes = 500, Species = "Human", NumCores = 4, 
-                            ClusteringName = NULL, SavePath = NULL, ReturnSeurObj = F){
+SingleRmySerObj <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, singleRSavePath = NULL) {
+    if (is.null(seuratObj)){
+        stop("Seurat object is required")
+    }
   
+    if (!is.null(singleRSavePath) & (!dir.exists(dirname(singleRSavePath)))) {
+        stop("Save path does not exist")
+    }
 
-  #Annotation can be any Idents from Metadata
-  #ClusteringName input cluster id for each of the cells with at least min.genes, if NULL uses SingleR clusterings.
-  
-  if(is.null(SeurObj) & is.null(SeurObjPath)) stop("Seurat object not def, SeurObjPath or SeurObj needed.")
-  
-  if((!is.null(SavePath)) & (!dir.exists(dirname(SavePath))) ) stop("Save path does not exist")
-  
-    
-   
-    
-    
-  
-  if(!is.null(SeurObjPath)) SeurObj <- readRDS(SeurObjPath)
-  
-  dim(SeurObj)
-  
-  if(PlotFigs) DimPlot(SeurObj) + theme_bw()
-  
-  if(is.null(ProjName)) ProjName = SeurObj@project.name
-  
-  
-  # SeuratMeta <- as.data.frame(SeurObj@meta.data)
-  # if(!is.null(Annotation))
-  
-  
-  singler <- generateSingleR(SeurObj = SeurObj, Annotation = Annotation, ProjName = ProjName, MinGenes = MinGenes, Species = Species, 
-                  ClusteringName = ClusteringName, NumCores = NumCores, NormGeneLength = F, VarGeneMethod = "de",
-                  FineTune = T, DoSig = T, MainTypes=T, RedFS = T)
-  
-  
-  
-  
-  
-  if(!is.null(SavePath)) saveRDS(singler, SavePath)
-  
-  
-  if(ReturnSeurObj){
-    SeurObj$SingleR_Labels1 <- "unk"
-    SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
+    singler <- GenerateSingleR(seuratObj = seuratObj, dataset = dataset)
 
-    SeurObj$SingleR_Labels2 <- "unk"
-    SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
+    if (!is.null(singleRSavePath)) {
+        saveRDS(singler, singleRSavePath)
+    }
 
-    SeurObj$SingleR_LabelsOther <- "unk"
-    SeurObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
+    seuratObj <- SaveSingleRtoSeuratObj(seuratObj, singler)
 
-    return(SeurObj)
-  } else {
-    return(singler)
-  }
-  
-  
-
-  
+    return(seuratObj)
 }
 
 
-
-
-
-#' @title Save SingleR to SeurObj
+#' @title Save SingleR to SeurObject
 #'
 #' @description Add a pre-Computed SingleR classification into a Seurat object from path or direcly
-#' @param SeurObjPath, path to Seurat object
-#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
-#' @param SingleRPath path to SingleR object
 #' @return modified Seurat object
-#' @keywords SingleR Classification 
-#' @export
+#' @keywords SingleR Classification
 #' @import Seurat
-#' @importFrom cowplot plot_grid
-SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath = NULL){
+SaveSingleRtoSeuratObj <- function(seuratObj, singler) {
+  seuratObj$SingleR_Labels1 <- "unk"
+  seuratObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
   
-  if(is.null(SeurObj) & is.null(SeurObjPath)) stop("Seurat object not def, SeurObjPath or SeurObj needed.")
-  if(!is.null(SeurObjPath)) SeurObj <- readRDS(SeurObjPath)
+  seuratObj$SingleR_Labels2 <- "unk"
+  seuratObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
   
-  if(!is.null(SingleRPath)) singler <- readRDS(SingleRPath) else stop("SingleR path NULL")
+  seuratObj$SingleR_LabelsOther <- "unk"
+  seuratObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
   
-  SeurObj$SingleR_Labels1 <- "unk"
-  SeurObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
-  
-  SeurObj$SingleR_Labels2 <- "unk"
-  SeurObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
-  
-  SeurObj$SingleR_LabelsOther <- "unk"
-  SeurObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
-  
-  return(SeurObj)
-  
-
+  return(seuratObj)
 }
 
 
@@ -168,11 +82,11 @@ SaveSingleRtoSeurObj <- function(SeurObjPath = NULL, SeurObj = NULL, SingleRPath
 #' @importFrom cowplot plot_grid
 DimPlot_SingleRClassLabs <- function(SeurObj){
   cowplot::plot_grid(
-  DimPlot(SeurObj, group.by = "SingleR_Labels1") + theme_bw() + ggtitle("SingleR_Labels1") +theme(legend.position="bottom"),
-  DimPlot(SeurObj, group.by = "SingleR_Labels2") + theme_bw() + ggtitle("SingleR_Labels2") +theme(legend.position="bottom"),
-  DimPlot(SeurObj, group.by = "SingleR_LabelsOther") + theme_bw() + ggtitle("SingleR_LabelsOther") +theme(legend.position="bottom"), 
-  ncol = 1)
-  
+      DimPlot(SeurObj, group.by = "SingleR_Labels1") + theme_bw() + ggtitle("SingleR_Labels1") +theme(legend.position="bottom"),
+      DimPlot(SeurObj, group.by = "SingleR_Labels2") + theme_bw() + ggtitle("SingleR_Labels2") +theme(legend.position="bottom"),
+      DimPlot(SeurObj, group.by = "SingleR_LabelsOther") + theme_bw() + ggtitle("SingleR_LabelsOther") +theme(legend.position="bottom"),
+      ncol = 1
+  )
 }
 
 
@@ -195,8 +109,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
             axis.text.x = element_text(angle = 90)) +
       ggtitle("SingleR predicted classification  labels #1:: TestisII \n Total Contribution") + 
       ylab("Number of cells"),
-    
-    
+
     ggplot(melt(table(SeurObj$SingleR_Labels2)), aes(x=Var1, y = value, fill=Var1))  + 
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
@@ -207,8 +120,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
             axis.text.x = element_text(angle = 90)) +
       ggtitle("SingleR predicted classification labels #2:: TestisII \n Total Contribution") + 
       ylab("Number of cells"),
-    
-    
+
     ggplot(melt(table(SeurObj$SingleR_LabelsOther)), aes(x=Var1, y = value, fill=Var1))  + 
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
