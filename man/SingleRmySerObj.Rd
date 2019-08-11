@@ -4,18 +4,20 @@
 \alias{SingleRmySerObj}
 \title{SingleR my Seurat Object}
 \usage{
-SingleRmySerObj(SeurObjPath = NULL, SeurObj = NULL, PlotFigs = T,
-  Annotation = NULL, ProjName = NULL, MinGenes = 500,
-  Species = "Human", NumCores = 4, ClusteringName = NULL,
-  SavePath = NULL, ReturnSeurObj = F)
+SingleRmySerObj(seuratObj = NULL, dataset = "hpca", assay = NULL,
+  singleRSavePath = NULL)
 }
 \arguments{
-\item{SeurObjPath, }{path to Seurat object}
+\item{seuratObj}{A Seurat object}
 
-\item{SeurObj}{a Seurat object, but if path given, path is prioritized.}
+\item{dataset}{The dataset (see singleR docs) to use as a reference}
+
+\item{assay}{The assay in the seurat object to use}
+
+\item{singleRSavePath}{If provided, the singleR object will be saved here}
 }
 \value{
-SingleR object or Seurat object
+The modified Seurat object
 }
 \description{
 Compute SingleR classification on a Seurat object from path or direcly
