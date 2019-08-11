@@ -53,7 +53,7 @@ Remotes:
     bioc::DelayedArray,
     bioc::DelayedMatrixStats,
     bioc::org.Hs.eg.db,
-    bioc::org.Mm.eg.db
+    bioc::org.Mm.eg.db,
     bioc::release/monocle,
     cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
