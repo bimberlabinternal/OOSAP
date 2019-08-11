@@ -37,11 +37,23 @@ Imports:
     fastAdaboost,
     reticulate,
     caret,
-    SingleR
+    SingleR,
+    AnnotationDbi,
+    Biobase,
+    DelayedArray,
+    DelayedMatrixStats,
+    org.Hs.eg.db,
+    org.Mm.eg.db
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
+    bioc::AnnotationDbi,
+    bioc::Biobase,
+    bioc::DelayedArray,
+    bioc::DelayedMatrixStats,
+    bioc::org.Hs.eg.db,
+    bioc::org.Mm.eg.db
     bioc::release/monocle,
     cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
