@@ -10,7 +10,7 @@ RUN apt-get update -y \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN echo 'local({\nr <- getOption("repos")\nr["BioCann"] <- "https://bioconductor.org/packages/release/data/annotation"\nr["BioC"] <- "https://bioconductor.org/packages/release"\nr["CRAN"] <- "http://cran.rstudio.com/"\noptions(repos = r)\n})' > ~/.Rprofile \
+RUN echo 'local({\nr <- getOption("repos")\nr["BioC"] <- "https://bioconductor.org/packages/release/bioc"\nr["CRAN"] <- "http://cran.rstudio.com/"\noptions(repos = r)\nr["BioCann"] <- "https://bioconductor.org/packages/release/data/annotation"\n})' > ~/.Rprofile \
     && Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
