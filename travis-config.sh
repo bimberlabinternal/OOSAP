@@ -21,3 +21,5 @@ CORES=2
 echo "options(Ncpus = ${CORES})" >> ~/.Rprofile
 CORES=`Rscript -e "getOption('Ncpus', 1L)"`
 echo "Final Ncpus: $CORES"
+
+export PKG_CXXFLAGS='-std=c++11'
