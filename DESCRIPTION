@@ -37,13 +37,7 @@ Imports:
     fastAdaboost,
     reticulate,
     caret,
-    SingleR,
-    AnnotationDbi,
-    Biobase,
-    DelayedArray,
-    DelayedMatrixStats,
-    org.Hs.eg.db,
-    org.Mm.eg.db
+    SingleR
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
