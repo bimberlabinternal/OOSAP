@@ -45,7 +45,7 @@ Suggests:
 Remotes:
     cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
-    bbimber/SingleR
+    LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 
     'LabKeySettings.R'
