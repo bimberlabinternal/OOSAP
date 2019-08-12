@@ -43,7 +43,7 @@ Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
-    bbimber/garnett,
+    cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
     bbimber/SingleR
 RoxygenNote: 6.1.1
