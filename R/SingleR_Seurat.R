@@ -14,7 +14,7 @@
 GenerateSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL){
     data <- GetAssayData(object = seuratObj, slot = 'counts', assay = assay)
     ref <- SingleR::getReferenceDataset(dataset)
-    pred <- SingleR(test=data, ref=ref, labels=ref$label)
+    pred <- SingleR(test=data, ref=ref$data, labels=ref$types)
 
     return(pred)
 }

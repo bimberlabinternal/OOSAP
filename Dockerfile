@@ -10,8 +10,7 @@ RUN apt-get update -y \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e "install.packages(c('devtools', 'remotes'), dependencies=TRUE, repos='http://cran.rstudio.com/')" \
-    # NOTE: manually installing might be required if remotes goes out of order.  monocle is needed before garnett
-    # && Rscript -e "BiocManager::install(c('monocle', 'AnnotationDbi', 'Biobase', 'DelayedArray', 'DelayedMatrixStats', 'org.Hs.eg.db', 'org.Mm.eg.db', 'loomR', 'SingleCellExperiment', 'MAST', 'DESeq2'))" \
+RUN echo 'local({\nr <- getOption("repos")\nr["BioCann"] <- "https://bioconductor.org/packages/release/data/annotation"\nr["BioC"] <- "https://bioconductor.org/packages/release"\nr["CRAN"] <- "http://cran.rstudio.com/"\noptions(repos = r)\n})' > ~/.Rprofile \
+    && Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
