@@ -37,8 +37,10 @@ SingleRmySerObj <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, si
         stop("Seurat object is required")
     }
   
-    if (!is.null(singleRSavePath) & (!dir.exists(dirname(singleRSavePath)))) {
-        stop("Save path does not exist")
+    if (!is.null(singleRSavePath)) {
+        if (!dir.exists(dirname(singleRSavePath))) {
+            stop("Save path does not exist")
+        }
     }
 
     singler <- GenerateSingleR(seuratObj = seuratObj, dataset = dataset)
