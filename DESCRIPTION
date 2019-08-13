@@ -44,7 +44,7 @@ Suggests:
     testthat (>= 2.1.0)
 Remotes:
     cole-trapnell-lab/garnett,
-    bioc::release/DropletUtils,
+    bioc::devel/DropletUtils,
     LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 
