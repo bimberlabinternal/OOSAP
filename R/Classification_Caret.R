@@ -69,87 +69,7 @@ GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", Scale
 }
 
 
-#' @title A Title
-#'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
-ClassifyCellsCustom <- function(Classifier.rds.path = "", ClassifierNames="", testing.data, log10T=T, returnTraining=F){
 
-  if(file.exists(Classifier.rds.path)){
-    MultiClassifierResults <- readRDS(Classifier.rds.path)
-    Available.Classifiers  <- names(MultiClassifierResults)[grepl("classifier", names(MultiClassifierResults))]
-
-    print(Available.Classifiers)
-
-    if(ClassifierNames[1]=="") ClassifierNames <- Available.Classifiers
-    if(length(which(ClassifierNames %in% Available.Classifiers)) < length(ClassifierNames)) {
-      print("Names in ClassifierNames did not match whats available")
-      ClassifierNames <- Available.Classifiers
-    }
-    MultiClassifier        <- MultiClassifierResults[Available.Classifiers]
-
-
-    if(class(testing.data)[1]=="seurat") {
-      print("Converting Seurat Sparse Matrix to one with 0s .... ")
-
-      testing.data <- Matrix::as.matrix(t(testing.data@data))
-    } else {
-      if(!(class(testing.data)[1] %in% c("dgCMatrix", "matrix", "Matrix")) ) {
-        print("DGE mat not Seurat or dgCMatrix")
-        print("Make sure columns are cells and rows are genes and convert to expected format for speed")
-        testing.data <- Matrix::as.matrix((testing.data))
-
-      }
-    }
-
-
-    if(log10T) {
-      print("log-transforming")
-      testing.data <- log10(testing.data+1)
-    }
-
-
-    print("Starting Classification")
-
-    testing.data.yhat <- data.frame(lapply(Available.Classifiers, function(ClassifX){
-      print(ClassifX)
-
-      tempClassifier <- MultiClassifier[[ClassifX]]
-
-      y.hat <- stats::predict(tempClassifier, newdata = testing.data)
-
-
-      return(y.hat)
-    }))
-
-    colnames(testing.data.yhat) <- Available.Classifiers
-
-    NotLevelName <- levels(testing.data.yhat[,1])[grep("Not", levels(testing.data.yhat[,1]))]
-
-    testing.data.yhat$CountNot <- apply(testing.data.yhat, 1, function(x) sum(grepl(NotLevelName, x)))
-    testing.data.yhat$CountTot <- rep(length(Available.Classifiers), nrow(testing.data.yhat))
-
-    testing.data.yhat$NotProb <- testing.data.yhat$CountNot/testing.data.yhat$CountTot
-
-
-
-    rownames(testing.data.yhat) <- rownames(testing.data)
-
-
-    return(list(yhat.DF = testing.data.yhat,
-                classification.levels = levels(testing.data.yhat[,1]),
-                Available.Classifiers = Available.Classifiers,
-                log10T = log10T,
-                DGEcolNames = colnames(testing.data),
-                DGErowNames = rownames(testing.data),
-                MultiClassifierResults = ifelse(returnTraining, MultiClassifierResults, "NULL")))
-
-  } else {
-    print("Check classifier path ....")
-  }
-}
 
 
 
@@ -189,32 +109,46 @@ MultiClassifier_Cells <- function (object_train,
                                   NcrossVal = 10, 
                                   preProc = c( "scale", "center", "nzv", "zv"))
 {
+  #Aug 2019 update
 
 
   results_ls <- list()
   
-  training.classes <- as.vector(x = Y_Train_True)
-  #training.genes   <- #SetIfNull(x = training.genes, default = rownames(x = object_train@assays$RNA@data))
-  training.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
-  
-  
-  testing.classes <- as.vector(x = Y_Test_True)
   testing.genes   <- training.genes #SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
-  testing.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
   
-
-
-
-  if(log10p1) training.data <- log10(training.data + 1)
-  if(log10p1) testing.data  <- log10(testing.data + 1)
+  training.classes <- as.vector(x = Y_Train_True)
+  testing.classes <- as.vector(x = Y_Test_True)
   
-  if(asinhp1) training.data <- asinh(training.data)
-  if(asinhp1) testing.data  <- asinh(testing.data)
+  if(class(object_train)[1] %in% c("matrix", "data.frame")) {
+    training.data    <- as.data.frame(object_train)
+  } else {
+    training.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_train, assay = assay, slot = data2use)))[,training.genes]
+    
+  }
   
-
-
-
-
+  if(class(object_test)[1] %in% c("matrix", "data.frame")) {
+    testing.data    <- as.data.frame(object_test)
+  } else {
+    testing.data    <- as.data.frame(Matrix::t(Seurat::GetAssayData(object = object_test, assay = assay, slot = data2use)))[,testing.genes ]
+    
+  }
+  
+  if(Xp1) training.data <- training.data + 1
+  if(Xp1) testing.data <- testing.data + 1
+  
+  
+  
+  
+  if(Xlog10) training.data <- log10(training.data)
+  if(Xlog10) testing.data  <- log10(testing.data)
+  
+  if(Xasinh) training.data <- asinh(training.data)
+  if(Xasinh) testing.data  <- asinh(testing.data)
+  
+  
+  
+  
+  
   training.data$Class <- factor(x = training.classes)
 
 
