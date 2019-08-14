@@ -82,6 +82,7 @@ GetEnsmbleVarImportance <- function(ClassiferSet, AvailableClassifiers="", Scale
 #' @keywords Machine Learning, Seurat, classification
 #' @importFrom fastAdaboost adaboost
 #' @importFrom stats predict
+#' @importFrom rpart.plot prp
 #' @export
 MultiClassifier_Cells <- function (object_train,
                                   object_test,
@@ -90,8 +91,9 @@ MultiClassifier_Cells <- function (object_train,
                                   training.genes = NULL,
                                   Y_Train_True = NULL,
                                   Y_Test_True = NULL,
-                                  log10p1=F,
-                                  asinhp1 = F,
+                                  Xp1 = F,
+                                  Xlog10=F,
+                                  Xasinh = F,
                                   do_Adaboost = F,
                                   do_Caret_LinSVM = F,
                                   do_ranger_RF = F,
@@ -694,4 +696,13 @@ MultiClassifier_Cells <- function (object_train,
 
   }
 
+
+EnsmbleVarImp <- function(TrainingX, TrainingY, 
+                          NcrossVal      = 10,
+                          crossValReps   = 5,
+                          preProc        = c( "scale", "center", "nzv", "zv"),
+                          preProcBL      = F,
+                          geneVector     = NULL){
+  
+}
 
