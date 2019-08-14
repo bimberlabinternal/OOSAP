@@ -30,4 +30,7 @@ if [ -e ~/.Rprofile ];then
 fi
 
 # Log repos to ensure Bioconductor used:
+cat "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile
+
+echo 'R repos:'
 Rscript -e "getOption('repos')"
