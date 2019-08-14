@@ -29,11 +29,14 @@ if [ -e ~/.Rprofile ];then
     cat ~/.Rprofile
 fi
 
+if [ -e ~/.Rprofile.site ];then
+    echo 'Rprofile.site exists:'
+    cat ~/.Rprofile.site
+fi
+
 # Log repos to ensure Bioconductor used:
-echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile
-echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile.site
+#echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile
+#echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile.site
 
 echo 'R repos:'
 Rscript -e "getOption('repos')"
-echo "Bioconductor repos:"
-Rscript -e "BiocManager::repositories(version = 'devel')"
