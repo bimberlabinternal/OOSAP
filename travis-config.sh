@@ -29,4 +29,5 @@ if [ -e ~/.Rprofile ];then
     cat ~/.Rprofile
 fi
 
-echo "local({\nr <- getOption('repos')\nr['BioC'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/bioc'\nr['CRAN'] <- 'https://cran.rstudio.com/'\noptions(repos = r)\nr['BioCann'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/annotation'\nr['BioCexp'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/experiment'\n})" > ~/.Rprofile
+# Log repos to ensure Bioconductor used:
+Rscript -e "getOption('repos')"

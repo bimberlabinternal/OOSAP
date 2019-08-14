@@ -12,8 +12,8 @@ RUN apt-get update -y \
 
 ENV BIOC_VERSION devel
 
-RUN echo "local({\nr <- getOption('repos')\nr['BioC'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/bioc'\nr['CRAN'] <- 'https://cran.rstudio.com/'\noptions(repos = r)\nr['BioCann'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/annotation'\nr['BioCexp'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/experiment'\n})" > ~/.Rprofile \
-    && Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)" \
+RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)" \
+    && Rscript -e "cat(append = TRUE, file = '~/.Rprofile.site', 'options(repos = BiocManager::repositories())';"
     # NOTE: these seem to be required for garnett to succeed in docker
     && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell'), dependencies=TRUE, ask = FALSE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'SingleR', dependencies = T, upgrade = 'always', ask=FALSE)" \
