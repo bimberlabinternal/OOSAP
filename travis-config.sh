@@ -21,3 +21,12 @@ CORES=2
 echo "options(Ncpus = ${CORES})" >> ~/.Rprofile
 CORES=`Rscript -e "getOption('Ncpus', 1L)"`
 echo "Final Ncpus: $CORES"
+
+
+# Note: this is a hack.  Add Bioconductor repos to default repos, so install.packages will pick them up.
+if [ -e ~/.Rprofile ];then
+    echo 'Rprofile exists:'
+    cat ~/.Rprofile
+fi
+
+echo "local({\nr <- getOption('repos')\nr['BioC'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/bioc'\nr['CRAN'] <- 'https://cran.rstudio.com/'\noptions(repos = r)\nr['BioCann'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/annotation'\nr['BioCexp'] <- 'https://bioconductor.org/packages/"${BIOC_VERSION}"/data/experiment'\n})" > ~/.Rprofile
