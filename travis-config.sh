@@ -31,6 +31,9 @@ fi
 
 # Log repos to ensure Bioconductor used:
 cat "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile
+cat "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile.site
 
 echo 'R repos:'
 Rscript -e "getOption('repos')"
+echo "Bioconductor repos:"
+Rscript -e "BiocManager::repositories(version = 'devel')"
