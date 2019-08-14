@@ -38,6 +38,7 @@ Imports:
     fastAdaboost,
     reticulate,
     caret,
+    scater,
     SingleR
 Suggests:
     ggvis,

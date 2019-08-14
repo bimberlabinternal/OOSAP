@@ -11,10 +11,23 @@
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
+#' @importFrom scater logNormCounts
 GenerateSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL){
-    data <- GetAssayData(object = seuratObj, slot = 'counts', assay = assay)
-    ref <- SingleR::getReferenceDataset(dataset)
-    pred <- SingleR(test=data, ref=ref$data, labels=ref$types)
+    data <- Seurat::GetAssayData(object = seuratObj, slot = 'counts', assay = assay)
+
+    #genesPresent <- intersect(rownames(data), rownames(ref$data))
+    #ref$data <- ref$data[genesPresent,]
+    #data <- data[genesPresent,]
+
+    data <- scater:::logNormCounts(data)
+
+    if (dataset == 'hpca'){
+        ref <- SingleR::HumanPrimaryCellAtlasData()
+    } else {
+        stop('hpca is currently the only supported reference dataset')
+    }
+
+    pred <- SingleR::SingleR(test=data, ref=ref, labels=ref$label.main)
 
     return(pred)
 }
