@@ -4,10 +4,10 @@
 \alias{DimPlot_SingleRClassLabs}
 \title{DimPlot SingleR Class Lables}
 \usage{
-DimPlot_SingleRClassLabs(SeurObj)
+DimPlot_SingleRClassLabs(seuratObject)
 }
 \arguments{
-\item{SeurObj}{a Seurat object, but if path given, path is prioritized.}
+\item{seuratObject}{a Seurat object, but if path given, path is prioritized.}
 }
 \description{
 Dimplot Seurobject with SingleR class lables

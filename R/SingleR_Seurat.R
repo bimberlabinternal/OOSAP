@@ -1,25 +1,22 @@
-
-
-
 #' @title generate SingleR object
 #'
 #' @description Compute SingleR classification on a Seurat object
 #' @param seuratObj A Seurat object
 #' @param dataset The dataset (see singleR docs) to use as a reference
 #' @param assay The assay in the seurat object to use
-#' @return SingleR object
+#' @param resultTableFile If provided, a table of results will be saved here
+#' @return The modified seurat object
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
+#' @export
 #' @importFrom scater logNormCounts
-GenerateSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL){
-    data <- Seurat::GetAssayData(object = seuratObj, slot = 'counts', assay = assay)
+RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL){
+    if (is.null(seuratObj)){
+        stop("Seurat object is required")
+    }
 
-    #genesPresent <- intersect(rownames(data), rownames(ref$data))
-    #ref$data <- ref$data[genesPresent,]
-    #data <- data[genesPresent,]
-
-    data <- scater:::logNormCounts(data)
+    sce <- Seurat::as.SingleCellExperiment(seuratObj)
 
     if (dataset == 'hpca'){
         ref <- SingleR::HumanPrimaryCellAtlasData()
@@ -27,79 +24,40 @@ GenerateSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL){
         stop('hpca is currently the only supported reference dataset')
     }
 
-    pred <- SingleR::SingleR(test=data, ref=ref, labels=ref$label.main)
+    #Subset genes:
+    genesPresent <- intersect(rownames(seuratObj), rownames(ref))
+    ref <- ref[genesPresent,]
+    seuratObj <- seuratObj[genesPresent,]
 
-    return(pred)
-}
+    #Convert to SingleCellExperiment
+    sce <- Seurat::as.SingleCellExperiment(seuratObj)
+    sce <- scater:::logNormCounts(sce, log = T)
 
+    pred <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, assay.type.ref = 'normcounts', method = 'single')
+    seuratObj['SingleR_Labels'] <- pred.results$labels
 
-#' @title SingleR my Seurat Object
-#'
-#' @description Compute SingleR classification on a Seurat object from path or direcly
-#' @param seuratObj A Seurat object
-#' @param dataset The dataset (see singleR docs) to use as a reference
-#' @param assay The assay in the seurat object to use
-#' @param singleRSavePath If provided, the singleR object will be saved here
-#' @return The modified Seurat object
-#' @keywords SingleR Classification
-#' @export
-#' @import Seurat
-#' @import SingleR
-SingleRmySerObj <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, singleRSavePath = NULL) {
-    if (is.null(seuratObj)){
-        stop("Seurat object is required")
+    pred2 <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, assay.type.ref = 'normcounts', method = 'single')
+    seuratObj['SingleR_Labels_Fine'] <- pred2.results$labels
+
+    if (!is.null(resultTableFile)){
+        write.table(file = resultTableFile, data.frame(CellBarcodes = rownames(seuratObj), SingleR_Labels = seuratObj$SingleR_Labels, SingleR_Labels_Fine = seuratObj$SingleR_Labels_Fine), sep = '\t', row.names = F, quote = F)
     }
-  
-    if (!is.null(singleRSavePath)) {
-        if (!dir.exists(dirname(singleRSavePath))) {
-            stop("Save path does not exist")
-        }
-    }
-
-    singler <- GenerateSingleR(seuratObj = seuratObj, dataset = dataset)
-
-    if (!is.null(singleRSavePath)) {
-        saveRDS(singler, singleRSavePath)
-    }
-
-    seuratObj <- SaveSingleRtoSeuratObj(seuratObj, singler)
 
     return(seuratObj)
 }
 
 
-#' @title Save SingleR to SeurObject
-#'
-#' @description Add a pre-Computed SingleR classification into a Seurat object from path or direcly
-#' @return modified Seurat object
-#' @keywords SingleR Classification
-#' @import Seurat
-SaveSingleRtoSeuratObj <- function(seuratObj, singler) {
-  seuratObj$SingleR_Labels1 <- "unk"
-  seuratObj@meta.data[names(singler$singler[[1]]$SingleR.single$labels[,1]),]$SingleR_Labels1 <- singler$singler[[1]]$SingleR.single$labels[,1]
-  
-  seuratObj$SingleR_Labels2 <- "unk"
-  seuratObj@meta.data[names(singler$singler[[2]]$SingleR.single$labels[,1]),]$SingleR_Labels2 <- singler$singler[[2]]$SingleR.single$labels[,1]
-  
-  seuratObj$SingleR_LabelsOther <- "unk"
-  seuratObj@meta.data[names(singler$other),]$SingleR_LabelsOther <- singler$other
-  
-  return(seuratObj)
-}
-
-
 #' @title DimPlot SingleR Class Lables
 #' @description Dimplot Seurobject with SingleR class lables
-#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
+#' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @keywords Dimplot SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-DimPlot_SingleRClassLabs <- function(SeurObj){
+DimPlot_SingleRClassLabs <- function(seuratObject){
   cowplot::plot_grid(
-      DimPlot(SeurObj, group.by = "SingleR_Labels1") + theme_bw() + ggtitle("SingleR_Labels1") +theme(legend.position="bottom"),
-      DimPlot(SeurObj, group.by = "SingleR_Labels2") + theme_bw() + ggtitle("SingleR_Labels2") +theme(legend.position="bottom"),
-      DimPlot(SeurObj, group.by = "SingleR_LabelsOther") + theme_bw() + ggtitle("SingleR_LabelsOther") +theme(legend.position="bottom"),
+      DimPlot(seuratObject, group.by = "SingleR_Labels") + theme_bw() + ggtitle("SingleR_Labels") +theme(legend.position="bottom"),
+      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine") + theme_bw() + ggtitle("SingleR_Labels_Fine") +theme(legend.position="bottom"),
       ncol = 1
   )
 }
@@ -107,14 +65,14 @@ DimPlot_SingleRClassLabs <- function(SeurObj){
 
 #' @title Tabulate SingleR Class Lables
 #' @description Tabulate Seurobject with SingleR class lables
-#' @param SeurObj a Seurat object, but if path given, path is prioritized. 
+#' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @keywords Tabulate SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-Tabulate_SingleRClassLabs <- function(SeurObj){
+Tabulate_SingleRClassLabs <- function(seuratObject){
   cowplot::plot_grid(
-    ggplot(melt(table(SeurObj$SingleR_Labels1)), aes(x=Var1, y = value, fill=Var1))  + 
+    ggplot(melt(table(seuratObject$SingleR_Labels)), aes(x=Var1, y = value, fill=Var1))  +
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
@@ -125,7 +83,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
       ggtitle("SingleR predicted classification  labels #1:: TestisII \n Total Contribution") + 
       ylab("Number of cells"),
 
-    ggplot(melt(table(SeurObj$SingleR_Labels2)), aes(x=Var1, y = value, fill=Var1))  + 
+    ggplot(melt(table(seuratObject$SingleR_Labels_Fine)), aes(x=Var1, y = value, fill=Var1))  +
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
@@ -136,18 +94,7 @@ Tabulate_SingleRClassLabs <- function(SeurObj){
       ggtitle("SingleR predicted classification labels #2:: TestisII \n Total Contribution") + 
       ylab("Number of cells"),
 
-    ggplot(melt(table(SeurObj$SingleR_LabelsOther)), aes(x=Var1, y = value, fill=Var1))  + 
-      geom_bar(stat="identity", position="dodge", width = 0.7) + 
-      # scale_fill_manual(values=col_vector) +
-      theme_bw() + 
-      theme(legend.position="bottom",
-            legend.direction="horizontal",
-            legend.title = element_blank(),
-            axis.text.x = element_text(angle = 90)) +
-      ggtitle("SingleR predicted classification labels other:: TestisII \n Total Contribution") + 
-      ylab("Number of cells"),
     ncol = 1)
-  
 }
 
 

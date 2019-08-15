@@ -28,8 +28,10 @@ jobs:
     - stage: test
       script:
         - R CMD build .
-        - travis_wait 30 R CMD check *tar.gz
-        - "echo 'exit code: '$?"
+        # See: https://github.com/r-lib/testthat/issues/515
+        - # consider adding --as-cran
+        - R CMD check --no-tests *tar.gz
+        - Rscript -e 'res=devtools::test(reporter="summary");df=as.data.frame(res);if(sum(df$failed) > 0 || any(df$error)) {q(status=1)}'
       after_script:
         - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout; else echo 'Test output not found'; fi
         - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout.fail ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout.fail; else echo 'Test output not found'; fi

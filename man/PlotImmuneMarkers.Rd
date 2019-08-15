@@ -6,6 +6,9 @@
 \usage{
 PlotImmuneMarkers(seuratObj, reduction = "tsne")
 }
+\arguments{
+\item{reduction}{The reduction to use}
+}
 \description{
 Generate a set of Seurat FeaturePlots for common immune cell markers
 }

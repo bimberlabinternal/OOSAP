@@ -10,8 +10,6 @@ RemoveCellCycle(seuratObj, runPCAonVariableGenes = F)
 \item{seuratObj}{The seurat object}
 
 \item{runPCAonVariableGenes}{Whether to run PCR on variable genes}
-
-\item{seurObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

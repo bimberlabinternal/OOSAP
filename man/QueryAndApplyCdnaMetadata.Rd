@@ -11,10 +11,14 @@ QueryAndApplyCdnaMetadata(seuratObj, fieldSelect = c("rowid",
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
+
+\item{fieldSelect}{The set of fields to query}
+
+\item{fieldNames}{The labels to use for the fields}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-QueryAndApplyCdnaMetadata
+This will read the barcodePrefix from the seurat object, query the LK server and apply the appropriate metadata from the cDNA table
 }

@@ -6,9 +6,14 @@
 \usage{
 HasStepRun(seuratObj, name)
 }
+\arguments{
+\item{seuratObj}{The seurat object}
+
+\item{name}{The name of the step to mark complete}
+}
 \value{
 A modified Seurat object.
 }
 \description{
-HasStepRun
+An internal method to mark steps as complete, to avoid recalculating
 }

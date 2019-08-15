@@ -7,9 +7,9 @@
 WriteSummaryMetrics(seuratObj, file)
 }
 \arguments{
-\item{file}{The file where metrics will be written}
+\item{seuratObj, }{A Seurat object.}
 
-\item{seurObj, }{A Seurat object.}
+\item{file}{The file where metrics will be written}
 }
 \description{
 WriteSummaryMetrics

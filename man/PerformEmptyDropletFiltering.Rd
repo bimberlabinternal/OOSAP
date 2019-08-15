@@ -8,7 +8,11 @@ PerformEmptyDropletFiltering(seuratRawData, fdrThreshold = 0.01,
   emptyDropNIters = 10000)
 }
 \arguments{
-\item{seuratRawData, }{raw data}
+\item{seuratRawData}{Raw data}
+
+\item{fdrThreshold}{FDR threshold, passed directly to PerformEmptyDrops()}
+
+\item{emptyDropNIters}{Number of iterations, passed directly to PerformEmptyDrops()}
 }
 \value{
 Plot

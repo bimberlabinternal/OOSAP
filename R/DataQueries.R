@@ -1,39 +1,17 @@
 #' @include LabKeySettings.R
 #' @import Rlabkey
 
-#' @title GetCdnaRecords
-#'
-#' @export
-GetCdnaRecords <- function(readsetId, type = 'GEX') {
-  fieldName <- switch(type,
-                      'GEX' = 'readsetId',
-                      'TCR' = 'enrichedReadsetId',
-                      'HTO' = 'hashingReadsetId'
-  )
-
-  df <- labkey.selectRows(
-    baseUrl=lkBaseUrl,
-    folderPath=lkDefaultFolder,
-    schemaName="tcrdb",
-    queryName="clones",
-    showHidden=TRUE,
-    #colSelect=c(''),
-    colFilter=makeFilter(c(fieldName, "EQUAL", readsetId)),
-    containerFilter=NULL,
-    colNameOpt='rname'
-  )
-
-  return(df)
-}
-
 utils::globalVariables(
   names = c('SortOrder'),
   package = 'OOSAP',
   add = TRUE
 )
 #' @title QueryAndApplyCdnaMetadata
+#' @description This will read the barcodePrefix from the seurat object, query the LK server and apply the appropriate metadata from the cDNA table
 #'
 #' @param seuratObj, A Seurat object.
+#' @param fieldSelect The set of fields to query
+#' @param fieldNames The labels to use for the fields
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom dplyr %>% group_by_at summarise_at arrange
@@ -161,7 +139,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   return(seuratObj)
 }
 
-GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
+.GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
   metrics <- labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
@@ -254,16 +232,16 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
       } else {
         toAdd$HTO_Singlet <- NA
       }
-      toAdd <- AppendMetrics(row, toAdd, metrics, 'GEX', 'readsetid')
-      toAdd <- AppendMetrics(row, toAdd, metrics, 'TCR', 'enrichedreadsetid')
+      toAdd <- .AppendMetrics(row, toAdd, metrics, 'GEX', 'readsetid')
+      toAdd <- .AppendMetrics(row, toAdd, metrics, 'TCR', 'enrichedreadsetid')
 
       #call files:
-      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_WhitelistFile', savePath, T)
-      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_WhitelistFile', savePath, T)
-      toAdd <- DownloadCallFile(wb, callFiles, row[['hashingreadsetid']], toAdd, 'HTO_Top_BarcodesFile', savePath, F)
+      toAdd <- .DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_WhitelistFile', savePath, T)
+      toAdd <- .DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_WhitelistFile', savePath, T)
+      toAdd <- .DownloadCallFile(wb, callFiles, row[['hashingreadsetid']], toAdd, 'HTO_Top_BarcodesFile', savePath, F)
 
-      toAdd <- DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_CallsFile', savePath, F)
-      toAdd <- DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_CallsFile', savePath, F)
+      toAdd <- .DownloadCallFile(wb, callFiles, row[['readsetid']], toAdd, 'GEX_CallsFile', savePath, F)
+      toAdd <- .DownloadCallFile(wb, callFiles, row[['enrichedreadsetid']], toAdd, 'TCR_CallsFile', savePath, F)
 
       #now merge HTOs:
       toAdd <- merge(toAdd, htoSummary, by.x = c('GEX_ReadsetId'), by.y = c('readsetid'), all.x = T)
@@ -275,7 +253,7 @@ GenerateDataToCompareBarcodeSets <- function(workbooks, savePath = './') {
   return(summary)
 }
 
-AppendMetrics <- function(row, toAdd, metrics, type, field) {
+.AppendMetrics <- function(row, toAdd, metrics, type, field) {
   for (name in c('FractionOfInputCalled', 'InputBarcodes', 'TotalCalledNotInInput')) {
     toAdd[[paste0(type, '_', name)]] <- NA
   }
@@ -292,7 +270,7 @@ AppendMetrics <- function(row, toAdd, metrics, type, field) {
   return(toAdd)
 }
 
-DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPath, downloadWhitelist) {
+.DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPath, downloadWhitelist) {
   toAdd[fieldName] <- NA
 
   cf <- callFiles[callFiles$readset == readsetId,]
@@ -343,7 +321,7 @@ DownloadCallFile <- function(wb, callFiles, readsetId, toAdd, fieldName, localPa
   return(toAdd)
 }
 
-ProcessSet <- function(df, set1, set2, type1, type2) {
+.ProcessSet <- function(df, set1, set2, type1, type2) {
   for (name1 in names(set1)) {
     h <- set1[[name1]]
 
@@ -367,10 +345,11 @@ utils::globalVariables(
 #'
 #' @description This iterates the provided workbooks, identifying every 10x cDNA library and the GEX/TCR/HTO libraries.  It generates summaries of the cell barcode intersect between them, which can help debug sample swaps.
 #' @param workbooks A vector of workbook IDs
+#' @param savePath The folder path to use for saving output files
 #' @export
 #' @importFrom dplyr %>% mutate group_by
 CompareCellBarcodeSets <- function(workbooks, savePath = './') {
-  summary <- GenerateDataToCompareBarcodeSets(workbooks, savePath)
+  summary <- .GenerateDataToCompareBarcodeSets(workbooks, savePath)
 
   htoBC <- list()
   gexBC <- list()
@@ -408,14 +387,14 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 
   df <- data.frame(dataset1 = character(), type1 = character(), dataset2 = character(), type2 = character(), intersect = integer(), length1 = integer(), length2 = integer())
 
-  df <- ProcessSet(df, htoBC, gexBC, 'HTO', 'GEX')
-  df <- ProcessSet(df, htoBC, tcrBC, 'HTO', 'TCR')
+  df <- .ProcessSet(df, htoBC, gexBC, 'HTO', 'GEX')
+  df <- .ProcessSet(df, htoBC, tcrBC, 'HTO', 'TCR')
 
-  df <- ProcessSet(df, gexBC, htoBC, 'GEX', 'HTO')
-  df <- ProcessSet(df, gexBC, tcrBC, 'GEX', 'TCR')
+  df <- .ProcessSet(df, gexBC, htoBC, 'GEX', 'HTO')
+  df <- .ProcessSet(df, gexBC, tcrBC, 'GEX', 'TCR')
 
-  df <- ProcessSet(df, tcrBC, htoBC, 'TCR', 'HTO')
-  df <- ProcessSet(df, tcrBC, gexBC, 'TCR', 'GEX')
+  df <- .ProcessSet(df, tcrBC, htoBC, 'TCR', 'HTO')
+  df <- .ProcessSet(df, tcrBC, gexBC, 'TCR', 'GEX')
 
   df$fraction <- df$intersect / df$length1
   df <- df[order(df$dataset1, df$type1, df$type2, -df$intersect),]
@@ -449,13 +428,13 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 
     df <- data.frame(HTO = character(), Type = character(), Count.HTO = integer(), Fraction.HTO = numeric(), Count.Compare = integer(), Fraction.Compare = numeric(), Difference = numeric())
     #GEX:
-    dfG <- CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$GEX_CallsFile, 'GEX')
+    dfG <- .CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$GEX_CallsFile, 'GEX')
     if (!all(is.na(dfG))){
       df <- rbind(df, dfG)
     }
 
     #TCR
-    dfT <- CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$TCR_CallsFile, 'TCR')
+    dfT <- .CompareHtosByCall(name, row$HTO_Top_BarcodesFile, row$TCR_CallsFile, 'TCR')
     if (!all(is.na(dfT))){
       df <- rbind(df, dfT)
     }
@@ -481,7 +460,7 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
   return(dfSummary)
 }
 
-CompareHtosByCall <- function(name, htoCallFile, compareFile, type) {
+.CompareHtosByCall <- function(name, htoCallFile, compareFile, type) {
   if (is.na(compareFile)){
     print(paste0('Missing ', type, ' call file for: ', name))
     return(NA)
@@ -513,3 +492,267 @@ CompareHtosByCall <- function(name, htoCallFile, compareFile, type) {
   return(df)
 }
 
+
+#' @title DownloadAndAppendTcrClonotypes
+#' @description Download And Append TCR Clonotypes data from Prime-Seq
+#' @param seuratObject A Seurat object
+#' @param outPath The output filepath
+#' @param dropExisting If true, any existing clonotype data will be replaced
+#' @return A modified Seurat object.
+#' @export
+DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T){
+  if (is.null(seuratObject[['BarcodePrefix']])){
+    stop('Seurat object lacks BarcodePrefix column')
+  }
+
+  i <- 0
+  for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
+    i <- i + 1
+    print(paste0('Adding TCR clonotypes for prefix: ', barcodePrefix))
+
+    vloupeId <- .FindMatchedVloupe(barcodePrefix)
+    if (is.na(vloupeId)){
+      stop(paste0('Unable to find VLoupe file for loupe file: ', barcodePrefix))
+    }
+
+    clonotypeFile <- file.path(outPath, paste0(barcodePrefix, '_clonotypes.csv'))
+    .DownloadCellRangerClonotypes(vLoupeId = vloupeId, outFile = clonotypeFile, overwrite = T)
+    if (!file.exists(clonotypeFile)){
+      stop(paste0('Unable to download clonotype file for prefix: ', barcodePrefix))
+    }
+
+    doDropExisting <- i == 1 && dropExisting
+    seuratObject <- .AppendTcrClonotypes(seuratObject, clonotypeFile, barcodePrefix = barcodePrefix, dropExisting = doDropExisting)
+  }
+
+  return(seuratObject)
+}
+
+utils::globalVariables(
+  names = c('sortOrder'),
+  package = 'OOSAP',
+  add = TRUE
+)
+
+.AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F){
+  tcr <- .ProcessAndAggregateTcrClonotypes(clonotypeFile)
+
+  if (!is.null(barcodePrefix)){
+    tcr$barcode <- as.character(tcr$barcode)
+    tcr$barcode <- paste0(barcodePrefix, '_', tcr$barcode)
+    tcr$barcode <- as.factor(tcr$barcode)
+  }
+
+  origRows <- nrow(tcr)
+
+  datasetSelect <- seuratObject$BarcodePrefix == barcodePrefix
+  gexBarcodes <- colnames(seuratObject)[datasetSelect]
+
+  tcr <- tcr[tcr$barcode %in% gexBarcodes,]
+  pct <- nrow(tcr) / origRows * 100
+
+  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data: ', nrow(tcr), " (", pct, "%)"))
+
+  merged <- merge(data.frame(barcode = gexBarcodes, sortOrder = 1:length(gexBarcodes)), tcr, by = c('barcode'), all.x = T)
+  rownames(merged) <- merged$barcode
+  merged <- dplyr::arrange(merged, sortOrder)
+  merged <- merged[colnames(merged) != 'sortOrder']
+
+  # Check barcodes match before merge
+  if (sum(merged$barcode != gexBarcodes) > 0) {
+    #stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
+    stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != gexBarcodes )))
+
+  }
+
+  for (colName in colnames(tcr)[colnames(tcr) != 'barcode']) {
+    toAdd <- as.character(merged[[colName]])
+    names(toAdd) <- merged[['barcode']]
+
+    if ((colName %in% names(seuratObject@meta.data)) && dropExisting) {
+      seuratObject@meta.data[colName] <- NULL
+    }
+
+    if (!(colName %in% names(seuratObject@meta.data))) {
+      toUpdate <- rep(NA, ncol(seuratObject))
+    } else {
+      toUpdate <- unlist(seuratObject[[colName]])
+    }
+
+    names(toUpdate) <- colnames(seuratObject)
+    toUpdate[datasetSelect] <- toAdd
+    seuratObject[[colName]] <- as.factor(toUpdate)
+  }
+
+  return(seuratObject)
+}
+
+.FindMatchedVloupe <- function(loupeDataId) {
+  rows <- labkey.selectRows(
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="sequenceanalysis",
+  queryName="outputfiles",
+  viewName="",
+  colSort="-rowid",
+  colSelect="readset/cdna/enrichedReadsetId",
+  colFilter=makeFilter(c("rowid", "EQUAL", loupeDataId)),
+  containerFilter=NULL,
+  colNameOpt="rname"
+  )
+
+  if (nrow(rows) != 1) {
+    return(NA)
+  }
+
+  tcrReadsetId <- rows[['readset_cdna_enrichedreadsetid']]
+  if (is.na(tcrReadsetId) || is.null(tcrReadsetId)) {
+    return(NA)
+  }
+
+  rows <- labkey.selectRows(
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="sequenceanalysis",
+  queryName="outputfiles",
+  viewName="",
+  colSort="-rowid",
+  colSelect="rowid,",
+  colFilter=makeFilter(c("readset", "EQUAL", tcrReadsetId), c("category", "EQUAL", "10x VLoupe")),
+  containerFilter=NULL,
+  colNameOpt="rname"
+  )
+
+  if (nrow(rows) > 1){
+    rows <- rows[1]
+  }
+
+  return(rows[['rowid']])
+}
+
+.DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
+  #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
+  rows <- labkey.selectRows(
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="sequenceanalysis",
+  queryName="outputfiles",
+  viewName="",
+  colSort="-rowid",
+  colSelect="rowid,workbook/workbookid,dataid/webdavurlrelative",
+  colFilter=makeFilter(c("rowid", "EQUAL", vLoupeId)),
+  containerFilter=NULL,
+  colNameOpt="rname"
+  )
+
+  if (nrow(rows) != 1) {
+    return(NA)
+  }
+
+  wb <- rows[['workbook_workbookid']]
+  if (is.na(wb) || is.null(wb)){
+    wb <- ''
+  }
+
+  remotePath <- rows[['dataid_webdavurlrelative']]
+  remotePath <- paste0(dirname(remotePath), '/all_contig_annotations.csv')
+
+  success <- labkey.webdav.get(
+  baseUrl=lkBaseUrl,
+  folderPath=paste0(lkDefaultFolder,wb),
+  remoteFilePath = remotePath,
+  overwrite = overwrite,
+  localFilePath = outFile
+  )
+
+  if (!success | !file.exists(outFile)) {
+    return(NA)
+  }
+
+  return(outFile)
+}
+
+
+utils::globalVariables(
+names = c('chain', 'cdr3', 'LabelCol', 'barcode', 'ChainCDR3s', 'TRA', 'TRB', 'TRD', 'TRG', 'TRAV', 'TRBV', 'TRDV', 'TRGV', 'CloneName'),
+package = 'OOSAP',
+add = TRUE
+)
+
+#' @import Rlabkey
+#' @importFrom dplyr %>% coalesce group_by summarise
+#' @importFrom naturalsort naturalsort
+.ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
+  tcr <- utils::read.table(clonotypeFile, header=T, sep = ',')
+  tcr <- tcr[tcr$cdr3 != 'None',]
+
+  # drop cellranger '-1' suffix
+  tcr$barcode <- gsub("-1", "", tcr$barcode)
+
+  #Download named clonotypes and merge:
+  # Add clone names:
+  labelDf <- labkey.selectRows(
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="tcrdb",
+  queryName="clones",
+  showHidden=TRUE,
+  colSelect=c('clonename','chain','cdr3','animals', 'displayname', 'vgene'),
+  containerFilter=NULL,
+  colNameOpt='rname'
+  )
+
+  labelDf$LabelCol <- coalesce(as.character(labelDf$displayname), as.character(labelDf$clonename))
+
+  labelDf <- labelDf %>%
+    group_by(chain, cdr3) %>%
+    summarise(CloneName = paste0(sort(unique(LabelCol)), collapse = ","))
+
+  tcr <- merge(tcr, labelDf, by.x = c('chain', 'cdr3'), by.y = c('chain', 'cdr3'), all.x = TRUE, all.y = FALSE)
+
+  # Many TRDV genes can be used as either alpha or delta TCRs.  10x classifies and TRDV/TRAJ/TRAC clones as 'Multi'.  Re-classify these:
+  tcr$chain[tcr$chain == 'Multi' & grepl(pattern = 'TRD', x = tcr$v_gene) & grepl(pattern = 'TRAJ', x = tcr$j_gene) & grepl(pattern = 'TRAC', x = tcr$c_gene)] <- c('TRA')
+
+  # Add chain-specific columns:
+  tcr$ChainCDR3s <- paste0(tcr$chain, ':', tcr$cdr3)
+  for (l in c('TRA', 'TRB', 'TRD', 'TRG')){
+    tcr[[l]] <- c(NA)
+    tcr[[l]][tcr$chain == l] <- as.character(tcr$cdr3[tcr$chain == l])
+
+    target <- paste0(l, 'V')
+    tcr[[target]] <- c(NA)
+    tcr[[target]][tcr$chain == l] <- as.character(tcr$v_gene[tcr$chain == l])
+  }
+
+  # Summarise, grouping by barcode
+  tcr <- tcr %>% group_by(barcode) %>% summarise(
+  ChainCDR3s = paste0(sort(unique(ChainCDR3s)), collapse = ","),
+  CDR3s = paste0(sort(unique(cdr3)), collapse = ","),
+  TRA = paste0(sort(unique(as.character(TRA))), collapse = ","),
+  TRB = paste0(sort(unique(as.character(TRB))), collapse = ","),
+  TRD = paste0(sort(unique(as.character(TRD))), collapse = ","),
+  TRG = paste0(sort(unique(as.character(TRG))), collapse = ","),
+  TRAV = paste0(sort(unique(as.character(TRAV))), collapse = ","),
+  TRBV = paste0(sort(unique(as.character(TRBV))), collapse = ","),
+  TRDV = paste0(sort(unique(as.character(TRDV))), collapse = ","),
+  TRGV = paste0(sort(unique(as.character(TRGV))), collapse = ","),
+
+  CloneNames = paste0(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
+  )
+
+  # Note: we should attempt to produce a more specfic call, assuming we have data from multiple chains
+  # The intent of this was to allow a A- or B-only hit to produce a call, but if we have both A/B, take their intersect.
+
+  tcr$CloneNames <- sapply(strsplit(as.character(tcr$CloneNames), ",", fixed = TRUE), function(x) paste0(naturalsort(unique(x)), collapse = ","))
+
+  tcr$barcode <- as.factor(tcr$barcode)
+  for (colName in colnames(tcr)[colnames(tcr) != 'barcode']) {
+    v <- tcr[[colName]]
+    v <- as.character(v)
+    v[v == ''] <- NA
+
+    tcr[[colName]] <- as.factor(v)
+  }
+
+  return(tcr)
+}

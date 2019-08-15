@@ -2,12 +2,15 @@
 % Please edit documentation in R/Seurat_III.R
 \name{ggUMAP}
 \alias{ggUMAP}
-\title{AddTitleToMultiPlot}
+\title{ggUMAP}
 \usage{
 ggUMAP(object, colFac = NULL, col_vector = NULL, ptSize = 0.15,
   ptAlpha = 0.5, add2title = "", legendTitle = "",
   cells.use = NULL)
 }
+\arguments{
+\item{object}{A seurat object}
+}
 \description{
-AddTitleToMultiPlot
+Generated a ggplot object from the UMAP data of a seurat object
 }

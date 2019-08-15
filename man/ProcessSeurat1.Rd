@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{ProcessSeurat1}
 \alias{ProcessSeurat1}
-\title{Run the primary seurat processing steps}
+\title{Run the primary seurat processing steps.}
 \usage{
 ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   doCellFilter = F, nUMI.high = 20000, nGene.high = 3000,
@@ -13,10 +13,40 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
+
+\item{saveFile}{If provided, the seuratObj will be saved here as it is processed, providing some ability to resume if there is a failure}
+
+\item{doCellCycle}{If true, CellCycle genes will be regressed}
+
+\item{doCellFilter}{If true, basic filtering will be performed using nCount_RNA, nFeature_RNA, and pMito}
+
+\item{nGene.high}{If doCellFilter=T, cells with nGene above this value will be filtered}
+
+\item{pMito.high}{If doCellFilter=T, cells with percent mito above this value will be filtered}
+
+\item{nGene.low}{If doCellFilter=T, cells with nGene below this value will be filtered}
+
+\item{pMito.low}{If doCellFilter=T, cells with percent mito  below this value will be filtered}
+
+\item{forceReCalc}{If true, all steps will be repeated even if already marked as complete}
+
+\item{variableGeneTable}{If provided, a table of variable genes will be written to this file}
+
+\item{variableFeatureSelectionMethod}{The selection method to be passed to FindVariableFeatures()}
+
+\item{nVariableFeatures}{The number of variable features to find}
+
+\item{printDefaultPlots}{If true, the default set of QC plots will be printed}
+
+\item{npcs}{Number of PCs to use for RunPCA()}
+
+\item{uUMI.high}{If doCellFilter=T, cells with nUMI above this value will be filtered}
+
+\item{uUMI.low}{If doCellFilter=T, cells with nUMI below this value will be filtered}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-A description
+This is the primary entry point for processing scRNAseq data with Seurat
 }
