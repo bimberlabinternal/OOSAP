@@ -306,8 +306,11 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
-                           variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', nVariableFeatures = 2000, printDefaultPlots = T,
-                           npcs = 50){
+                           variableGeneTable = NULL, 
+                           variableFeatureSelectionMethod = 'vst', 
+                           nVariableFeatures = 2000, printDefaultPlots = T,
+                           npcs = 50, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
+                           spikeGenes = NULL){
 
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
@@ -334,7 +337,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
-    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = NULL)
+    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = NULL)
     seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
   }
 
@@ -347,8 +350,16 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- RemoveCellCycle(seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
   }
+  
+  if(!is.null(spikeGenes)){
+    VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
+  }
+  
+  
+  
 
   vg <- VariableFeatures(object = seuratObj)
+  
   if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA')) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- MarkStepRun(seuratObj, 'RunPCA')
