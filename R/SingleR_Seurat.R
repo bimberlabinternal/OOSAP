@@ -34,7 +34,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     sce <- scater:::logNormCounts(sce)
 
     refAssay <- 'logcounts'
-    if (!('logcounts' %in% names(assays(ref)))) {
+    if (!('logcounts' %in% names(SummarizedExperiment::assays(ref)))) {
         refAssay <- 'normcounts'
     }
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, method = 'single', assay.type.ref = refAssay)
