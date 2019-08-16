@@ -35,7 +35,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 
     refAssay -> 'logcounts'
     if (!('logcounts' %in% names(assays(ref)))) {
-        refAssay <- normcounts
+        refAssay <- 'normcounts'
     }
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, method = 'single', assay.type.ref = refAssay)
     seuratObj[['SingleR_Labels']] <- pred.results$labels

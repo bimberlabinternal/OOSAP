@@ -5,9 +5,6 @@ seuratObj <- readRDS('../testdata/testSeurat.rds')
 results <- 'singleR.txt'
 seuratObj <- RunSingleR(seuratObj = seuratObj, resultTableFile = results)
 
-print(table(unique$SingleR_Labels))
-print(table(unique$SingleR_Labels_Fine))
-
 test_that("cell type counts not as expected", {
     expect_equal(905, sum(seuratObj$SingleR_Labels == 'NK_cell'))
     expect_equal(25, sum(seuratObj$SingleR_Labels == 'B_cell'))
