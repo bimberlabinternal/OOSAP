@@ -766,7 +766,8 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
 #' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
-FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
+FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F,
+                                    UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
   if (is.null(dimsToUse)) {
     elbow <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
@@ -807,10 +808,10 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP')) {
     seuratObj <- RunUMAP(seuratObj,
                            dims = dimsToUse,
-                           n.neighbors = 40L,
-                           min.dist = 0.2,
+                           n.neighbors = UMAP_NumNeib,
+                           min.dist = UMAP_MinDist,
                            metric = "correlation",
-                           seed.use = 1234)
+                           seed.use = UMAP_Seed, n.epochs = UMAP.NumEpoc)
     seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
   }
 
