@@ -33,9 +33,6 @@ jobs:
         - R CMD check --no-tests *tar.gz
         - Rscript -e 'res=devtools::test(reporter="summary");df=as.data.frame(res);if(sum(df$failed) > 0 || any(df$error)) {q(status=1)}'
       after_script:
-        - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout; else echo 'Test output not found'; fi
-        - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout.fail ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/tests/testthat.Rout.fail; else echo 'Test output not found'; fi
-        - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00check.log ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00check.log; else echo '00check.log not found'; fi
         - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out; else echo '00install.log not found'; fi
 
 addons:

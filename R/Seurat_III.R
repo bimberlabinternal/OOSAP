@@ -338,13 +338,14 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param nVariableFeatures The number of variable features to find
 #' @param printDefaultPlots If true, the default set of QC plots will be printed
 #' @param npcs Number of PCs to use for RunPCA()
+#' @param ccPcaResultFile If provided, the PCA results from cell cycle regression will be written here
 #' @return A modified Seurat object.
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
 nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
 nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
 variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', nVariableFeatures = 2000, printDefaultPlots = T,
-npcs = 50){
+npcs = 50, ccPcaResultFile = NULL){
 
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
@@ -371,17 +372,17 @@ npcs = 50){
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
-    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = NULL)
+    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
     seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
-    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "percent.mito"), display.progress = F, verbose = F)
+    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
   }
 
   if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
-    seuratObj <- RemoveCellCycle(seuratObj)
+    seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile)
     seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
   }
 
@@ -429,9 +430,10 @@ npcs = 50){
 #' @title RemoveCellCycle
 #' @param seuratObj The seurat object
 #' @param runPCAonVariableGenes Whether to run PCR on variable genes
+#' @param pcaResultFile If provided, cell cycle PCA results will be written here
 #' @return A modified Seurat object.
 #' @importFrom cowplot plot_grid
-RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
+RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile = NULL) {
   print("Performing cell cycle cleaning ...")
 
   # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
@@ -480,9 +482,9 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   set.ident = TRUE)
 
   print(cowplot::plot_grid(plotlist = list(DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
   )
 
   print("Regressing out S and G2M score ...")
@@ -494,8 +496,11 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
     seuratObj <- RunPCA(object = seuratObj, pc.genes = VariableFeatures(object = seuratObj), do.print = F, verbose = F)
   }
 
-  for (colName in colnames(SeuratObjsCCPCA)) {
-    seuratObj[[colName]] <- SeuratObjsCCPCA[colnames(seuratObj),colName]
+  #TODO:
+  #seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
+
+  if (!is.null(pcaResultFile)) {
+    write.table(SeuratObjsCCPCA, file = pcaResultFile, sep = '\t', row.names = F, quote = F)
   }
 
   return(seuratObj)

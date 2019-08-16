@@ -31,13 +31,17 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 
     #Convert to SingleCellExperiment
     sce <- Seurat::as.SingleCellExperiment(seuratObj)
-    sce <- scater:::logNormCounts(sce, log = T)
+    sce <- scater:::logNormCounts(sce)
 
-    pred <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, assay.type.ref = 'normcounts', method = 'single')
-    seuratObj['SingleR_Labels'] <- pred.results$labels
+    refAssay -> 'logcounts'
+    if (!('logcounts' %in% names(assays(ref)))) {
+        refAssay <- normcounts
+    }
+    pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, method = 'single', assay.type.ref = refAssay)
+    seuratObj[['SingleR_Labels']] <- pred.results$labels
 
-    pred2 <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, assay.type.ref = 'normcounts', method = 'single')
-    seuratObj['SingleR_Labels_Fine'] <- pred2.results$labels
+    pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay)
+    seuratObj[['SingleR_Labels_Fine']] <- pred.results$labels
 
     if (!is.null(resultTableFile)){
         write.table(file = resultTableFile, data.frame(CellBarcodes = rownames(seuratObj), SingleR_Labels = seuratObj$SingleR_Labels, SingleR_Labels_Fine = seuratObj$SingleR_Labels_Fine), sep = '\t', row.names = F, quote = F)
