@@ -342,7 +342,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
-    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "percent.mito"), display.progress = F, verbose = F)
+    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
   }
 
@@ -350,10 +350,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- RemoveCellCycle(seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
     
-    if (forceReCalc | !HasStepRun(seuratObj, 'ScaleDataPostCC')) {
-      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "percent.mito"), display.progress = F, verbose = F)
-      seuratObj <- MarkStepRun(seuratObj, 'ScaleDataPostCC')
-    }
+    
   }
   
   if(!is.null(spikeGenes)){
@@ -761,6 +758,11 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   for (colName in colnames(SeuratObjsCCPCA)) {
     seuratObj[[colName]] <- SeuratObjsCCPCA[colnames(seuratObj),colName]
   }
+  
+  print("Scaling data with full set of genes")
+  seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), display.progress = F, verbose = F)
+  
+  
 
   return(seuratObj)
 }
