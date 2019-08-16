@@ -4,12 +4,15 @@
 \alias{RemoveCellCycle}
 \title{RemoveCellCycle}
 \usage{
-RemoveCellCycle(seuratObj, runPCAonVariableGenes = F)
+RemoveCellCycle(seuratObj, runPCAonVariableGenes = F,
+  pcaResultFile = NULL)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
 
 \item{runPCAonVariableGenes}{Whether to run PCR on variable genes}
+
+\item{pcaResultFile}{If provided, cell cycle PCA results will be written here}
 }
 \value{
 A modified Seurat object.

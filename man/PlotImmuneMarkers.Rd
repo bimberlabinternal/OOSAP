@@ -7,6 +7,8 @@
 PlotImmuneMarkers(seuratObj, reduction = "tsne")
 }
 \arguments{
+\item{seuratObj}{A seurat object}
+
 \item{reduction}{The reduction to use}
 }
 \description{

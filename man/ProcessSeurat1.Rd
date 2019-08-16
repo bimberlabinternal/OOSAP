@@ -9,7 +9,7 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   pMito.high = 0.15, nUMI.low = 0.99, nGene.low = 200,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
   variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
-  printDefaultPlots = T, npcs = 50)
+  printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
@@ -39,6 +39,8 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
 \item{printDefaultPlots}{If true, the default set of QC plots will be printed}
 
 \item{npcs}{Number of PCs to use for RunPCA()}
+
+\item{ccPcaResultFile}{If provided, the PCA results from cell cycle regression will be written here}
 
 \item{uUMI.high}{If doCellFilter=T, cells with nUMI above this value will be filtered}
 

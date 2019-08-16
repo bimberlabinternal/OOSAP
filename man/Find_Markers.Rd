@@ -9,6 +9,8 @@ Find_Markers(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
   "LR", "MAST", "DESeq2"), numGenesToSave = 20, onlyPos = F)
 }
 \arguments{
+\item{seuratObj}{A seurat object}
+
 \item{resolutionToUse}{The resolution, generally computed during FindClustersAndDimRedux()}
 
 \item{outFile}{A file where a table of markers will be saved}
