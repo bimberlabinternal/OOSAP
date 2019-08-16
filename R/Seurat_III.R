@@ -349,6 +349,11 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
     seuratObj <- RemoveCellCycle(seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
+    
+    if (forceReCalc | !HasStepRun(seuratObj, 'ScaleDataPostCC')) {
+      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "percent.mito"), display.progress = F, verbose = F)
+      seuratObj <- MarkStepRun(seuratObj, 'ScaleDataPostCC')
+    }
   }
   
   if(!is.null(spikeGenes)){
