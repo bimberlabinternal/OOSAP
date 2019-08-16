@@ -499,6 +499,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
   seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
 
   if (!is.null(pcaResultFile)) {
+    SeuratObjsCCPCA$CellBarcode <- colnames(seuratObj)
     write.table(SeuratObjsCCPCA, file = pcaResultFile, sep = '\t', row.names = F, quote = F)
   }
 

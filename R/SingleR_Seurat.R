@@ -33,7 +33,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     sce <- Seurat::as.SingleCellExperiment(seuratObj)
     sce <- scater:::logNormCounts(sce)
 
-    refAssay -> 'logcounts'
+    refAssay <- 'logcounts'
     if (!('logcounts' %in% names(assays(ref)))) {
         refAssay <- 'normcounts'
     }
