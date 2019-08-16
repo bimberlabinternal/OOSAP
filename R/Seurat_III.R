@@ -572,6 +572,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
 
 #' @title Find_Markers
+#' @param seuratObj A seurat object
 #' @param resolutionToUse The resolution, generally computed during FindClustersAndDimRedux()
 #' @param outFile A file where a table of markers will be saved
 #' @param saveFileMarkers A file where the dataframe of markers will be saved as RDS
@@ -1251,6 +1252,7 @@ random.seed = 1, returnScore = F) {
 #' @title PlotImmuneMarkers
 #'
 #' @description Generate a set of Seurat FeaturePlots for common immune cell markers
+#' @param seuratObj A seurat object
 #' @param reduction The reduction to use
 #' @export
 #' @import Seurat
