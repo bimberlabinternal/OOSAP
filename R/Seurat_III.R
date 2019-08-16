@@ -747,7 +747,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   )
 
   print("Regressing out S and G2M score ...")
-  seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F)
+  seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F, features = rownames(x = seuratObj))
 
   #Note: normally this is run upstream, which supports more options for how variable genes are defined.
   if (runPCAonVariableGenes) {
@@ -759,9 +759,9 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
     seuratObj[[colName]] <- SeuratObjsCCPCA[colnames(seuratObj),colName]
   }
   
-  print("Scaling data with full set of genes")
-  seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), display.progress = F, verbose = F)
-  
+  # print("Scaling data with full set of genes")
+  # seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), display.progress = F, verbose = F)
+  # 
   
 
   return(seuratObj)
