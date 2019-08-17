@@ -18,7 +18,7 @@ test_that("cell type counts not as expected", {
 })
 
 test_that("cell type counts not as expected", {
-    expect_equal(3886, nrow(read.table(results, sep = '\t', header = T)))
+    expect_equal(ncol(seuratObj) + 1, nrow(read.table(results, sep = '\t', header = T)))
 })
 
 unlink(results)
