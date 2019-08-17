@@ -6,6 +6,13 @@
 \usage{
 PerformEmptyDrops(seuratRawData, emptyDropNIters, fdrThreshold = 0.01)
 }
+\arguments{
+\item{seuratRawData}{Raw data}
+
+\item{emptyDropNIters}{Number of iterations, passed directly to PerformEmptyDrops()}
+
+\item{fdrThreshold}{FDR threshold, passed directly to PerformEmptyDrops()}
+}
 \value{
 A modified Seurat object.
 }

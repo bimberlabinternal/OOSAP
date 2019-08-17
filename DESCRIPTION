@@ -34,18 +34,19 @@ Imports:
     glmnet,
     ranger,
     org.Hs.eg.db,
+    org.Mm.eg.db,
     fastAdaboost,
     reticulate,
     caret,
+    scater,
     SingleR
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
-    bioc::release/monocle,
     cole-trapnell-lab/garnett,
-    bioc::release/DropletUtils,
-    dviraran/SingleR
+    bioc::devel/DropletUtils,
+    LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 
     'LabKeySettings.R'

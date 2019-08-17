@@ -4,10 +4,10 @@
 \alias{Tabulate_SingleRClassLabs}
 \title{Tabulate SingleR Class Lables}
 \usage{
-Tabulate_SingleRClassLabs(SeurObj)
+Tabulate_SingleRClassLabs(seuratObject)
 }
 \arguments{
-\item{SeurObj}{a Seurat object, but if path given, path is prioritized.}
+\item{seuratObject}{a Seurat object, but if path given, path is prioritized.}
 }
 \description{
 Tabulate Seurobject with SingleR class lables

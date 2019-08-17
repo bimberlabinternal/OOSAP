@@ -4,11 +4,17 @@
 \alias{AvgCellExprs}
 \title{AvgCellExprs}
 \usage{
-AvgCellExprs(seuratObj, varName = "ClusterNames_0.2", Genes,
-  Slot = "scale.data")
+AvgCellExprs(seuratObj, varName = "ClusterNames_0.2", genes,
+  slot = "scale.data")
 }
 \arguments{
-\item{seurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
+
+\item{varName}{The resolution/ident to use}
+
+\item{genes}{A vector of genes to include}
+
+\item{slot}{The slot to use, passed to GetAssayData}
 }
 \value{
 A data.frame of avg expression per var

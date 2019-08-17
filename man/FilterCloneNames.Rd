@@ -4,7 +4,12 @@
 \alias{FilterCloneNames}
 \title{FilterCloneNames}
 \usage{
-FilterCloneNames(seuratObject, minValue)
+FilterCloneNames(seuratObj, minValue)
+}
+\arguments{
+\item{seuratObj}{The seurat object}
+
+\item{minValue}{Filters clones not present in at least this many cells}
 }
 \description{
 Filter Clone Names

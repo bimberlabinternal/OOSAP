@@ -6,8 +6,15 @@
 \usage{
 ReadAndFilter10xData(dataDir, datasetName, emptyDropNIters = 10000)
 }
+\arguments{
+\item{dataDir}{The directory holding raw count data}
+
+\item{datasetName}{A name to use when creating the Seurat object}
+
+\item{emptyDropNIters}{The number of iterations to use with PerformEmptyDrops()}
+}
 \value{
-A modified Seurat object.
+A Seurat object.
 }
 \description{
 Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
