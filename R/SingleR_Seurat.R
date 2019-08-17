@@ -38,13 +38,30 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         refAssay <- 'normcounts'
     }
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, method = 'single', assay.type.ref = refAssay)
+    pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
+
+    if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
+        stop('Cell barcodes did not match for all results')
+    }
+
     seuratObj[['SingleR_Labels']] <- pred.results$labels
 
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay)
+    pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
+
+    if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
+        stop('Cell barcodes did not match for all results')
+    }
+
     seuratObj[['SingleR_Labels_Fine']] <- pred.results$labels
 
+    #sanity check:
+    if (length(colnames(seuratObj)) != length(rownames(pred.results))) {
+        stop('SingleR did not produce results for all cells')
+    }
+
     if (!is.null(resultTableFile)){
-        write.table(file = resultTableFile, data.frame(CellBarcodes = rownames(seuratObj), SingleR_Labels = seuratObj$SingleR_Labels, SingleR_Labels_Fine = seuratObj$SingleR_Labels_Fine), sep = '\t', row.names = F, quote = F)
+        write.table(file = resultTableFile, data.frame(CellBarcodes = rownames(pred.results), SingleR_Labels = seuratObj$SingleR_Labels, SingleR_Labels_Fine = seuratObj$SingleR_Labels_Fine), sep = '\t', row.names = F, quote = F)
     }
 
     return(seuratObj)
