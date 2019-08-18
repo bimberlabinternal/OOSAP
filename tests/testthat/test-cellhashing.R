@@ -81,6 +81,8 @@ test_that("Cell hashing works", {
 
         expect_equal(expectedHtos, actualHtosMatrix)
 
+        #should error:
+        sqrt(12, foo = 'bar')
         dt <- l$dt
 
         expect_equal(test[['CalledCells']], nrow(dt))
