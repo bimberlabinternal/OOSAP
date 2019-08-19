@@ -4,10 +4,12 @@
 \alias{Tabulate_SingleRClassLabs}
 \title{Tabulate SingleR Class Lables}
 \usage{
-Tabulate_SingleRClassLabs(seuratObject)
+Tabulate_SingleRClassLabs(seuratObject, plotIndividually = F)
 }
 \arguments{
 \item{seuratObject}{a Seurat object, but if path given, path is prioritized.}
+
+\item{plotIndividually}{If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other}
 }
 \description{
 Tabulate Seurobject with SingleR class lables
