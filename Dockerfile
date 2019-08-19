@@ -14,6 +14,6 @@ RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), depend
     && echo -e "local({\noptions(repos = BiocManager::repositories(version = 'devel'))\n})\n" >> ~/.Rprofile.site \
     && Rscript -e "options('repos')" \
     # NOTE: these seem to be required for garnett to succeed in docker
-    && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell'), dependencies=TRUE, ask = FALSE)" \
+    && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats'), dependencies=TRUE, ask = FALSE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
