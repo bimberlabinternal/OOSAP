@@ -71,28 +71,36 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 #' @title DimPlot SingleR Class Lables
 #' @description Dimplot Seurobject with SingleR class lables
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
+#' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
 #' @keywords Dimplot SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-DimPlot_SingleRClassLabs <- function(seuratObject){
-  cowplot::plot_grid(
-      DimPlot(seuratObject, group.by = "SingleR_Labels") + theme_bw() + ggtitle("SingleR_Labels") +theme(legend.position="bottom"),
-      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine") + theme_bw() + ggtitle("SingleR_Labels_Fine") +theme(legend.position="bottom"),
-      ncol = 1
-  )
+DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
+    plots <- list(
+      DimPlot(seuratObject, group.by = "SingleR_Labels") + theme_bw() + ggtitle("SingleR Predicted Classification") + theme(legend.position="bottom"),
+      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine") + theme_bw() + ggtitle("SingleR Predicted Classification (Fine)") + theme(legend.position="bottom")
+    )
+
+    if (plotIndividually){
+        plot(plots[[1]])
+        plot(plots[[2]])
+    } else {
+        cowplot::plot_grid(plots[[1]], plots[[2]], ncol = 1)
+    }
 }
 
 
 #' @title Tabulate SingleR Class Lables
 #' @description Tabulate Seurobject with SingleR class lables
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
+#' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
 #' @keywords Tabulate SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-Tabulate_SingleRClassLabs <- function(seuratObject){
-  cowplot::plot_grid(
+Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
+  plots <- list(
     ggplot(melt(table(seuratObject$SingleR_Labels)), aes(x=Var1, y = value, fill=Var1))  +
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
@@ -101,7 +109,7 @@ Tabulate_SingleRClassLabs <- function(seuratObject){
             legend.direction="horizontal",
             legend.title = element_blank(),
             axis.text.x = element_text(angle = 90)) +
-      ggtitle("SingleR predicted classification  labels #1:: TestisII \n Total Contribution") + 
+      ggtitle("SingleR Predicted Classification:") +
       ylab("Number of cells"),
 
     ggplot(melt(table(seuratObject$SingleR_Labels_Fine)), aes(x=Var1, y = value, fill=Var1))  +
@@ -112,10 +120,16 @@ Tabulate_SingleRClassLabs <- function(seuratObject){
             legend.direction="horizontal",
             legend.title = element_blank(),
             axis.text.x = element_text(angle = 90)) +
-      ggtitle("SingleR predicted classification labels #2:: TestisII \n Total Contribution") + 
-      ylab("Number of cells"),
+      ggtitle("SingleR Predicted Classification (Fine):") +
+      ylab("Number of cells")
+    )
 
-    ncol = 1)
+    if (plotIndividually){
+        plot(plots[[1]])
+        plot(plots[[2]])
+    } else {
+        cowplot::plot_grid(plots[[1]], plots[[2]], ncol = 1)
+    }
 }
 
 
