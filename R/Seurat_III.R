@@ -747,6 +747,7 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F) {
   )
 
   print("Regressing out S and G2M score ...")
+  # plan("multiprocess", workers = 4)
   seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F, features = rownames(x = seuratObj))
 
   #Note: normally this is run upstream, which supports more options for how variable genes are defined.
