@@ -56,7 +56,6 @@ Collate:
     'Classification_Garnett.R'
     'Classification_Seurat.R'
     'Classification_Sim.R'
-    'CollaboratorFxs_MyersGroup.R'
     'DataQueries.R'
     'GSEA_Seurat.R'
     'Monocle_III.R'
