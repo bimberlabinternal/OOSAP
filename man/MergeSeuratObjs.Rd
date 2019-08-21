@@ -5,14 +5,34 @@
 \title{MergeSeuratObjs}
 \usage{
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
-  MaxCCAspaceDim = 20, MaxPCs2Weight = 20, projectName = NULL,
-  PreProcSeur = F, useAllFeatures = F, nVariableFeatures = 2000,
+  maxCCAspaceDim = 20, maxPCs2Weight = 20, projectName = NULL,
+  doScaleData = F, useAllFeatures = F, nVariableFeatures = 2000,
   includeCellCycleGenes = T)
+}
+\arguments{
+\item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names)}
+
+\item{metadata}{A list of metadata.  If provided, the names of this list will be used as dataset names}
+
+\item{alignData}{If true, data will be aligned using Seurat::IntegrateData()}
+
+\item{maxCCAspaceDim}{The number of dims to use with FindIntegrationAnchors()}
+
+\item{maxPCs2Weight}{The number of dims to use with IntegrateData()}
+
+\item{projectName}{The project name when creating the final seuratObj}
+
+\item{doScaleData}{If true, scale=T will be passed to IntegrateData()}
+
+\item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
+
+\item{nVariableFeatures}{The number of VariableFeatures to identify}
+
+\item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
 }
 \value{
 A modified Seurat object.
 }
 \description{
-Merges a list of Seurat objects.
+Merges a list of Seurat objects, using Seurat::IntegrateData()
 }
-\keyword{merge}

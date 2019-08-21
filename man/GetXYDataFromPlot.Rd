@@ -6,6 +6,11 @@
 \usage{
 GetXYDataFromPlot(plot, cellNames)
 }
+\arguments{
+\item{plot}{The plot object}
+
+\item{cellNames}{The set of cells to export}
+}
 \description{
-Get XY Data From Plot
+Get XY data from a seurat plot
 }

@@ -84,19 +84,22 @@ HTODemux2 <- function(
     #values_negative=values[setdiff(object@cell.names,WhichCells(object,which.max(average.expression[iter,])))]
 
     minNonZero <- which.min(x = average.expression[iter,average.expression[iter, ] > 0])
+    maxNonZero <- which.max(x = average.expression[iter,average.expression[iter, ] > 0])
 
-    #This will occur when there are only 2 possible HTOs
-    if (minNonZero == max(average.expression)){
-      print('Min. non-zero value is the same as max value, using 0.01')
-      minNonZero <- 0.01
+    # This indicates the only non-zero cluster is the primary one.
+    # It's not especially likely, but could occur when there are only 2 possible HTOs
+    if (minNonZero == maxNonZero){
+      print('Min. non-zero value is the same as max value, using cutoff of 1 read')
+      cutoff <- 1
+    } else {
+      values.use <- values[WhichCells(
+        object = object,
+        idents = levels(x = Idents(object = object))[[minNonZero]]
+      )]
+      fit <- suppressWarnings(expr = fitdist(data = values.use, distr = "nbinom"))
+      cutoff <- as.numeric(x = quantile(x = fit, probs = positive.quantile)$quantiles[1])
     }
 
-    values.use <- values[WhichCells(
-      object = object,
-      idents = levels(x = Idents(object = object))[[minNonZero]]
-    )]
-    fit <- suppressWarnings(expr = fitdist(data = values.use, distr = "nbinom"))
-    cutoff <- as.numeric(x = quantile(x = fit, probs = positive.quantile)$quantiles[1])
     discrete[iter, names(x = which(x = values > cutoff))] <- 1
     if (verbose) {
       message(paste0("Cutoff for ", iter, " : ", cutoff, " reads"))

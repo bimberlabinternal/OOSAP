@@ -6,7 +6,22 @@
 \usage{
 Find_Markers(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
   testsToUse = c("wilcox", "bimod", "roc", "t", "negbinom", "poisson",
-  "LR", "MAST", "DESeq2"), numGenesToSave = 20, onlypos = F)
+  "LR", "MAST", "DESeq2"), numGenesToSave = 20, onlyPos = F)
+}
+\arguments{
+\item{seuratObj}{A seurat object}
+
+\item{resolutionToUse}{The resolution, generally computed during FindClustersAndDimRedux()}
+
+\item{outFile}{A file where a table of markers will be saved}
+
+\item{saveFileMarkers}{A file where the dataframe of markers will be saved as RDS}
+
+\item{testsToUse}{A vector of tests to be used.  Each will be used to run FindAllMarkers() and the results merged}
+
+\item{numGenesToSave}{The number of top markers per cluster to save}
+
+\item{onlyPos}{If true, only positive markers will be saved}
 }
 \description{
 Find_Markers

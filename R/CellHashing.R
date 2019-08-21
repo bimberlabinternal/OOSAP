@@ -532,6 +532,7 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData) {
 #'
 #' @description A description
 #' @return A data table of results.
+#' @export
 #' @import data.table
 GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
   sc <- NA
@@ -668,7 +669,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   print(paste0('Total discordant global calls: ', nrow(merged[!merged$GlobalConcordant])))
 
   discord <- merged[!merged$GlobalConcordant]
-  discord <- discord %>% group_by(HTO_classification.global.MultiSeq, HTO_classification.global.Seurat) %>% summarise(Count = n())
+  discord <- discord %>% group_by(HTO_classification.global.MultiSeq, HTO_classification.global.Seurat) %>% summarise(Count = dplyr::n())
 
   print(qplot(x=HTO_classification.global.MultiSeq, y=HTO_classification.global.Seurat, data=discord, fill=Count, geom="tile") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -677,7 +678,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   )
 
   discord <- merged[!merged$Concordant]
-  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = n())
+  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
 
   print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -686,7 +687,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   )
 
   discord <- merged[!merged$ConcordantNoNeg]
-  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = n())
+  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
 
   print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
           theme(axis.text.x = element_text(angle = 90, hjust = 1)) +

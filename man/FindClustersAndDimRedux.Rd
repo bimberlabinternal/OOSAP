@@ -9,7 +9,13 @@ FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
   UMAP_Seed = 1234, UMAP.NumEpoc = 500)
 }
 \arguments{
-\item{seurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
+
+\item{dimsToUse}{The number of dims to use.  If null, this will be inferred using FindSeuratElbow()}
+
+\item{saveFile}{If provided, the seurat object will be saved as RDS to this location}
+
+\item{forceReCalc}{If true, all steps will be performed even if already marked complete}
 }
 \value{
 A modified Seurat object.

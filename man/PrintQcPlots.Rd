@@ -7,11 +7,8 @@
 PrintQcPlots(seuratObj)
 }
 \arguments{
-\item{seuratObj, }{A Seurat object.}
-}
-\value{
-Plot
+\item{seuratObj}{A Seurat object.}
 }
 \description{
-PrintQcPlots
+Prints a number of QC plots from a seurat object, generally following the basic Seurat vignette
 }

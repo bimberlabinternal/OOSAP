@@ -4,8 +4,15 @@
 \alias{AddClonesToPlot}
 \title{AddClonesToPlot}
 \usage{
-AddClonesToPlot(seuratObject, plot, colorShapes = "black")
+AddClonesToPlot(seuratObj, plot, colorShapes = "black")
+}
+\arguments{
+\item{seuratObj}{The seurat object}
+
+\item{colorShapes}{A string or vector that is passed to geom_point()}
+
+\item{The}{plot object, such as the result from FeaturePlot()}
 }
 \description{
-Add Clones To Plot
+Can be used to highlight a set of cells from a seurat plot, such as overlaying specific clonotypes
 }

@@ -6,9 +6,13 @@
 \usage{
 MarkStepRun(seuratObj, name, saveFile = NULL)
 }
-\value{
-A modified Seurat object.
+\arguments{
+\item{seuratObj}{The seurat object}
+
+\item{name}{The name of the step to test}
+
+\item{saveFile}{If provided, the seurat object will be saved as RDS to this location}
 }
 \description{
-MarkStepRun
+An internal method to determine is a step has been marked as complete
 }

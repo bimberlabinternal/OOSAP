@@ -1,6 +1,7 @@
 ^\.travis\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.git*
 ^OOSAP.iml$
 ^OOSAP.ipr$
 ^OOSAP.iws$

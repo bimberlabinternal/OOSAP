@@ -5,21 +5,23 @@
 \title{Create a Seurat 3 object}
 \usage{
 CreateSeuratObj(seuratData = NA, project = NA, minFeatures = 25,
-  minCells = 0, MitoGenesPattern = "^MT-")
+  minCells = 0, mitoGenesPattern = "^MT-")
 }
 \arguments{
-\item{seuratData, }{A Seurat input data from Read10X().}
+\item{seuratData, }{Seurat input data, usually from Read10X().}
 
 \item{project, }{Sets the project name for the Seurat object.}
 
 \item{minFeatures, }{Include cells where at least this many features are detected.}
 
 \item{minCells, }{Include features detected in at least this many cells.}
+
+\item{mitoGenesPattern}{The expression to use when identfying mitochondrial genes}
 }
 \value{
 A Seurat object with p.mito calculated.
 }
 \description{
-Create Seurat Object from Read10X().
+Create Seurat object from count data (usually from Read10X()). This also sets pct.mito.
 }
 \keyword{CreateSeuratObj}

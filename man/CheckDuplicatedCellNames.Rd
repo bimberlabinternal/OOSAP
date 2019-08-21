@@ -7,10 +7,10 @@
 CheckDuplicatedCellNames(object.list, stop = TRUE)
 }
 \arguments{
-\item{object.list, }{A lists of Seurat objects}
+\item{object.list}{A lists of Seurat objects}
 
-\item{stop, }{Boolean that determines if stop() or print() is used when duplicates are found}
+\item{stop}{Boolean that determines if stop() or print() is used when duplicates are found}
 }
 \description{
-A variant on Seurat CheckDuplicatedCellNames that reports the top duplicated barcoded for debugging
+A variant on Seurat CheckDuplicatedCellNames that reports the top duplicated barcodes.  Mainly for debugging
 }

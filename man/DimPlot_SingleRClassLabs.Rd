@@ -4,10 +4,12 @@
 \alias{DimPlot_SingleRClassLabs}
 \title{DimPlot SingleR Class Lables}
 \usage{
-DimPlot_SingleRClassLabs(SeurObj)
+DimPlot_SingleRClassLabs(seuratObject, plotIndividually = F)
 }
 \arguments{
-\item{SeurObj}{a Seurat object, but if path given, path is prioritized.}
+\item{seuratObject}{a Seurat object, but if path given, path is prioritized.}
+
+\item{plotIndividually}{If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other}
 }
 \description{
 Dimplot Seurobject with SingleR class lables

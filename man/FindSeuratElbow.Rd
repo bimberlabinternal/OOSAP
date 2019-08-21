@@ -7,6 +7,17 @@
 FindSeuratElbow(object, ndims = 25, reduction = "pca",
   print.plot = T, min.y = 1.3)
 }
+\arguments{
+\item{object}{A seurat object}
+
+\item{ndims}{The number of dims, passed to FindElbow()}
+
+\item{reduction}{The reduction, such as 'pca'}
+
+\item{print.plot}{If true, summary plots will be printed}
+
+\item{min.y}{The min.y, passed directly to FindElbow()}
+}
 \description{
 FindSeuratElbow
 }
