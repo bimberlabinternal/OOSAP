@@ -49,6 +49,8 @@ Suggests:
 Remotes:
     cole-trapnell-lab/garnett,
     bioc::devel/DropletUtils,
+    bioc::devel/biomaRt,
+    bioc::devel/sctransform,
     LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 
