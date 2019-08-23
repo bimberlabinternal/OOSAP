@@ -41,15 +41,12 @@ Imports:
     scater,
     SingleR,
     biomaRt
-    sctransform
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
 Remotes:
     cole-trapnell-lab/garnett,
     bioc::devel/DropletUtils,
-    bioc::devel/biomaRt,
-    bioc::devel/sctransform,
     LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 
