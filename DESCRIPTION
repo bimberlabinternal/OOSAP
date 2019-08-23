@@ -39,7 +39,8 @@ Imports:
     reticulate,
     caret,
     scater,
-    SingleR
+    SingleR,
+    biomaRt
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
@@ -58,9 +59,11 @@ Collate:
     'Classification_Sim.R'
     'DataQueries.R'
     'GSEA_Seurat.R'
+    'GeneNames.R'
     'Monocle_III.R'
     'PhenotypingGeneSets.R'
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
     'SingleR_Seurat.R'
+    'data.R'
     'mcl.R'

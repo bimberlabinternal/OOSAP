@@ -9,9 +9,9 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   pMito.high = 0.15, nUMI.low = 0.99, nGene.low = 200,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
   variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
-  printDefaultPlots = T, npcs = 50, mean.cutoff = c(0.0125, 3),
-  dispersion.cutoff = c(0.5, Inf), spikeGenes = NULL,
-  ccPcaResultFile = NULL)
+  printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL,
+  useSCTransform = F, mean.cutoff = c(0.0125, 3),
+  dispersion.cutoff = c(0.5, Inf), spikeGenes = NULL)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
@@ -43,6 +43,8 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
 \item{npcs}{Number of PCs to use for RunPCA()}
 
 \item{ccPcaResultFile}{If provided, the PCA results from cell cycle regression will be written here}
+
+\item{useSCTransform}{If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)}
 
 \item{uUMI.high}{If doCellFilter=T, cells with nUMI above this value will be filtered}
 
