@@ -39,7 +39,8 @@ Imports:
     reticulate,
     caret,
     scater,
-    SingleR
+    SingleR,
+    sctransform
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
