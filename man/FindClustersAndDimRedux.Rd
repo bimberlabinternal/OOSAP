@@ -5,7 +5,7 @@
 \title{FindClustersAndDimRedux}
 \usage{
 FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
-  forceReCalc = F)
+  forceReCalc = F, umap.method = "umap-learn")
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
@@ -15,6 +15,8 @@ FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
 \item{saveFile}{If provided, the seurat object will be saved as RDS to this location}
 
 \item{forceReCalc}{If true, all steps will be performed even if already marked complete}
+
+\item{umap.method}{The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP}
 }
 \value{
 A modified Seurat object.
