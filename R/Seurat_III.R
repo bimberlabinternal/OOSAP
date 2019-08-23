@@ -335,17 +335,19 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param forceReCalc If true, all steps will be repeated even if already marked as complete
 #' @param variableGeneTable If provided, a table of variable genes will be written to this file
 #' @param variableFeatureSelectionMethod The selection method to be passed to FindVariableFeatures()
+#' @param useSCTransform If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)
 #' @param nVariableFeatures The number of variable features to find
 #' @param printDefaultPlots If true, the default set of QC plots will be printed
 #' @param npcs Number of PCs to use for RunPCA()
 #' @param ccPcaResultFile If provided, the PCA results from cell cycle regression will be written here
 #' @return A modified Seurat object.
+#' @import sctransform
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
 nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
 nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
 variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', nVariableFeatures = 2000, printDefaultPlots = T,
-npcs = 50, ccPcaResultFile = NULL){
+npcs = 50, ccPcaResultFile = NULL, useSCTransform = F){
 
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
@@ -366,24 +368,33 @@ npcs = 50, ccPcaResultFile = NULL){
     seuratObj <- MarkStepRun(seuratObj, 'FilterCells')
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData')) {
-    seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
-    seuratObj <- MarkStepRun(seuratObj, 'NormalizeData', saveFile)
-  }
+  if (!useSCTransform) {
+    if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData')) {
+      seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
+      seuratObj <- MarkStepRun(seuratObj, 'NormalizeData', saveFile)
+    }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
-    seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
-    seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
-  }
+    if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
+      seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
+      seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
+    }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
-    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
-    seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
-  }
+    if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
+      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
+      seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
+    }
 
-  if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
-    seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile)
-    seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
+    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
+      seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = F)
+      seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
+    }
+  } else {
+    print('Using SCTransform')
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE)
+    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
+      seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = T)
+      seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
+    }
   }
 
   vg <- VariableFeatures(object = seuratObj)
@@ -431,9 +442,10 @@ npcs = 50, ccPcaResultFile = NULL){
 #' @param seuratObj The seurat object
 #' @param runPCAonVariableGenes Whether to run PCR on variable genes
 #' @param pcaResultFile If provided, cell cycle PCA results will be written here
+#' @param useSCTransform If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)
 #' @return A modified Seurat object.
 #' @importFrom cowplot plot_grid
-RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile = NULL) {
+RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile = NULL, useSCTransform = F) {
   print("Performing cell cycle cleaning ...")
 
   # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
@@ -489,7 +501,11 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
   )
 
   print("Regressing out S and G2M score ...")
-  seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F)
+  if (!useSCTransform) {
+    seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F)
+  } else {
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE)
+  }
 
   #Note: normally this is run upstream, which supports more options for how variable genes are defined.
   if (runPCAonVariableGenes) {
@@ -497,7 +513,12 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
     seuratObj <- RunPCA(object = seuratObj, pc.genes = VariableFeatures(object = seuratObj), do.print = F, verbose = F)
   }
 
-  seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
+  #Eisa: is this really correct to repeat regression here?
+  if (!useSCTransform) {
+    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
+  } else {
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE)
+  }
 
   if (!is.null(pcaResultFile)) {
     SeuratObjsCCPCA$CellBarcode <- colnames(seuratObj)
