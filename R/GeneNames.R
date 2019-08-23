@@ -10,6 +10,7 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
     ensembl = useEnsembl(biomart=biomart, dataset=dataset)
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
     homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
+    homologs[homologs == ''] <- NA
 
     ret <- data.frame(ensembl_gene_id = ensemblIds, SortOrder = 1:length(ensemblIds))
     ret <- merge(ret, homologs, by = c('ensembl_gene_id'), all.x = T)

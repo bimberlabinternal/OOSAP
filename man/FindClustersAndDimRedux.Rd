@@ -19,7 +19,6 @@ FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
 \item{minDimsToUse}{The minimum numbers of dims to use.  If dimsToUse is provided, this will override.}
 
 \item{umap.method}{The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP}
-
 }
 \value{
 A modified Seurat object.
