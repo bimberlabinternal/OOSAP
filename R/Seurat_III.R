@@ -512,9 +512,10 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
 #' @param dimsToUse The number of dims to use.  If null, this will be inferred using FindSeuratElbow()
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
 #' @param forceReCalc If true, all steps will be performed even if already marked complete
+#' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
 #' @return A modified Seurat object.
 #' @export
-FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F) {
+FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, umap.method = 'umap-learn') {
   if (is.null(dimsToUse)) {
     elbow <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
@@ -554,12 +555,13 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP')) {
     seuratObj <- RunUMAP(seuratObj,
-    dims = dimsToUse,
-    n.neighbors = 40L,
-    min.dist = 0.2,
-    metric = "correlation",
-    seed.use = 1234)
-    seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
+      dims = dimsToUse,
+      n.neighbors = 40L,
+      min.dist = 0.2,
+      metric = "correlation",
+      umap.method = umap.method,
+      seed.use = 1234)
+      seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
   }
 
   for (reduction in c('tsne', 'umap')){
