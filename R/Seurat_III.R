@@ -477,14 +477,15 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
 
   # Eisa: do we still need a custom version of this?
   seuratObj <- CellCycleScoring(object = seuratObj,
-  s.features = s.genes,
-  g2m.features = g2m.genes,
-  set.ident = TRUE)
+    s.features = s.genes,
+    g2m.features = g2m.genes,
+    set.ident = TRUE
+  )
 
   print(cowplot::plot_grid(plotlist = list(DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
-    DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
-    DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
-    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
+  DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
+  DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
+  DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
   )
 
   print("Regressing out S and G2M score ...")
@@ -510,17 +511,22 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
 #' @title FindClustersAndDimRedux
 #' @param seuratObj, A Seurat object.
 #' @param dimsToUse The number of dims to use.  If null, this will be inferred using FindSeuratElbow()
+#' @param minDimsToUse The minimum numbers of dims to use.  If dimsToUse is provided, this will override.
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
 #' @param forceReCalc If true, all steps will be performed even if already marked complete
 #' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
 #' @return A modified Seurat object.
 #' @export
-FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, umap.method = 'umap-learn') {
+FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn') {
   if (is.null(dimsToUse)) {
     elbow <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
 
     dimsToUse <- 1:elbow
+
+    if (!is.null(minDimsToUse)) {
+      dimsToUse <- max(minDimsToUse, dimsToUse)
+    }
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindNeighbors')) {
