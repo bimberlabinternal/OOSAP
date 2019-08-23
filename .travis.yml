@@ -12,7 +12,7 @@ os:
 
 # see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 before_install:
-  - chmod +x ./travis-config.sh && ./travis-config.sh && pip install --user wheel && pip install --user numba==0.42.0 && pip install --user umap-learn
+  - chmod +x ./travis-config.sh && ./travis-config.sh && pip install --user wheel && pip install -q --user numba==0.42.0 && pip install -q --user umap-learn
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual

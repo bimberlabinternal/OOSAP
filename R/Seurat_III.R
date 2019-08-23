@@ -341,7 +341,6 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param npcs Number of PCs to use for RunPCA()
 #' @param ccPcaResultFile If provided, the PCA results from cell cycle regression will be written here
 #' @return A modified Seurat object.
-#' @import sctransform
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
 nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
