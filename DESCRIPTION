@@ -42,6 +42,7 @@ Imports:
     scater,
     SingleR,
     biomaRt
+    sctransform
 Suggests:
     ggvis,
     testthat (>= 2.1.0)

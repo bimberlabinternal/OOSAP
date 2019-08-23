@@ -5,7 +5,7 @@
 \title{RemoveCellCycle}
 \usage{
 RemoveCellCycle(seuratObj, runPCAonVariableGenes = F,
-  pcaResultFile = NULL)
+  pcaResultFile = NULL, useSCTransform = F)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
@@ -13,6 +13,8 @@ RemoveCellCycle(seuratObj, runPCAonVariableGenes = F,
 \item{runPCAonVariableGenes}{Whether to run PCR on variable genes}
 
 \item{pcaResultFile}{If provided, cell cycle PCA results will be written here}
+
+\item{useSCTransform}{If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)}
 }
 \value{
 A modified Seurat object.
