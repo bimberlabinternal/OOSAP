@@ -7,4 +7,6 @@ test_that("All aliases preserved", {
     cdGenes <- RenameGenesUsingCD(c('PTPR', '12345', 'DPP4'))
     expect_equal(cdGenes, c('PTPR', '12345', 'DPP4 (CD26,ADCP2)'))
 
+    aliased <- AliasGeneNames(c('ENSMMUG00000040244', 'CD8'))
+    expect_equal(aliased, c('TRAV-1', 'CD8'))
 })
