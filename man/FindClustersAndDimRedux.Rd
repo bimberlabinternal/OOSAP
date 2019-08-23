@@ -5,7 +5,7 @@
 \title{FindClustersAndDimRedux}
 \usage{
 FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
-  forceReCalc = F)
+  forceReCalc = F, minDimsToUse = NULL)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
@@ -15,6 +15,8 @@ FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
 \item{saveFile}{If provided, the seurat object will be saved as RDS to this location}
 
 \item{forceReCalc}{If true, all steps will be performed even if already marked complete}
+
+\item{minDimsToUse}{The minimum numbers of dims to use.  If dimsToUse is provided, this will override.}
 }
 \value{
 A modified Seurat object.
