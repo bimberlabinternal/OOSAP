@@ -12,9 +12,17 @@ Ser2Monicle_MakeNProcess <- function(SeurObj = NULL, retunMon = T, PCAnDim = 20,
                                      dotSNE = F,
                                      doClust = T, ClusLouvRes = 0.00005, louvain_iter = 3,
                                      KeepTopNgenes = 3000, 
-                                     minExprGeneDet = 0.1, upperScale = 2, lowerScale = 2.5){
+                                     minExprGeneDet = 0.1, upperScale = 2, lowerScale = 2.5, assay="counts"){
 
-  SeurObj.counts   <- SeurObj@assays$RNA@counts
+  if(is.null(assay)){
+    assay = DefaultAssay(SeurObj)
+  }
+  
+  
+  
+  # SeurObj.counts   <- SeurObj@assays$RNA@counts
+  SeurObj.counts   <- FetchData(SeurObj, vars = rownames(SeurObj), slot=assay)
+  
   SeurObj.meta.data <- SeurObj@meta.data
 
   gene_ann <- data.frame(gene_short_name = row.names(SeurObj.counts), row.names = row.names(SeurObj.counts))

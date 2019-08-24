@@ -5,7 +5,7 @@
 \title{A Title}
 \usage{
 ClassifyCellsCustom(Classifier.rds.path = "", ClassifierNames = "",
-  testing.data, log10T = T, returnTraining = F)
+  testing.data, log10T = T, returnTraining = F, assay = NULL)
 }
 \value{
 A modified Seurat object.

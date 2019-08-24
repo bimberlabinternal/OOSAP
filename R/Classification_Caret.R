@@ -116,7 +116,7 @@ MultiClassifier_Cells <- function (object_train,
 
   results_ls <- list()
   
-  testing.genes   <- training.genes #SetIfNull(x = training.genes, default = rownames(x = object_test@assays$RNA@data))
+  testing.genes   <- training.genes 
   
   training.classes <- as.vector(x = Y_Train_True)
   testing.classes <- as.vector(x = Y_Test_True)

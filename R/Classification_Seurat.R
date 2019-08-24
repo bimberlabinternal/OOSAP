@@ -6,8 +6,9 @@
 #' @export
 ClassifyCellsCustom <- function(Classifier.rds.path = "",
                                        ClassifierNames="",
-                                       testing.data, log10T=T, returnTraining=F){
-  #March-2019 version
+                                       testing.data, log10T=T, returnTraining=F, assay = NULL){
+  #Aug-2019 version
+
 
 
   if(!file.exists(Classifier.rds.path)){
@@ -31,8 +32,15 @@ ClassifyCellsCustom <- function(Classifier.rds.path = "",
 
   if(class(testing.data)[1]=="seurat") {
     print("Converting Seurat Sparse Matrix to one with 0s .... ")
+    
+    if(is.null(assay)){
+      assay = DefaultAssay(testing.data)
+    }
 
-    testing.data <- Matrix::as.matrix(Matrix::t(testing.data@assays$RNA@data))
+    #testing.data <- Matrix::as.matrix(Matrix::t(testing.data@assays$RNA@data))
+    testing.data <- Matrix::as.matrix(Matrix::t(FetchData(testing.data, vars = rownames(testing.data), slot=assay)))
+    
+
 
   } else {
     if(!(class(testing.data)[1] %in% c("dgCMatrix", "matrix", "Matrix")) ) {
@@ -108,12 +116,15 @@ PredictSER <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
                            Garnett.path = "./data/Garnett/pbmc_classification.txt", MCEClassify=T,
                            ModuleScoreGeneListClassify=F, ModuleScoreGeneLists=NULL,
                            RhesusConvDavid.path = "./data/Rhesus/David6.8_ConvertedRhesus_ENSMMUG.txt",
-                           RhesusConvDavid = F, ENSMB.tag="ENSMM", yhat.save.path = NA, cleanName=T){
+                           RhesusConvDavid = F, ENSMB.tag="ENSMM", yhat.save.path = NA, cleanName=T,
+                       assay = NULL){
 
 
   if(is.null(ProcSERobj.path)){
     stop("path does not exists")
   }
+  
+ 
 
   ClassifiersLS <- list()
   ClassifiersLS$MCEyhat <- list()
@@ -253,8 +264,14 @@ PredictSER <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
 
         }
       }
-
-
+      
+      
+      
+      if(is.null(assay)){
+        assay = DefaultAssay(tempSER)
+      }
+      
+      
 
       #CD8 T cells
 
@@ -264,9 +281,13 @@ PredictSER <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
 
           #one can directly give the Seurat object to the ClassifyCellsCustom()
           #since looping, its faster to compute the non-sparse log once
+          
 
-          X.SerObj.temp <- log10(Matrix::as.matrix(Matrix::t(tempSER@assays$RNA@data))+1)
+          # X.SerObj.temp <- log10(Matrix::as.matrix(Matrix::t(tempSER@assays$RNA@data))+1)
 
+          
+          X.SerObj.temp <- log10(Matrix::as.matrix(Matrix::t(FetchData(tempSER, vars = rownames(tempSER), slot=assay)))+1)
+          
           if(RhesusConvDavid){
 
             if(!file.exists(RhesusConvDavid.path)) print("David file not found") else {
@@ -407,7 +428,7 @@ PredictSER <- function(ProcSERobj.path = NULL, PatternOfProcSERobj="_proc.rds",
 
         print(dim(yhat.Combo))
         colnames(yhat.Combo) <- c("CD8T", "CD4T", "NK", "B", "Lymph")
-        rownames(yhat.Combo) <- colnames(tempSER@assays$RNA@data)
+        rownames(yhat.Combo) <- rownames(tempSER) #colnames(tempSER@assays$RNA@data)
 
         Classificatio.meta.data <- list()
 
