@@ -13,7 +13,7 @@ PredictSER(ProcSERobj.path = NULL, PatternOfProcSERobj = "_proc.rds",
   ModuleScoreGeneLists = NULL,
   RhesusConvDavid.path = "./data/Rhesus/David6.8_ConvertedRhesus_ENSMMUG.txt",
   RhesusConvDavid = F, ENSMB.tag = "ENSMM", yhat.save.path = NA,
-  cleanName = T)
+  cleanName = T, assay = NULL)
 }
 \value{
 A modified Seurat object.

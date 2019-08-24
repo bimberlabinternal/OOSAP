@@ -4,17 +4,19 @@
 \alias{RemoveCellCycle}
 \title{RemoveCellCycle}
 \usage{
-RemoveCellCycle(seuratObj, runPCAonVariableGenes = F,
-  pcaResultFile = NULL, useSCTransform = F)
+RemoveCellCycle(seuratObj, pcaResultFile = NULL, useSCTransform = F,
+  do.scale = T, do.center = T)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
 
-\item{runPCAonVariableGenes}{Whether to run PCR on variable genes}
-
 \item{pcaResultFile}{If provided, cell cycle PCA results will be written here}
 
 \item{useSCTransform}{If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)}
+
+\item{do.scale}{If true, scale residuals to have unit variance; SCTransform default = F; ScaldData default = T}
+
+\item{do.center}{If true,center residuals to have mean zero; SCTransform default = T; ScaldData default = T}
 }
 \value{
 A modified Seurat object.

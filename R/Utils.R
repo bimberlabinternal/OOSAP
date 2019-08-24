@@ -4,6 +4,12 @@
 #' @importFrom stats approxfun cmdscale dist kmeans lm na.omit prcomp quantile sd setNames wilcox.test
 #' @importFrom utils head read.csv read.table tail write.csv write.table
 
+#' @title frac_to_numeric
+#' @description Converts fraction to numeric
+#' @return A vector
+#' @keywords numeric
+frac_to_numeric <- function(x) sapply(x, function(x) eval(parse(text=x)))
+
 
 
 #' @title Range01

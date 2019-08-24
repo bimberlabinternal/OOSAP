@@ -343,10 +343,13 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @return A modified Seurat object.
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
-nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
-nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
-variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', nVariableFeatures = 2000, printDefaultPlots = T,
-npcs = 50, ccPcaResultFile = NULL, useSCTransform = F){
+                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
+                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
+                            variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', 
+                            nVariableFeatures = 2000, printDefaultPlots = T,
+                            npcs = 50, ccPcaResultFile = NULL, useSCTransform = F, 
+                            mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
+                            spikeGenes = NULL){
 
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
     print("Filtering Cells...")
@@ -374,9 +377,10 @@ npcs = 50, ccPcaResultFile = NULL, useSCTransform = F){
     }
 
     if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
-      seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
+      seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
       seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
     }
+
 
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
       seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
@@ -390,13 +394,22 @@ npcs = 50, ccPcaResultFile = NULL, useSCTransform = F){
   } else {
     print('Using SCTransform')
     seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE)
+    
     if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
       seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = T)
       seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
     }
   }
+  
+  if(!is.null(spikeGenes)){
+    VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
+  }
+  
+  
+  
 
   vg <- VariableFeatures(object = seuratObj)
+  
   if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA')) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- MarkStepRun(seuratObj, 'RunPCA')
@@ -439,12 +452,14 @@ npcs = 50, ccPcaResultFile = NULL, useSCTransform = F){
 
 #' @title RemoveCellCycle
 #' @param seuratObj The seurat object
-#' @param runPCAonVariableGenes Whether to run PCR on variable genes
 #' @param pcaResultFile If provided, cell cycle PCA results will be written here
 #' @param useSCTransform If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)
+#' @param do.scale If true, scale residuals to have unit variance; SCTransform default = F; ScaldData default = T
+#' @param do.center If true,center residuals to have mean zero; SCTransform default = T; ScaldData default = T
 #' @return A modified Seurat object.
 #' @importFrom cowplot plot_grid
-RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile = NULL, useSCTransform = F) {
+RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL, 
+                            useSCTransform = F, do.scale = T, do.center = T) {
   print("Performing cell cycle cleaning ...")
 
   # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
@@ -500,30 +515,25 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
   )
 
   print("Regressing out S and G2M score ...")
+
   if (!useSCTransform) {
-    seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), display.progress = F, verbose = F)
+    seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), 
+                           display.progress = F, verbose = F, 
+                           do.scale = do.scale, do.center = do.center)
+    
   } else {
-    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE)
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE, 
+                             return.only.var.genes = F, do.scale = do.scale, do.center = do.center)
   }
 
-  #Note: normally this is run upstream, which supports more options for how variable genes are defined.
-  if (runPCAonVariableGenes) {
-    print("Running PCA with variable genes ...")
-    seuratObj <- RunPCA(object = seuratObj, pc.genes = VariableFeatures(object = seuratObj), do.print = F, verbose = F)
-  }
 
-  #Eisa: is this really correct to repeat regression here?
-  if (!useSCTransform) {
-    seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
-  } else {
-    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE)
-  }
 
   if (!is.null(pcaResultFile)) {
     SeuratObjsCCPCA$CellBarcode <- colnames(seuratObj)
     write.table(SeuratObjsCCPCA, file = pcaResultFile, sep = '\t', row.names = F, quote = F)
   }
-
+  
+  
   return(seuratObj)
 }
 
@@ -537,7 +547,8 @@ RemoveCellCycle <- function(seuratObj, runPCAonVariableGenes = F, pcaResultFile 
 #' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
 #' @return A modified Seurat object.
 #' @export
-FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn') {
+FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
+                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
   if (is.null(dimsToUse)) {
     elbow <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', elbow))
@@ -581,13 +592,14 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP')) {
     seuratObj <- RunUMAP(seuratObj,
-      dims = dimsToUse,
-      n.neighbors = 40L,
-      min.dist = 0.2,
-      metric = "correlation",
-      umap.method = umap.method,
-      seed.use = 1234)
-      seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
+                           dims = dimsToUse,
+                           n.neighbors = UMAP_NumNeib,
+                           min.dist = UMAP_MinDist,
+                           metric = "correlation",
+                           umap.method = umap.method,
+                           seed.use = UMAP_Seed, n.epochs = UMAP.NumEpoc)
+    seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
+
   }
 
   for (reduction in c('tsne', 'umap')){

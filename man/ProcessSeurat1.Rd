@@ -10,7 +10,8 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
   variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
   printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL,
-  useSCTransform = F)
+  useSCTransform = F, mean.cutoff = c(0.0125, 3),
+  dispersion.cutoff = c(0.5, Inf), spikeGenes = NULL)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}
