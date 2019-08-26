@@ -20,6 +20,8 @@ test_that("Serat processing works as expected", {
   expect_equal(ncol(seuratObj), 1557)
   expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
 
+  expect_equal(length(rownames(seuratObj@assays$RNA@scale.data)), length(rownames(seuratObj@assays$RNA@counts)))
+
   seuratObj0 <- FindClustersAndDimRedux(seuratObj, minDimsToUse = 12, forceReCalc = T)
   expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
   rm(seuratObj0)
@@ -50,4 +52,18 @@ test_that("Serat processing works as expected", {
 
   #Note: if the expectations change, save this output as a reference:
   #saveRDS(seuratObj, file = '../testdata/seuratOutput.rds')
+})
+
+test_that("Serat SCTransform works as expected", {
+  seuratObj <- readRDS('../testdata/seuratOutput.rds')
+  seuratObjSCT <- OOSAP::CreateSeuratObj(seuratData = seuratObj@assays$RNA@counts, project = 'Set1')
+
+  seuratObjSCT <- ProcessSeurat1(seuratObjSCT, doCellCycle = F, useSCTransform = T)
+
+  #Note: this is not currently true
+  #expect_equal(length(rownames(seuratObjSCT@assays$SCT@scale.data)), length(rownames(seuratObjSCT@assays$SCT@counts)))
+
+  expect_equal(ncol(seuratObjSCT), ncol(seuratObj))
+
+  #saveRDS(seuratObjSCT, file = '../testdata/seuratObjSCT.rds')
 })
