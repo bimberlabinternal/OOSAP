@@ -44,6 +44,8 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.rds'))
     }
 
+    print(SingleR::plotScoreHeatmap(pred.results))
+
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
     }
@@ -57,6 +59,8 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     if (!is.null(singlerSavePrefix)){
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.fine.rds'))
     }
+
+    print(SingleR::plotScoreHeatmap(pred.results))
 
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
