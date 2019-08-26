@@ -6,8 +6,9 @@ test_that("Serat processing works as expected", {
   resolutionToUse <- 0.6
 
   seuratObj <- ReadAndFilter10xData('../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1', emptyDropNIters=5000)
+  #expectedSeuratObj <- readRDS('../testdata/seuratOutput.rds')
 
-  expect_equal(ncol(seuratObj), 3353)
+  expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
   vgFile <- 'variableGenes.txt'
   seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile, doCellFilter = T)
@@ -17,6 +18,11 @@ test_that("Serat processing works as expected", {
 
   seuratObj <- FindClustersAndDimRedux(seuratObj)
   expect_equal(ncol(seuratObj), 1557)
+  expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
+
+  seuratObj0 <- FindClustersAndDimRedux(seuratObj, minDimsToUse = 12, forceReCalc = T)
+  expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
+  rm(seuratObj0)
 
   unlink(vgFile)
 
@@ -41,4 +47,7 @@ test_that("Serat processing works as expected", {
   expect_equal(nrow(utils::read.table(dr, sep = '\t', header = T)), ncol(seuratObj))
 
   unlink(dr)
+
+  #Note: if the expectations change, save this output as a reference:
+  #saveRDS(seuratObj, file = '../testdata/seuratOutput.rds')
 })
