@@ -509,9 +509,9 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
   )
 
   print(cowplot::plot_grid(plotlist = list(DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
   )
 
   print("Regressing out S and G2M score ...")
@@ -526,13 +526,10 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
                              return.only.var.genes = F, do.scale = do.scale, do.center = do.center)
   }
 
-
-
   if (!is.null(pcaResultFile)) {
     SeuratObjsCCPCA$CellBarcode <- colnames(seuratObj)
     write.table(SeuratObjsCCPCA, file = pcaResultFile, sep = '\t', row.names = F, quote = F)
   }
-  
   
   return(seuratObj)
 }
@@ -550,14 +547,18 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
                                    UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
   if (is.null(dimsToUse)) {
-    elbow <- FindSeuratElbow(seuratObj)
-    print(paste0('Inferred elbow: ', elbow))
+    dimMax <- FindSeuratElbow(seuratObj)
+    print(paste0('Inferred elbow: ', dimMax))
 
-    dimsToUse <- 1:elbow
+    dimsToUse <- 1:dimMax
 
     if (!is.null(minDimsToUse)) {
-      dimsToUse <- max(minDimsToUse, dimsToUse)
+      print(paste0('Min dims to use: ', minDimsToUse))
+      dimMax <- max(minDimsToUse, dimMax)
     }
+
+    print(paste0('Selected dimsToUse: 1:', dimMax))
+    dimsToUse <- 1:dimMax
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindNeighbors')) {
@@ -632,7 +633,7 @@ numGenesToSave = 20, onlyPos = F) {
 
   Idents(seuratObj) <- seuratObj[[paste0('ClusterNames_',resolutionToUse)]]
 
-  if (file.exists(saveFileMarkers)) {
+  if (!is.null(saveFileMarkers) && file.exists(saveFileMarkers)) {
     print('resuming from file')
     seuratObj.markers <- readRDS(saveFileMarkers)
   } else {
@@ -648,12 +649,12 @@ numGenesToSave = 20, onlyPos = F) {
           tMarkers$cluster <- as.character(tMarkers$cluster)
 
           toBind <- data.frame(test = tMarkers$test,
-          cluster = tMarkers$cluster,
-          gene = tMarkers$gene,
-          avg_logFC = tMarkers$avg_logFC,
-          pct.1 = tMarkers$pct.1,
-          pct.2 = tMarkers$pct.2,
-          p_val_adj = tMarkers$p_val_adj
+            cluster = tMarkers$cluster,
+            gene = tMarkers$gene,
+            avg_logFC = tMarkers$avg_logFC,
+            pct.1 = tMarkers$pct.1,
+            pct.2 = tMarkers$pct.2,
+            p_val_adj = tMarkers$p_val_adj
           )
           if (all(is.na(seuratObj.markers))) {
             seuratObj.markers <- toBind
@@ -678,7 +679,9 @@ numGenesToSave = 20, onlyPos = F) {
       seuratObj.markers$cluster <- as.factor(seuratObj.markers$cluster)
     }
 
-    saveRDS(seuratObj.markers, file = saveFileMarkers)
+    if (!is.null(saveFileMarkers)){
+      saveRDS(seuratObj.markers, file = saveFileMarkers)
+    }
   }
 
   if (nrow(seuratObj.markers) == 0) {

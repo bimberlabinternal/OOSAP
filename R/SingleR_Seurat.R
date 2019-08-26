@@ -5,13 +5,14 @@
 #' @param dataset The dataset (see singleR docs) to use as a reference
 #' @param assay The assay in the seurat object to use
 #' @param resultTableFile If provided, a table of results will be saved here
+#' @param singlerSavePrefix If provided, the SingleR
 #' @return The modified seurat object
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
 #' @export
 #' @importFrom scater logNormCounts
-RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL){
+RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL){
     if (is.null(seuratObj)){
         stop("Seurat object is required")
     }
@@ -39,21 +40,36 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     }
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.main, method = 'single', assay.type.ref = refAssay)
     pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
+    if (!is.null(singlerSavePrefix)){
+        saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.rds'))
+    }
+
+    print(SingleR::plotScoreHeatmap(pred.results))
 
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
     }
 
-    seuratObj[['SingleR_Labels']] <- pred.results$labels
+    toAdd <- pred.results$labels
+    names(toAdd) <- rownames(pred.results)
+    seuratObj[['SingleR_Labels']] <- toAdd
 
     pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay)
     pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
+    if (!is.null(singlerSavePrefix)){
+        saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.fine.rds'))
+    }
+
+    print(SingleR::plotScoreHeatmap(pred.results))
 
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
     }
 
-    seuratObj[['SingleR_Labels_Fine']] <- pred.results$labels
+    toAdd <- pred.results$labels
+    names(toAdd) <- rownames(pred.results)
+
+    seuratObj[['SingleR_Labels_Fine']] <- toAdd
 
     #sanity check:
     if (length(colnames(seuratObj)) != length(rownames(pred.results))) {
