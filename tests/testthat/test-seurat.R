@@ -22,6 +22,10 @@ test_that("Serat processing works as expected", {
 
   expect_equal(length(rownames(seuratObj@assays$RNA@scale.data)), length(rownames(seuratObj@assays$RNA@counts)))
 
+  #Note: Seurat::PercentageFeatureSet returns 0-100.  our code is currently a fraction (0-1.0)
+  expect_true(max(seuratObj$p.mito < 1.0))
+  expect_true(max(seuratObj$p.mito > 0))
+
   seuratObj0 <- FindClustersAndDimRedux(seuratObj, minDimsToUse = 12, forceReCalc = T)
   expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
   rm(seuratObj0)
