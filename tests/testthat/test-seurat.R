@@ -60,9 +60,7 @@ test_that("Serat SCTransform works as expected", {
 
   seuratObjSCT <- ProcessSeurat1(seuratObjSCT, doCellCycle = F, useSCTransform = T)
 
-  #Note: this is not currently true
-  #expect_equal(length(rownames(seuratObjSCT@assays$SCT@scale.data)), length(rownames(seuratObjSCT@assays$SCT@counts)))
-
+  expect_equal(length(rownames(seuratObjSCT@assays$SCT@scale.data)), length(rownames(seuratObjSCT@assays$SCT@counts)))
   expect_equal(ncol(seuratObjSCT), ncol(seuratObj))
 
   #saveRDS(seuratObjSCT, file = '../testdata/seuratObjSCT.rds')
