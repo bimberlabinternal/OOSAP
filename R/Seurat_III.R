@@ -239,6 +239,8 @@ includeCellCycleGenes = T){
       } else {
         print('FindVariableFeatures performed')
       }
+
+      print(LabelPoints(plot = VariableFeaturePlot(so), points = head(VariableFeatures(so), 20), repel = TRUE))
     }
 
     seuratObjs[[exptNum]] <- so
@@ -390,7 +392,6 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
       seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
     }
 
-
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
       seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
@@ -413,9 +414,6 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   if(!is.null(spikeGenes)){
     VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
   }
-  
-  
-  
 
   vg <- VariableFeatures(object = seuratObj)
   
@@ -446,7 +444,17 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   if (printDefaultPlots){
     print(VizDimLoadings(object = seuratObj, dims = 1:2))
+    print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE))
+
     print(DimPlot(object = seuratObj))
+    if (doCellCycle) {
+      print(cowplot::plot_grid(plotlist = list(
+        DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
+        DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
+        DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4), group.by = 'Phase'),
+        DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5), group.by = 'Phase')
+      )))
+    }
 
     print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
     print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
@@ -503,7 +511,7 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
   }
 
   print("Running PCA with cell cycle genes")
-  seuratObj <- RunPCA(object = seuratObj, pc.genes = c(s.genes, g2m.genes), do.print = FALSE, verbose = F)
+  seuratObj <- RunPCA(object = seuratObj, features = c(s.genes, g2m.genes), do.print = FALSE, verbose = F)
   print(DimPlot(object = seuratObj, reduction = "pca"))
 
   #store values to append later
@@ -517,11 +525,14 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
     set.ident = TRUE
   )
 
-  print(cowplot::plot_grid(plotlist = list(DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
+  print(cowplot::plot_grid(plotlist = list(
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
     DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
     DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
-    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
-  )
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5))
+  )))
+
+  print(table(table(seuratObj$Phase)))
 
   print("Regressing out S and G2M score ...")
 
@@ -646,6 +657,7 @@ numGenesToSave = 20, onlyPos = F) {
     seuratObj.markers <- readRDS(saveFileMarkers)
   } else {
     seuratObj.markers <- NA
+    tMarkers <- NA
     for (test in testsToUse) {
       print(paste0('Running using test: ', test))
       tryCatch({
@@ -655,15 +667,34 @@ numGenesToSave = 20, onlyPos = F) {
         } else {
           tMarkers$test <- c(test)
           tMarkers$cluster <- as.character(tMarkers$cluster)
+          if (test == 'roc') {
+            toBind <- data.frame(
+              test = tMarkers$test,
+              cluster = tMarkers$cluster,
+              gene = tMarkers$gene,
+              pct.1 = tMarkers$pct.1,
+              pct.2 = tMarkers$pct.2,
+              avg_logFC = NA,
+              p_val_adj = NA,
+              myAUC = tMarkers$myAUC,
+              power = tMarkers$power,
+              avg_diff = tMarkers$avg_diff
+            )
+          } else {
+            toBind <- data.frame(
+              test = tMarkers$test,
+              cluster = tMarkers$cluster,
+              gene = tMarkers$gene,
+              pct.1 = tMarkers$pct.1,
+              pct.2 = tMarkers$pct.2,
+              avg_logFC = tMarkers$avg_logFC,
+              p_val_adj = tMarkers$p_val_adj,
+              myAUC = NA,
+              power = NA,
+              avg_diff = NA
+            )
+          }
 
-          toBind <- data.frame(test = tMarkers$test,
-            cluster = tMarkers$cluster,
-            gene = tMarkers$gene,
-            avg_logFC = tMarkers$avg_logFC,
-            pct.1 = tMarkers$pct.1,
-            pct.2 = tMarkers$pct.2,
-            p_val_adj = tMarkers$p_val_adj
-          )
           if (all(is.na(seuratObj.markers))) {
             seuratObj.markers <- toBind
           } else {
@@ -673,6 +704,8 @@ numGenesToSave = 20, onlyPos = F) {
       }, error = function(e){
         print(paste0('Error running test: ', test))
         print(e)
+        print(str(tMarkers))
+        print(str(seuratObj.markers))
       })
     }
 
