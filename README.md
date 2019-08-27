@@ -4,7 +4,7 @@
 
 OHSU-ONPRC Single-cell Analysis Package
 
-The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
+The goal of this package is to provide a high-level wrapper around tools and pipelines for the analysis of single-cell RNASeq data.
 
 ## Table of Contents
 * [Installation](#installation)
@@ -18,10 +18,8 @@ The goal of this package is bringing together tools and pipelines for the analys
 install.packages("devtools", 'remotes')
 
 #Latest version:
-install_github("bimberlabinternal/OOSAP")
+install_github("bimberlabinternal/OOSAP", tag = "Dev")
 
-#Or a specific release :
-install_github("bimberlabinternal/OOSAP", tag = "1.0")
 
 ```
 Pre-packaged Docker images with all needed dependencies installed can be found on our [dockerhub repository](https://hub.docker.com/r/bimberlab/oosap): 
