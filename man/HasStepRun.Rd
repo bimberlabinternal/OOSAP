@@ -4,7 +4,7 @@
 \alias{HasStepRun}
 \title{HasStepRun}
 \usage{
-HasStepRun(seuratObj, name)
+HasStepRun(seuratObj, name, forceReCalc = F, printResult = T)
 }
 \arguments{
 \item{seuratObj}{The seurat object}

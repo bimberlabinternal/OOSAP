@@ -5,7 +5,7 @@
 \title{generate SingleR object}
 \usage{
 RunSingleR(seuratObj = NULL, dataset = "hpca", assay = NULL,
-  resultTableFile = NULL)
+  resultTableFile = NULL, singlerSavePrefix = NULL)
 }
 \arguments{
 \item{seuratObj}{A Seurat object}
@@ -15,6 +15,8 @@ RunSingleR(seuratObj = NULL, dataset = "hpca", assay = NULL,
 \item{assay}{The assay in the seurat object to use}
 
 \item{resultTableFile}{If provided, a table of results will be saved here}
+
+\item{singlerSavePrefix}{If provided, the SingleR}
 }
 \value{
 The modified seurat object

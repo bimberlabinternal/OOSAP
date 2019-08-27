@@ -157,8 +157,17 @@ PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01)
 #' @param seuratObj The seurat object
 #' @param name The name of the step to mark complete
 #' @return A modified Seurat object.
-HasStepRun <- function(seuratObj, name) {
-  return(!is.null(seuratObj@misc[[paste0(name, 'Run')]]))
+HasStepRun <- function(seuratObj, name, forceReCalc = F, printResult = T) {
+  ret <- !is.null(seuratObj@misc[[paste0(name, 'Run')]])
+  if (ret && printResult) {
+    if (forceReCalc) {
+      print(paste0('Step already run, but forceReCalc=TRUE, so will repeat: ', name))
+    } else {
+      print(paste0('Step already run, will not repeat: ', name))
+    }
+  }
+
+  return(ret)
 }
 
 
@@ -217,14 +226,14 @@ includeCellCycleGenes = T){
     }
 
     if (alignData && length(seuratObjs) > 1) {
-      if (!HasStepRun(so, 'NormalizeData')) {
+      if (!HasStepRun(so, 'NormalizeData', forceReCalc = forceReCalc)) {
         print('Normalizing')
         so <- NormalizeData(object = so, verbose = F)
       } else {
         print('Normalization performed')
       }
 
-      if (!HasStepRun(so, 'FindVariableFeatures')) {
+      if (!HasStepRun(so, 'FindVariableFeatures', forceReCalc = forceReCalc)) {
         print('Finding variable features')
         so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
       } else {
@@ -351,7 +360,8 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
                             mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
                             spikeGenes = NULL){
 
-  if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells'))) {
+
+  if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells', forceReCalc = forceReCalc))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
 
@@ -371,31 +381,34 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (!useSCTransform) {
-    if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData')) {
+    if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData', forceReCalc = forceReCalc)) {
       seuratObj <- NormalizeData(object = seuratObj, normalization.method = "LogNormalize", verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'NormalizeData', saveFile)
     }
 
-    if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures')) {
+
+    if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures', forceReCalc = forceReCalc)) {
       seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
       seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
     }
 
 
-    if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData')) {
+
+    if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
       seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
     }
 
-    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
+    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle', forceReCalc = forceReCalc))) {
       seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = F)
       seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
     }
   } else {
     print('Using SCTransform')
-    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE)
+
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE, return.only.var.genes = F)
     
-    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle'))) {
+    if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle', forceReCalc = forceReCalc))) {
       seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = T)
       seuratObj <- MarkStepRun(seuratObj, 'CellCycle', saveFile)
     }
@@ -410,22 +423,23 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   vg <- VariableFeatures(object = seuratObj)
   
-  if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA')) {
+
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA', forceReCalc = forceReCalc)) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
     seuratObj <- MarkStepRun(seuratObj, 'RunPCA')
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'ProjectDim')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'ProjectDim', forceReCalc = forceReCalc)) {
     seuratObj <- ProjectDim(object = seuratObj)
     seuratObj <- MarkStepRun(seuratObj, 'ProjectDim')
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'JackStraw')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'JackStraw', forceReCalc = forceReCalc)) {
     seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
     seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'ScoreJackStraw')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'ScoreJackStraw', forceReCalc = forceReCalc)) {
     seuratObj <- ScoreJackStraw(object = seuratObj, dims = 1:20)
     seuratObj <- MarkStepRun(seuratObj, 'ScoreJackStraw')
   }
@@ -509,31 +523,28 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
   )
 
   print(cowplot::plot_grid(plotlist = list(DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
-  DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4)),
+    DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5)) ))
   )
 
   print("Regressing out S and G2M score ...")
 
+
   if (!useSCTransform) {
     seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), 
-                           display.progress = F, verbose = F, 
+                           display.progress = F, verbose = F, features = rownames(x = seuratObj),
                            do.scale = do.scale, do.center = do.center)
-    
   } else {
     seuratObj <- SCTransform(seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE, 
                              return.only.var.genes = F, do.scale = do.scale, do.center = do.center)
   }
 
-
-
   if (!is.null(pcaResultFile)) {
     SeuratObjsCCPCA$CellBarcode <- colnames(seuratObj)
     write.table(SeuratObjsCCPCA, file = pcaResultFile, sep = '\t', row.names = F, quote = F)
   }
-  
-  
+
   return(seuratObj)
 }
 
@@ -550,22 +561,26 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
                                    UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
   if (is.null(dimsToUse)) {
-    elbow <- FindSeuratElbow(seuratObj)
-    print(paste0('Inferred elbow: ', elbow))
+    dimMax <- FindSeuratElbow(seuratObj)
+    print(paste0('Inferred elbow: ', dimMax))
 
-    dimsToUse <- 1:elbow
+    dimsToUse <- 1:dimMax
 
     if (!is.null(minDimsToUse)) {
-      dimsToUse <- max(minDimsToUse, dimsToUse)
+      print(paste0('Min dims to use: ', minDimsToUse))
+      dimMax <- max(minDimsToUse, dimMax)
     }
+
+    print(paste0('Selected dimsToUse: 1:', dimMax))
+    dimsToUse <- 1:dimMax
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'FindNeighbors')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'FindNeighbors', forceReCalc = forceReCalc)) {
     seuratObj <- FindNeighbors(object = seuratObj, dims = dimsToUse)
     seuratObj <- MarkStepRun(seuratObj, 'FindNeighbors')
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'FindClusters')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'FindClusters', forceReCalc = forceReCalc)) {
     for (resolution in c(0.2, 0.4, 0.8, 1.2, 0.6)){
       seuratObj <- FindClusters(object = seuratObj, resolution = resolution)
       seuratObj[[paste0("ClusterNames_", resolution)]] <- Idents(object = seuratObj, verbose = F)
@@ -573,7 +588,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     }
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
     # To avoid Rtsne 'perplexity is too large for the number of samples' error.
     # See check here: https://github.com/jkrijthe/Rtsne/blob/ebed20f612712987fd160386132c17289169b4d8/R/utils.R
     # See also: https://github.com/satijalab/seurat/issues/167
@@ -590,7 +605,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP')) {
+  if (forceReCalc | !HasStepRun(seuratObj, 'RunUMAP', forceReCalc = forceReCalc)) {
     seuratObj <- RunUMAP(seuratObj,
                            dims = dimsToUse,
                            n.neighbors = UMAP_NumNeib,
@@ -632,7 +647,7 @@ numGenesToSave = 20, onlyPos = F) {
 
   Idents(seuratObj) <- seuratObj[[paste0('ClusterNames_',resolutionToUse)]]
 
-  if (file.exists(saveFileMarkers)) {
+  if (!is.null(saveFileMarkers) && file.exists(saveFileMarkers)) {
     print('resuming from file')
     seuratObj.markers <- readRDS(saveFileMarkers)
   } else {
@@ -648,12 +663,12 @@ numGenesToSave = 20, onlyPos = F) {
           tMarkers$cluster <- as.character(tMarkers$cluster)
 
           toBind <- data.frame(test = tMarkers$test,
-          cluster = tMarkers$cluster,
-          gene = tMarkers$gene,
-          avg_logFC = tMarkers$avg_logFC,
-          pct.1 = tMarkers$pct.1,
-          pct.2 = tMarkers$pct.2,
-          p_val_adj = tMarkers$p_val_adj
+            cluster = tMarkers$cluster,
+            gene = tMarkers$gene,
+            avg_logFC = tMarkers$avg_logFC,
+            pct.1 = tMarkers$pct.1,
+            pct.2 = tMarkers$pct.2,
+            p_val_adj = tMarkers$p_val_adj
           )
           if (all(is.na(seuratObj.markers))) {
             seuratObj.markers <- toBind
@@ -678,7 +693,9 @@ numGenesToSave = 20, onlyPos = F) {
       seuratObj.markers$cluster <- as.factor(seuratObj.markers$cluster)
     }
 
-    saveRDS(seuratObj.markers, file = saveFileMarkers)
+    if (!is.null(saveFileMarkers)){
+      saveRDS(seuratObj.markers, file = saveFileMarkers)
+    }
   }
 
   if (nrow(seuratObj.markers) == 0) {
