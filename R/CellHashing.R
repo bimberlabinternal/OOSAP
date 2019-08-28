@@ -498,7 +498,7 @@ DebugDemux <- function(seuratObj) {
 #' @return A modified Seurat object.
 DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
-  seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
+  seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
   DebugDemux(seuratObj)
 
@@ -557,7 +557,7 @@ GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, atte
 #' @return A modified Seurat object.
 DoMULTIseqDemux <- function(seuratObj) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
-  seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", display.progress = FALSE)
+  seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
   seuratObj <- MULTIseqDemux(seuratObj, assay = "HTO", quantile = 0.7, autoThresh = T, maxiter = 50, qrange = seq(from = 0.1, to = 0.9, by = 0.05), verbose = TRUE)
 

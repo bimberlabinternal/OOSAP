@@ -195,7 +195,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param maxCCAspaceDim The number of dims to use with FindIntegrationAnchors()
 #' @param maxPCs2Weight The number of dims to use with IntegrateData()
 #' @param projectName The project name when creating the final seuratObj
-#' @param doScaleData If true, scale=T will be passed to IntegrateData(); the default behavior of IntegrateData().
+#' @param doScaleData If true, scale=T will be passed to FindIntegrationAnchors(); the default behavior of IntegrateData().
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
@@ -388,12 +388,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     }
 
     if (forceReCalc | !HasStepRun(seuratObj, 'FindVariableFeatures', forceReCalc = forceReCalc)) {
-      seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nVariableFeatures = nVariableFeatures)
+      seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nfeatures = nVariableFeatures)
       seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
     }
 
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
-      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), display.progress = F, verbose = F)
+      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
     }
 
@@ -537,7 +537,7 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 
   if (!useSCTransform) {
     seuratObj <- ScaleData(object = seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), 
-                           display.progress = F, verbose = F, features = rownames(x = seuratObj),
+                           verbose = F, features = rownames(x = seuratObj),
                            do.scale = do.scale, do.center = do.center)
   } else {
     seuratObj <- SCTransform(seuratObj, vars.to.regress = c("S.Score", "G2M.Score"), verbose = FALSE, 
