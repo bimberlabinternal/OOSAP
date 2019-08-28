@@ -6,7 +6,7 @@
 \usage{
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
   maxCCAspaceDim = 20, maxPCs2Weight = 20, projectName = NULL,
-  doScaleData = F, useAllFeatures = F, nVariableFeatures = 2000,
+  doScaleData = T, useAllFeatures = F, nVariableFeatures = 2000,
   includeCellCycleGenes = T)
 }
 \arguments{
@@ -22,7 +22,7 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
 
 \item{projectName}{The project name when creating the final seuratObj}
 
-\item{doScaleData}{If true, scale=T will be passed to IntegrateData()}
+\item{doScaleData}{If true, scale=T will be passed to FindIntegrationAnchors(); the default behavior of IntegrateData().}
 
 \item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
 
