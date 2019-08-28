@@ -251,7 +251,7 @@ includeCellCycleGenes = T){
     CheckDuplicatedCellNames(seuratObjs)
 
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, scale = !doScaleData, verbose = F)
+    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, scale = doScaleData, verbose = F)
 
     #always run using intersection of all features
     features <- NULL
