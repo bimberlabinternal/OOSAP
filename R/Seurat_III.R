@@ -195,7 +195,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param maxCCAspaceDim The number of dims to use with FindIntegrationAnchors()
 #' @param maxPCs2Weight The number of dims to use with IntegrateData()
 #' @param projectName The project name when creating the final seuratObj
-#' @param doScaleData If true, scale=T will be passed to IntegrateData(); the default behavior of IntegrateData().
+#' @param doScaleEach If true, scale=T will be passed to FindIntegrationAnchors(), which is needed unless (rare) done previously on each object in list; the default behavior of FindIntegrationAnchors().
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
@@ -203,7 +203,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, maxCCAspaceDim = 20, maxPCs2Weight = 20,
-projectName = NULL, doScaleData = T, useAllFeatures = F, nVariableFeatures = 2000,
+projectName = NULL, doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
 includeCellCycleGenes = T){
   nameList <- NULL
   if (is.null(metadata)){
@@ -211,6 +211,8 @@ includeCellCycleGenes = T){
   } else {
     nameList <- names(metadata)
   }
+  
+  #TODO: iter the object list, check @msc if scaled, warn if even 1 is scaled prev. 
 
   for (exptNum in nameList) {
     print(paste0('adding dataset: ', exptNum))
@@ -251,7 +253,7 @@ includeCellCycleGenes = T){
     CheckDuplicatedCellNames(seuratObjs)
 
     # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, scale = doScaleData, verbose = F)
+    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, scale = doScaleEach, verbose = F)
 
     #always run using intersection of all features
     features <- NULL
