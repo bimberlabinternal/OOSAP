@@ -518,7 +518,6 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
   SeuratObjsCCPCA <- as.data.frame(seuratObj@reductions$pca@cell.embeddings)
   colnames(SeuratObjsCCPCA) <- paste(colnames(SeuratObjsCCPCA), "CellCycle", sep="_")
 
-  # Eisa: do we still need a custom version of this?
   seuratObj <- CellCycleScoring(object = seuratObj,
     s.features = s.genes,
     g2m.features = g2m.genes,
@@ -532,7 +531,7 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
     DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5))
   )))
 
-  print(table(table(seuratObj$Phase)))
+  print(table(seuratObj$Phase))
 
   print("Regressing out S and G2M score ...")
 
