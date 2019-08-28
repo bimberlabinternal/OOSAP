@@ -195,7 +195,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param maxCCAspaceDim The number of dims to use with FindIntegrationAnchors()
 #' @param maxPCs2Weight The number of dims to use with IntegrateData()
 #' @param projectName The project name when creating the final seuratObj
-#' @param doScaleData If true, scale=T will be passed to IntegrateData()
+#' @param doScaleData If true, scale=T will be passed to IntegrateData(); the default behavior of IntegrateData().
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
@@ -203,7 +203,7 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, maxCCAspaceDim = 20, maxPCs2Weight = 20,
-projectName = NULL, doScaleData = F, useAllFeatures = F, nVariableFeatures = 2000,
+projectName = NULL, doScaleData = T, useAllFeatures = F, nVariableFeatures = 2000,
 includeCellCycleGenes = T){
   nameList <- NULL
   if (is.null(metadata)){
