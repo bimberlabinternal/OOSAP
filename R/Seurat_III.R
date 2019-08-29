@@ -197,25 +197,32 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param projectName The project name when creating the final seuratObj
 #' @param doScaleEach If true, scale=T will be passed to FindIntegrationAnchors(); its default behavior to find anchors. 
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
-#' @param nVariableFeatures The number of VariableFeatures to identify
+#' @param nVariableFeatures If NULL, all genes are used. Default for speed is 2000, the number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
+#' @param selection.method can be vst, mvp, or disp. see selection.method paramter with ?Seurat::FindVariableFeatures for more details. 
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, maxCCAspaceDim = 20, maxPCs2Weight = 20,
 projectName = NULL, doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
-includeCellCycleGenes = T){
+includeCellCycleGenes = T, selection.method = "vst"){
   nameList <- NULL
   if (is.null(metadata)){
     nameList <- names(seuratObjs)
   } else {
     nameList <- names(metadata)
   }
+  
 
   for (exptNum in nameList) {
     print(paste0('adding dataset: ', exptNum))
     prefix <- paste0(exptNum)
     so <- seuratObjs[[exptNum]]
+    
+    # to do all genes, but this may take a loooooooong time. 
+    # roughly 2000 genes vs 20,000 genes or more is more than a log away. depending on algorithm(s) complexity e.g., log(n) or worse n^2 etc. t
+    if(is.null(nVariableFeatures)) nVariableFeatures = nrow(so)
+      
 
     if (!('BarcodePrefix' %in% names(so@meta.data))) {
       print(paste0('Adding barcode prefix: ', prefix))
@@ -235,7 +242,7 @@ includeCellCycleGenes = T){
 
       if (!HasStepRun(so, 'FindVariableFeatures')) {
         print('Finding variable features')
-        so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
+        so <- FindVariableFeatures(object = so, verbose = F, selection.method = selection.method, nfeatures = nVariableFeatures)
       } else {
         print('FindVariableFeatures performed')
       }
