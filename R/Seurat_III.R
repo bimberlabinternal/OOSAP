@@ -226,14 +226,14 @@ includeCellCycleGenes = T){
     }
 
     if (alignData && length(seuratObjs) > 1) {
-      if (!HasStepRun(so, 'NormalizeData', forceReCalc = forceReCalc)) {
+      if (!HasStepRun(so, 'NormalizeData')) {
         print('Normalizing')
         so <- NormalizeData(object = so, verbose = F)
       } else {
         print('Normalization performed')
       }
 
-      if (!HasStepRun(so, 'FindVariableFeatures', forceReCalc = forceReCalc)) {
+      if (!HasStepRun(so, 'FindVariableFeatures')) {
         print('Finding variable features')
         so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
       } else {
