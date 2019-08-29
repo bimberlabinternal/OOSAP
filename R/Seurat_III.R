@@ -788,6 +788,8 @@ FindSeuratElbow <- function(object, ndims = 25, reduction = "pca", print.plot = 
 #' @title FindElbow
 #' @importFrom stats coef
 FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min.x = NA) {
+  print('Elbow data: ')
+  print(y)
 
   # minor modification to debug specic scenarios when fail to find elbow
   # The following helper functions were found at

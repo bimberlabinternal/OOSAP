@@ -208,7 +208,7 @@ InferThresholds <- function(data, dataLabel, minQuant = 0.05, plotFigs = T, Find
   }
 
   if (nrow(tempDF.plot) > 1) {
-    tempElbow <- FindElbow(y=(tempDF.plot$y), plot=F, min.y = FindElbowMinY, ignore.concavity = T)
+    tempElbow <- FindElbow(y=(tempDF.plot$y), plot=T, min.y = FindElbowMinY, ignore.concavity = T)
 
     #since the FindElbow is ordering y decendingly, and we did 1:30
     tempElbow <- NoOfSteps - tempElbow
