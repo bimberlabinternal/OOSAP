@@ -30,6 +30,13 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
   }
 
   seuratRawData <- Read10X(data.dir = dataDir)
+
+  #Cannot have underscores in feature names, Seurat will replace with hyphen anyway.  Perform upfront to avoid warning
+  if (sum(grepl(x = rownames(seuratRawData), pattern = '_')) > 0) {
+    print('Replacing underscores with hyphens in feature names')
+    rownames(seuratRawData) <- gsub(x = rownames(seuratRawData), pattern = '_', replacement = '-')
+  }
+
   seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters)
 
   seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
@@ -248,7 +255,7 @@ includeCellCycleGenes = T){
       
       
 
-      print(LabelPoints(plot = VariableFeaturePlot(so), points = head(VariableFeatures(so), 20), repel = TRUE))
+      print(LabelPoints(plot = VariableFeaturePlot(so), points = head(VariableFeatures(so), 20), repel = TRUE, xnudge = 0, ynudge = 0))
     }
 
     seuratObjs[[exptNum]] <- so
@@ -452,7 +459,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   if (printDefaultPlots){
     print(VizDimLoadings(object = seuratObj, dims = 1:2))
-    print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE))
+    print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
 
     print(DimPlot(object = seuratObj))
     if (doCellCycle) {
@@ -860,38 +867,27 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
     ans <- NULL
     ix <- iy <- 0   # intersecting point
     lineMag <- lineMagnitude(x1, y1, x2, y2)
-    if (any(lineMag < 0.00000001)) { # modified for vectorization by BAH
+    if (any(lineMag < 0.00000001)) {
       #warning("short segment")
       #return(9999)
       warning("At least one line segment given by x1, y1, x2, y2 is very short.")
     }
     u <- (((px - x1) * (x2 - x1)) + ((py - y1) * (y2 - y1)))
     u <- u / (lineMag * lineMag)
-    if (any(u < 0.00001) || any(u > 1)) { # BAH added any to vectorize
-      ## closest point does not fall within the line segment, take the shorter distance
-      ## to an endpoint
-      ix <- lineMagnitude(px, py, x1, y1)
-      iy <- lineMagnitude(px, py, x2, y2)
-      #TODO: giving warning b/c length of ix/iy can be >1.  maybe if needs any() or all()??
-      if (length(ix) > 1 || length(iy) > 1) {
-        warning(paste0('length GT 1: ', length(ix), '/', length(iy)))
-        print('ix:')
-        print(ix)
-        print('iy:')
-        print(iy)
-        print(x1)
-        print(y1)
-        print(x2)
-        print(y2)
-      }
 
-      if (ix > iy)  ans <- iy
-      else ans <- ix
-    } else {
-      ## Intersecting point is on the line, use the formula
-      ix <- x1 + u * (x2 - x1)
-      iy <- y1 + u * (y2 - y1)
-      ans <- lineMagnitude(px, py, ix, iy)
+    ans <- c()
+    for (i in 1:length(u)) {
+      if (u[i] < 0.00001 || u[i] > 1) {
+        print('closest point does not fall within the line segment, take the shorter distance to an endpoint')
+        ix <- lineMagnitude(px[i], py[i], x1[i], y1[i])
+        iy <- lineMagnitude(px[i], py[i], x2[i], y2[i])
+        ans <- c(ans, min(ix, iy))
+      } else {
+        ## Intersecting point is on the line, use the formula
+        ix <- x1 + u * (x2 - x1)
+        iy <- y1 + u * (y2 - y1)
+        ans <- c(ans, lineMagnitude(px, py, ix, iy)[i])
+      }
     }
     ans
   }
@@ -962,6 +958,7 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
 
   if (is.na(which.max(DF$dist))) {
     #if all fails return 2
+    print('Max not found, defaulting to 2')
     return(2)
   } else {
     return(which.max(DF$dist))

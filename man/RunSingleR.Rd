@@ -5,7 +5,8 @@
 \title{generate SingleR object}
 \usage{
 RunSingleR(seuratObj = NULL, dataset = "hpca", assay = NULL,
-  resultTableFile = NULL, singlerSavePrefix = NULL)
+  resultTableFile = NULL, singlerSavePrefix = NULL,
+  minFraction = 0.01)
 }
 \arguments{
 \item{seuratObj}{A Seurat object}
@@ -17,6 +18,8 @@ RunSingleR(seuratObj = NULL, dataset = "hpca", assay = NULL,
 \item{resultTableFile}{If provided, a table of results will be saved here}
 
 \item{singlerSavePrefix}{If provided, the SingleR}
+
+\item{minFraction}{If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown}
 }
 \value{
 The modified seurat object
