@@ -31,10 +31,10 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
 
   seuratRawData <- Read10X(data.dir = dataDir)
 
-  #Cannot have hyphens in feature names, Seurat will replace with underscore anyway.  Perform upfront to avoid warning
-  if (sum(grepl(x = rownames(seuratRawData), pattern = '-')) > 0) {
-    print('Replacing hyphens with underscores in feature names')
-    rownames(seuratRawData) <- gsub(x = rownames(seuratRawData), pattern = '-', replacement = '_')
+  #Cannot have underscores in feature names, Seurat will replace with hyphen anyway.  Perform upfront to avoid warning
+  if (sum(grepl(x = rownames(seuratRawData), pattern = '_')) > 0) {
+    print('Replacing underscores with hyphens in feature names')
+    rownames(seuratRawData) <- gsub(x = rownames(seuratRawData), pattern = '_', replacement = '-')
   }
 
   seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters)
