@@ -6,13 +6,14 @@
 #' @param assay The assay in the seurat object to use
 #' @param resultTableFile If provided, a table of results will be saved here
 #' @param singlerSavePrefix If provided, the SingleR
+#' @param minFraction If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown
 #' @return The modified seurat object
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
 #' @export
 #' @importFrom scater logNormCounts
-RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL){
+RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL, minFraction = 0.01){
     if (is.null(seuratObj)){
         stop("Seurat object is required")
     }
@@ -74,6 +75,31 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     #sanity check:
     if (length(colnames(seuratObj)) != length(rownames(pred.results))) {
         stop('SingleR did not produce results for all cells')
+    }
+
+    if (!is.null(minFraction)){
+        for (label in c('SingleR_Labels', 'SingleR_Labels_Fine')) {
+            l <- unlist(seuratObj[[label]])
+            names(l) <- colnames(seuratObj)
+
+            print(paste0('Filtering ', label, ' below: ', minFraction))
+            d <- table(Label = l)
+            print(kable(d))
+
+            d <- d / sum(d)
+            toRemove <- names(d)[d < minFraction]
+            if (length(toRemove) > 0) {
+                print(paste0('Will remove: ', paste0(toRemove, collapse = ', ')))
+            }
+
+            l[l %in% toRemove] <- 'Unknown'
+            seuratObj[[label]] <- l
+
+            print('After filter:')
+            l <- unlist(seuratObj[[label]])
+            d <- table(Label = l)
+            print(kable(d))
+        }
     }
 
     if (!is.null(resultTableFile)){
