@@ -993,6 +993,7 @@ FindMatchedCellHashing <- function(loupeDataId){
       
       
       return(rowsB[['rowid']])
+    }
   }
 
   

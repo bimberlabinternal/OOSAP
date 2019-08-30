@@ -7,7 +7,8 @@
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
   maxCCAspaceDim = 20, maxPCs2Weight = 20, projectName = NULL,
   doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
-  includeCellCycleGenes = T)
+  includeCellCycleGenes = T, selection.method = "vst",
+  SpikeInGenes = NULL)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names)}
@@ -26,9 +27,13 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
 
 \item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
 
-\item{nVariableFeatures}{The number of VariableFeatures to identify}
+\item{nVariableFeatures}{If NULL, top 2000 genes are used. Default for speed is 2000, the number of VariableFeatures to identify}
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
+
+\item{selection.method}{can be vst, mvp, or disp. see selection.method paramter with ?Seurat::FindVariableFeatures for more details.}
+
+\item{SpikeInGenes}{A vector of gene names in the original seurat object. Check %in% seuratObjs before using.}
 }
 \value{
 A modified Seurat object.

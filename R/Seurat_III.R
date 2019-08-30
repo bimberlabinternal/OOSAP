@@ -197,15 +197,16 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param projectName The project name when creating the final seuratObj
 #' @param doScaleEach If true, scale=T will be passed to FindIntegrationAnchors(); its default behavior to find anchors. 
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
-#' @param nVariableFeatures If NULL, all genes are used. Default for speed is 2000, the number of VariableFeatures to identify
+#' @param nVariableFeatures If NULL, top 2000 genes are used. Default for speed is 2000, the number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @param selection.method can be vst, mvp, or disp. see selection.method paramter with ?Seurat::FindVariableFeatures for more details. 
+#' @param SpikeInGenes A vector of gene names in the original seurat object. Check %in% seuratObjs before using. 
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, alignData = T, maxCCAspaceDim = 20, maxPCs2Weight = 20,
 projectName = NULL, doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
-includeCellCycleGenes = T, selection.method = "vst"){
+includeCellCycleGenes = T, selection.method = "vst", SpikeInGenes = NULL){
   nameList <- NULL
   if (is.null(metadata)){
     nameList <- names(seuratObjs)
@@ -280,8 +281,16 @@ includeCellCycleGenes = T, selection.method = "vst"){
       }
 
       print(paste0('Total features in common: ', length(features)))
-    } else if (includeCellCycleGenes) {
-      features <- unique(c(cc.genes, g2m.genes.orig))
+      
+    } else {
+        if (includeCellCycleGenes) {
+          features <- unique(c(cc.genes, g2m.genes.orig))
+        }
+        if(!is.null(SpikeInGenes)) {
+          if(is.null(features)) features <- unique(SpikeInGenes) 
+          else features <- unique(c(features, SpikeInGenes))
+        }
+      
       if (length(seuratObjs) > 1) {
         for (i in 2:length(seuratObjs)) {
           features <- intersect(features, rownames(seuratObjs[[i]]))
