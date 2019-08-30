@@ -18,8 +18,6 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         stop("Seurat object is required")
     }
 
-    sce <- Seurat::as.SingleCellExperiment(seuratObj)
-
     if (dataset == 'hpca'){
         ref <- SingleR::HumanPrimaryCellAtlasData()
     } else {
@@ -31,8 +29,22 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     ref <- ref[genesPresent,]
     seuratObj <- seuratObj[genesPresent,]
 
+    #Note: if these data were integrated with CCA, counts will be null for the default assay
+    if (is.null(assay)) {
+        assay <- Seurat::DefaultAssay(seuratObj)
+    }
+
+    if (length(seuratObj@assays[[assay]]@counts) == 0) {
+        print('Selected assay has no count data, trying RNA')
+        assay <- 'RNA'
+        if (length(seuratObj@assays[[assay]]@counts) == 0) {
+            warning('Unable to find counts for the seurat object, aborting SingleR')
+            return(seuratObj)
+        }
+    }
+
     #Convert to SingleCellExperiment
-    sce <- Seurat::as.SingleCellExperiment(seuratObj)
+    sce <- Seurat::as.SingleCellExperiment(seuratObj, assay = assay)
     sce <- scater:::logNormCounts(sce)
 
     refAssay <- 'logcounts'
