@@ -40,7 +40,9 @@ Imports:
     caret,
     scater,
     SingleR,
-    biomaRt
+    biomaRt,
+    DESeq2,
+    MAST
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
