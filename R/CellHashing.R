@@ -931,19 +931,22 @@ FindMatchedCellHashing <- function(loupeDataId){
     containerFilter=NULL,
     colNameOpt="rname"
   )
-
-  if (nrow(rows) != 1) {
+  
+  if (nrow(rows) == 0) {
+    print(paste0("Loupe File ID: ", loupeDataId, " not found"))
     return(NA)
   }
-
+  
   readset <- rows[['readset']]
+  
   if (is.na(readset) || is.null(readset)) {
+    print("readset is NA/NULL")
     return(NA)
   }
-
+  
   libraryId <- rows[['library_id']]
-
-  rows <- labkey.selectRows(
+  
+  rowsB <- labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
@@ -951,16 +954,60 @@ FindMatchedCellHashing <- function(loupeDataId){
     viewName="",
     colSort="-rowid",
     colSelect="rowid,",
-    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls"), c("libraryId", "EQUAL", libraryId)),
+    colFilter=makeFilter(c("readset", "EQUAL", readset), 
+                         c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
+                         c("libraryId", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
   )
-
-  if (nrow(rows) > 1){
-    rows <- rows[1]
+  
+  
+  
+  if (nrow(rowsB) != 1){
+    
+    if(nrow(rowsB)>1) rowsB <- rowsB[1] else {
+      print(paste0("Seurat Cell Hashing Calls readset: ", readset, " libraryId: ", libraryId, " not found"))
+    }
+    
+    
+    TryGEX = T
+    
+  } else TryGEX = F
+  
+  if(TryGEX){
+    rowsB <- labkey.selectRows(
+      baseUrl=lkBaseUrl,
+      folderPath=lkDefaultFolder,
+      schemaName="sequenceanalysis",
+      queryName="outputfiles",
+      viewName="",
+      colSort="-rowid",
+      colSelect="rowid,",
+      colFilter=makeFilter(c("readset", "EQUAL", readset), 
+                           c("category", "EQUAL", "10x GEX Cell Hashing Calls"), 
+                           c("libraryId", "EQUAL", libraryId)),
+      containerFilter=NULL,
+      colNameOpt="rname"
+    )
+    
+    if (nrow(rowsB) != 1){
+      
+      if(nrow(rowsB)>1) rowsB <- rowsB[1] else {
+        print(paste0("10x GEX Cell Hashing Calls readset: ", readset, " libraryId: ", libraryId, " not found"))
+      }
+      
+      print("Error, no Hashing found")
+      
+      return(NULL)
+      
+    } else {
+      
+      
+      return(rowsB[['rowid']])
+    }
   }
-
-  return(rows[['rowid']])
+  
+  
 }
 
 
