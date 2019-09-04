@@ -49,6 +49,8 @@ Suggests:
 Remotes:
     cole-trapnell-lab/garnett,
     bioc::devel/DropletUtils,
+    bioc::devel/DESeq2,
+    bioc::devel/MAST,
     LTLA/SingleR
 RoxygenNote: 6.1.1
 Collate: 

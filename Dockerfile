@@ -10,7 +10,7 @@ RUN apt-get update -y \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE, repos = 'http://cran.rstudio.com')" \
+RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)" \
     && echo -e "local({\noptions(repos = BiocManager::repositories(version = 'devel'))\n})\n" >> ~/.Rprofile.site \
     # NOTE: these seem to be required for garnett to succeed in docker
     && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats'), dependencies=TRUE, ask = FALSE)" \
