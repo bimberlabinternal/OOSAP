@@ -659,6 +659,8 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 #' @param numGenesToSave The number of top markers per cluster to save
 #' @param onlyPos If true, only positive markers will be saved
 #' @importFrom dplyr %>% coalesce group_by summarise filter top_n
+#' @import DESeq2
+#' @import MAST
 #' @export
 Find_Markers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
 testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
