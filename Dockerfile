@@ -11,7 +11,7 @@ RUN apt-get update -y \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)" \
-    && echo -e "local({\noptions(repos = BiocManager::repositories(version = 'devel'))\n})\n" >> ~/.Rprofile.site \
+    && echo -e "local({\nr <- BiocManager::repositories(version = 'devel')\nr['CRAN'] <- 'http://cran.rstudio.com'\noptions(repos = r)\n})\n" >> ~/.Rprofile.site \
     # NOTE: these seem to be required for garnett to succeed in docker
     && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats'), dependencies=TRUE, ask = FALSE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
