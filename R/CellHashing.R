@@ -398,7 +398,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   initialCells <- ncol(seuratObj)
   print(paste0('Initial cell barcodes in GEX data: ', ncol(seuratObj)))
 
-  if(!file.exists(barcodeCallFile)) stop("Barcode File Not found")
+  if (!file.exists(barcodeCallFile)) stop("Barcode File Not found")
 
   barcodeCallTable <- utils::read.table(barcodeCallFile, sep = '\t', header = T)
   if (!is.null(barcodePrefix)) {
@@ -951,63 +951,51 @@ FindMatchedCellHashing <- function(loupeDataId){
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
-    viewName="",
     colSort="-rowid",
     colSelect="rowid,",
     colFilter=makeFilter(c("readset", "EQUAL", readset), 
                          c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
-                         c("libraryId", "EQUAL", libraryId)),
+                         c("library_id", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
   )
-  
-  
-  
-  if (nrow(rowsB) != 1){
-    
-    if(nrow(rowsB)>1) rowsB <- rowsB[1] else {
-      print(paste0("Seurat Cell Hashing Calls readset: ", readset, " libraryId: ", libraryId, " not found"))
-    }
-    
-    
-    TryGEX = T
-    
-  } else TryGEX = F
-  
-  if(TryGEX){
+
+  ret <- NULL
+  if (nrow(rowsB) == 0){
+    print(paste0("Output of type 'Seurat Cell Hashing Calls' not found.  Readset: ", readset, ", libraryId: ", libraryId))
+  } else {
+    ret <- rowsB[1]
+  }
+
+  if (is.null(ret)){
+    print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
     rowsB <- labkey.selectRows(
       baseUrl=lkBaseUrl,
       folderPath=lkDefaultFolder,
       schemaName="sequenceanalysis",
       queryName="outputfiles",
-      viewName="",
       colSort="-rowid",
       colSelect="rowid,",
       colFilter=makeFilter(c("readset", "EQUAL", readset), 
                            c("category", "EQUAL", "10x GEX Cell Hashing Calls"), 
-                           c("libraryId", "EQUAL", libraryId)),
+                           c("library_ld", "EQUAL", libraryId)),
       containerFilter=NULL,
       colNameOpt="rname"
     )
     
-    if (nrow(rowsB) != 1){
-      
-      if(nrow(rowsB)>1) rowsB <- rowsB[1] else {
-        print(paste0("10x GEX Cell Hashing Calls readset: ", readset, " libraryId: ", libraryId, " not found"))
-      }
-      
-      print("Error, no Hashing found")
-      
-      return(NULL)
-      
+    if (nrow(rowsB) == 0){
+      print("Not found")
     } else {
-      
-      
-      return(rowsB[['rowid']])
+      ret <- rowsB[1]
+      print("Found output")
     }
   }
-  
-  
+
+  if (is.null(ret)) {
+    return(NA)
+  } else {
+    return(ret[['rowid']])
+  }
 }
 
 
