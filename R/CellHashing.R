@@ -398,7 +398,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   initialCells <- ncol(seuratObj)
   print(paste0('Initial cell barcodes in GEX data: ', ncol(seuratObj)))
 
-  if(!file.exists(barcodeCallFile)) stop("Barcode File Not found")
+  if (!file.exists(barcodeCallFile)) stop("Barcode File Not found")
 
   barcodeCallTable <- utils::read.table(barcodeCallFile, sep = '\t', header = T)
   if (!is.null(barcodePrefix)) {
@@ -931,36 +931,71 @@ FindMatchedCellHashing <- function(loupeDataId){
     containerFilter=NULL,
     colNameOpt="rname"
   )
-
-  if (nrow(rows) != 1) {
+  
+  if (nrow(rows) == 0) {
+    print(paste0("Loupe File ID: ", loupeDataId, " not found"))
     return(NA)
   }
-
+  
   readset <- rows[['readset']]
+  
   if (is.na(readset) || is.null(readset)) {
+    print("readset is NA/NULL")
     return(NA)
   }
-
+  
   libraryId <- rows[['library_id']]
-
-  rows <- labkey.selectRows(
+  
+  rowsB <- labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
-    viewName="",
     colSort="-rowid",
     colSelect="rowid,",
-    colFilter=makeFilter(c("readset", "EQUAL", readset), c("category", "EQUAL", "Seurat Cell Hashing Calls"), c("libraryId", "EQUAL", libraryId)),
+    colFilter=makeFilter(c("readset", "EQUAL", readset), 
+                         c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
+                         c("library_id", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
   )
 
-  if (nrow(rows) > 1){
-    rows <- rows[1]
+  ret <- NULL
+  if (nrow(rowsB) == 0){
+    print(paste0("Output of type 'Seurat Cell Hashing Calls' not found.  Readset: ", readset, ", libraryId: ", libraryId))
+  } else {
+    ret <- rowsB[1]
   }
 
-  return(rows[['rowid']])
+  if (is.null(ret)){
+    print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
+    rowsB <- labkey.selectRows(
+      baseUrl=lkBaseUrl,
+      folderPath=lkDefaultFolder,
+      schemaName="sequenceanalysis",
+      queryName="outputfiles",
+      colSort="-rowid",
+      colSelect="rowid,",
+      colFilter=makeFilter(c("readset", "EQUAL", readset), 
+                           c("category", "EQUAL", "10x GEX Cell Hashing Calls"), 
+                           c("library_ld", "EQUAL", libraryId)),
+      containerFilter=NULL,
+      colNameOpt="rname"
+    )
+    
+    if (nrow(rowsB) == 0){
+      print("Not found")
+    } else {
+      ret <- rowsB[1]
+      print("Found output")
+    }
+  }
+
+  if (is.null(ret)) {
+    return(NA)
+  } else {
+    return(ret[['rowid']])
+  }
 }
 
 
