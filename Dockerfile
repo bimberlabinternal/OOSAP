@@ -12,7 +12,7 @@ RUN apt-get update -y \
 
 RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)" \
     && echo -e "local({\noptions(repos = BiocManager::repositories(version = 'devel'))\n})\n" >> ~/.Rprofile.site \
-    # NOTE: these seem to be required for garnett to succeed in docker
-    && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats'), dependencies=TRUE, ask = FALSE)" \
+    # NOTE: these seem to be required for garnett to succeed in docker. DESeq2/genefilter added for Seurat
+    && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats', 'DESeq2', 'genefilter'), dependencies=TRUE, ask = FALSE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
