@@ -5,12 +5,13 @@
 \title{MergeSeuratObjs}
 \usage{
 MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
-  maxCCAspaceDim = 20, maxPCs2Weight = 20, projectName = NULL,
-  doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
-  includeCellCycleGenes = T)
+  method = "simple", maxCCAspaceDim = 20, maxPCs2Weight = 20,
+  useAllFeatures = F, nVariableFeatures = 2000,
+  includeCellCycleGenes = T, assay = NULL,
+  normalization.method = "LogNormalize", spike.genes = NULL)
 }
 \arguments{
-\item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names)}
+\item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)}
 
 \item{metadata}{A list of metadata.  If provided, the names of this list will be used as dataset names}
 
@@ -20,15 +21,13 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
 
 \item{maxPCs2Weight}{The number of dims to use with IntegrateData()}
 
-\item{projectName}{The project name when creating the final seuratObj}
-
-\item{doScaleEach}{If true, scale=T will be passed to FindIntegrationAnchors(); its default behavior to find anchors.}
-
 \item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
 
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
+
+\item{projectName}{The project name when creating the final seuratObj}
 }
 \value{
 A modified Seurat object.

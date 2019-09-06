@@ -13,6 +13,9 @@ MarkStepRun(seuratObj, name, saveFile = NULL)
 
 \item{saveFile}{If provided, the seurat object will be saved as RDS to this location}
 }
+\value{
+A modified Seurat object.
+}
 \description{
 An internal method to determine is a step has been marked as complete
 }
