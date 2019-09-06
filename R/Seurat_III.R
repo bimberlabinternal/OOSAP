@@ -223,7 +223,6 @@ doMergeCCA <- function(seuratObjs, nameList,
     print(paste0('adding dataset: ', exptNum))
     prefix <- paste0(exptNum)
     so <- seuratObjs[[exptNum]]
-    #so$BarcodePrefix <- "1234"
     if (!('BarcodePrefix' %in% names(so@meta.data))) {
       print(paste0('Adding barcode prefix: ', prefix))
       so <- RenameCells(object = so, add.cell.id = prefix)
@@ -369,53 +368,25 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
 #' @description Merges a list of Seurat objects, using Seurat::IntegrateData()
 #' @param seuratObjs A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)
 #' @param metadata A list of metadata.  If provided, the names of this list will be used as dataset names
-#' @param alignData If true, data will be aligned using Seurat::IntegrateData()
+#' @param method A string either simple or cca
 #' @param maxCCAspaceDim The number of dims to use with FindIntegrationAnchors()
 #' @param maxPCs2Weight The number of dims to use with IntegrateData()
 #' @param projectName The project name when creating the final seuratObj
-#' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)
+#' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended due to complexity). Also having all genes, means possibly more unwanted noise. Consider Spiking interesting/canonical genes as oppose to all. 
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, 
-                            alignData = T, 
-                            method = "simple", #"cca" or etc
+                            method = c("simple", "cca"), #"cca" or etc
                             maxCCAspaceDim = 20, maxPCs2Weight = 20, 
                             useAllFeatures = F, nVariableFeatures = 2000,
                             includeCellCycleGenes = T, assay = NULL,
                             normalization.method = "LogNormalize", 
                             spike.genes = NULL){
   
-  # #Testing with panc8 data
-  # options(future.globals.maxSize = 10000 * 1024^2)
-  # library(Seurat)
-  # library(SeuratData)
-  # library(ggplot2)
-  # data("panc8")
-  # seuratObjs <- SplitObject(panc8, split.by = "tech")
-  # method = "simple" # simple or cca
-  # useAllFeatures = F
-  # nVariableFeatures = 2000
-  # includeCellCycleGenes = T
-  # assay = NULL
-  # cc.genes <- OOSAP:::cc.genes
-  # g2m.genes.orig <- OOSAP:::g2m.genes.orig
-  # spike.genes = unique(c(OOSAP::Phenotyping_GeneList()$TCellCanonical,
-  #                      OOSAP::Phenotyping_GeneList()$TCellSecondary,
-  #                      OOSAP::Phenotyping_GeneList()$TCellTranscription,
-  #                      OOSAP::Phenotyping_GeneList()$CD8Canonical,
-  #                      OOSAP::Phenotyping_GeneList()$MAIT,
-  #                      OOSAP::Phenotyping_GeneList()$CD8Subphenos1,
-  #                      OOSAP::Phenotyping_GeneList()$CD4Canonical,
-  #                      OOSAP::Phenotyping_GeneList()$CD4Subphenos1,
-  #                      OOSAP::Phenotyping_GeneList()$NKCanonical,
-  #                      OOSAP::Phenotyping_GeneList()$HighlyActivated))
-  # metadata = NULL
-  # maxCCAspaceDim = 20
-  # normalization.method = "LogNormalize"
-  # maxPCs2Weight = 20
+
   
   
   if(!(method %in% c("simple", "cca"))) stop("method needs to be either simple or cca") else print(paste0("starting ", method, " merge"))
@@ -440,11 +411,11 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
                             cc.genes=cc.genes, g2m.genes.orig=g2m.genes.orig, 
                             nVariableFeatures = nVariableFeatures, 
                             spike.genes = spike.genes, maxPCs2Weight=maxPCs2Weight)
-  }
-  if(method == "simple") {
+  } else { if(method == "simple") {
     seuratObj <- doMergeSimple(seuratObjs = seuratObjs, 
                                            nameList = nameList, 
                                            projectName = "simplemerge")
+  }
   }
   
   dim(seuratObj)

@@ -4,8 +4,8 @@
 \alias{MergeSeuratObjs}
 \title{MergeSeuratObjs}
 \usage{
-MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
-  method = "simple", maxCCAspaceDim = 20, maxPCs2Weight = 20,
+MergeSeuratObjs(seuratObjs, metadata = NULL, method = c("simple",
+  "cca"), maxCCAspaceDim = 20, maxPCs2Weight = 20,
   useAllFeatures = F, nVariableFeatures = 2000,
   includeCellCycleGenes = T, assay = NULL,
   normalization.method = "LogNormalize", spike.genes = NULL)
@@ -15,13 +15,13 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
 
 \item{metadata}{A list of metadata.  If provided, the names of this list will be used as dataset names}
 
-\item{alignData}{If true, data will be aligned using Seurat::IntegrateData()}
+\item{method}{A string either simple or cca}
 
 \item{maxCCAspaceDim}{The number of dims to use with FindIntegrationAnchors()}
 
 \item{maxPCs2Weight}{The number of dims to use with IntegrateData()}
 
-\item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
+\item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended due to complexity). Also having all genes, means possibly more unwanted noise. Consider Spiking interesting/canonical genes as oppose to all.}
 
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
 
