@@ -1243,7 +1243,6 @@ random.seed = 1, returnScore = F) {
   set.seed(seed = random.seed)
   genes.old <- genes.list
 
-
   if (is.null(x = genes.list)) {
     stop("Missing input gene list")
   }
@@ -1258,15 +1257,15 @@ random.seed = 1, returnScore = F) {
   cluster.length <- length(x = genes.list)
 
   if (!all(Seurat:::LengthCheck(values = genes.list))) {
-    warning(paste(
-    'Could not find enough genes in the SeurObj from the following gene lists:',
-    paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
-    'Attempting to match case...'
+    print(paste(
+    'Could not find enough genes in the seurat object from the following gene lists:',
+      paste(names(x = which(x = ! Seurat:::LengthCheck(values = genes.list)))),
+      'Attempting to match case...'
     ))
 
     genes.list <- lapply(
-    X = genes.old,
-    FUN = CaseMatch, match = rownames(SeurObj)
+      X = genes.old,
+      FUN = Seurat::CaseMatch, match = rownames(SeurObj)
     )
   }
 

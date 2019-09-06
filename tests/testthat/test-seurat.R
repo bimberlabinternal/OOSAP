@@ -6,7 +6,7 @@ test_that("Serat processing works as expected", {
   resolutionToUse <- 0.6
 
   seuratObj <- ReadAndFilter10xData('../testdata/10xCounts/CellRanger2/raw_gene_bc_matrices/cellRanger-3204293', 'Set1', emptyDropNIters=5000)
-  #expectedSeuratObj <- readRDS('../testdata/seuratOutput.rds')
+  #expectedSeuratObj <- readRDS('../testdata/seuratOutputSS.rds')
 
   expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
@@ -55,7 +55,8 @@ test_that("Serat processing works as expected", {
   unlink(dr)
 
   #Note: if the expectations change, save this output as a reference:
-  #saveRDS(seuratObj, file = '../testdata/seuratOutput.rds')
+  #seuratObjSS <- seuratObj[1:100]
+  #saveRDS(seuratObjSS, file = '../testdata/seuratOutputSS.rds')
 })
 
 test_that("Serat SCTransform works as expected", {
@@ -67,5 +68,6 @@ test_that("Serat SCTransform works as expected", {
   expect_equal(length(rownames(seuratObjSCT@assays$SCT@scale.data)), length(rownames(seuratObjSCT@assays$SCT@counts)))
   expect_equal(ncol(seuratObjSCT), ncol(seuratObj))
 
-  #saveRDS(seuratObjSCT, file = '../testdata/seuratObjSCT.rds')
+  #seuratObjSS <- seuratObjSCT[1:100]
+  #saveRDS(seuratObjSS, file = '../testdata/seuratObjSCT.rds')
 })

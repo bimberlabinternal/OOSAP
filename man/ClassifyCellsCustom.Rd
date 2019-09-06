@@ -4,13 +4,9 @@
 \alias{ClassifyCellsCustom}
 \title{A Title}
 \usage{
-ClassifyCellsCustom(Classifier.rds.path = "", ClassifierNames = "",
-  testing.data, log10T = T, returnTraining = F, assay = NULL)
-}
-\value{
-A modified Seurat object.
+ClassifyCellsCustom(classifierFile, ClassifierNames = NULL, testing.data,
+  log10T = T, assay = NULL)
 }
 \description{
 A description
 }
-\keyword{SerIII_template}

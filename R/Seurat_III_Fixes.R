@@ -70,9 +70,9 @@ HTODemux2 <- function(
 
   #TODO: checking for any HTO negative in all clusters:
 
-  #if (sum(average.expression == 0) > 0) {
-  #  stop("Cells with zero counts exist as a cluster.")
-  #}
+  if (sum(average.expression == 0) > 0) {
+    warning("Cells with zero counts exist as a cluster.")
+  }
 
   #create a matrix to store classification result
   discrete <- GetAssayData(object = object, assay = assay)

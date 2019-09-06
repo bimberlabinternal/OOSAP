@@ -42,7 +42,8 @@ Imports:
     SingleR,
     biomaRt,
     DESeq2,
-    MAST
+    MAST,
+    kernlab
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
