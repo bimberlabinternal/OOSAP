@@ -339,7 +339,7 @@ RunUMAP.Matrix <- function(
 }
 
 .GetSPhaseGenes <- function(){
-  return (.GetCCGenes[1:43])
+  return (.GetCCGenes()[1:43])
 }
 
 .GetG2MGenes <- function() {
