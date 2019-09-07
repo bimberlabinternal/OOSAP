@@ -4,31 +4,30 @@
 \alias{MergeSeuratObjs}
 \title{MergeSeuratObjs}
 \usage{
-MergeSeuratObjs(seuratObjs, metadata = NULL, alignData = T,
-  maxCCAspaceDim = 20, maxPCs2Weight = 20, projectName = NULL,
-  doScaleEach = T, useAllFeatures = F, nVariableFeatures = 2000,
-  includeCellCycleGenes = T)
+MergeSeuratObjs(seuratObjs, metadata = NULL, method = c("simple",
+  "cca"), maxCCAspaceDim = 20, maxPCs2Weight = 20,
+  useAllFeatures = F, nVariableFeatures = 2000,
+  includeCellCycleGenes = T, assay = NULL,
+  normalization.method = "LogNormalize", spike.genes = NULL)
 }
 \arguments{
-\item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names)}
+\item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)}
 
 \item{metadata}{A list of metadata.  If provided, the names of this list will be used as dataset names}
 
-\item{alignData}{If true, data will be aligned using Seurat::IntegrateData()}
+\item{method}{A string either simple or cca}
 
 \item{maxCCAspaceDim}{The number of dims to use with FindIntegrationAnchors()}
 
 \item{maxPCs2Weight}{The number of dims to use with IntegrateData()}
 
-\item{projectName}{The project name when creating the final seuratObj}
-
-\item{doScaleEach}{If true, scale=T will be passed to FindIntegrationAnchors(); its default behavior to find anchors.}
-
-\item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
+\item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended due to complexity). Also having all genes, means possibly more unwanted noise. Consider Spiking interesting/canonical genes as oppose to all.}
 
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
+
+\item{projectName}{The project name when creating the final seuratObj}
 }
 \value{
 A modified Seurat object.

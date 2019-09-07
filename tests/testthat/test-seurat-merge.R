@@ -13,9 +13,56 @@ test_that("Seurat-merge works as expected", {
 
   expect_equal(length(seuratObjs), 2)
 
+  #Simple method
   seuratObj <- MergeSeuratObjs(seuratObjs, data)
-  rm(seuratObjs)
+
+  #barcodes should have prefix:
+  expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
 
   # NOTE: this might not be deterministic.  expect about 7987
+  print(paste0('cells: ', ncol(seuratObj)))
   expect_equal(7987, ncol(seuratObj), tolerance = 10)
+  
+  #Invalid method
+  expect_error(MergeSeuratObjs(seuratObjs, data, method = 'bad'))
+               
+  #CCA method
+  seuratObj <- MergeSeuratObjs(seuratObjs, NULL, method = 'cca')
+  expect_equal("Integrated", Seurat::DefaultAssay(seuratObj))
+  expect_equal(7987, ncol(seuratObj), tolerance = 10)
+  expect_equal(nrow(seuratObj), 2168)
+
+  #barcodes should have prefix:
+  expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
+
+  #CCA method + spike genes
+  spikeGenes <- unique(c(OOSAP::Phenotyping_GeneList()$TCellCanonical,
+                         OOSAP::Phenotyping_GeneList()$TCellSecondary,
+                         OOSAP::Phenotyping_GeneList()$TCellTranscription,
+                         OOSAP::Phenotyping_GeneList()$CD8Canonical,
+                         OOSAP::Phenotyping_GeneList()$MAIT,
+                         OOSAP::Phenotyping_GeneList()$CD8Subphenos1,
+                         OOSAP::Phenotyping_GeneList()$CD4Canonical,
+                         OOSAP::Phenotyping_GeneList()$CD4Subphenos1,
+                         OOSAP::Phenotyping_GeneList()$NKCanonical,
+                         OOSAP::Phenotyping_GeneList()$HighlyActivated))
+  
+  expectedSpike = intersect(rownames(seuratObjs[[1]]), spikeGenes)
+
+  #Not all genes will be present:
+  expect_equal(length(intersect(rownames(seuratObj), expectedSpike)), 34)
+
+
+  #Repeat with spike genes
+  seuratObj <- MergeSeuratObjs(seuratObjs, NULL, method = 'cca', spike.genes = spikeGenes)
+
+  expect_equal(nrow(seuratObj), 2183)
+  
+  #barcodes should have prefix:
+  expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
+  
+  #All spike genes should be present
+  expect_equal(sort(intersect(rownames(seuratObj), expectedSpike)), sort(expectedSpike))
+  
 })
+
