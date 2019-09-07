@@ -227,7 +227,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 		so <- seuratObjs[[exptNum]]
 		if (!HasStepRun(so, 'NormalizeData')) {
 			print('Normalizing')
-			so <- NormalizeData(object = so, verbose = F)
+			so <- NormalizeData(object = so, verbose = F, normalization.method = normalization.method)
 		} else {
 			print('Normalization performed')
 		}
@@ -254,8 +254,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 	print("Performing FindIntegrationAnchors to find anchors...")
     
 	# dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-	anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, verbose = F,
-																		assay = assay)
+	anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, verbose = F, assay = assay)
 
 	allFeatures <- rownames(seuratObjs[[1]])
     
