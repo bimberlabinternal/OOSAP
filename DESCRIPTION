@@ -42,7 +42,8 @@ Imports:
     SingleR,
     biomaRt,
     DESeq2,
-    MAST
+    MAST,
+    kernlab
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
@@ -59,7 +60,8 @@ Collate:
     'Utils.R'
     'Classification_Caret.R'
     'Classification_Garnett.R'
-    'Classification_Seurat.R'
+    'Classification_MCE.R'
+    'Classification_SGS.R'
     'Classification_Sim.R'
     'DataQueries.R'
     'GSEA_Seurat.R'

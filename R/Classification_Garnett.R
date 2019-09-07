@@ -8,7 +8,6 @@
 #' @description A description
 #' @param SerObj, A Seurat object.
 #' @return A modified Seurat object.
-#' @keywords SerIII_template
 #' @export
 Garnett_Classification <- function(SerObj,
                                           marker_file_path = "./data/Garnett/pbmc_classification.txt",

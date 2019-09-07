@@ -5,3 +5,5 @@
 ^OOSAP.iml$
 ^OOSAP.ipr$
 ^OOSAP.iws$
+^OOSAP.*\.tar\.gz$
+^OOSAP.*\.zip$
