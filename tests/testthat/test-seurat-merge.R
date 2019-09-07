@@ -14,8 +14,10 @@ test_that("Seurat-merge works as expected", {
   expect_equal(length(seuratObjs), 2)
 
   #Simple method
-  seuratObj <- MergeSeuratObjs(seuratObjs, data)
-
+  seuratObj <- MergeSeuratObjs(seuratObjs, data, method = NULL)
+  expect_equal("RNA", Seurat::DefaultAssay(seuratObj))
+  expect_equal("simple", seuratObj@misc$MergeMethod)
+  
   #barcodes should have prefix:
   expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
 
@@ -29,6 +31,7 @@ test_that("Seurat-merge works as expected", {
   #CCA method
   seuratObj <- MergeSeuratObjs(seuratObjs, NULL, method = 'cca')
   expect_equal("Integrated", Seurat::DefaultAssay(seuratObj))
+  expect_equal("cca", seuratObj@misc$MergeMethod)
   expect_equal(7987, ncol(seuratObj), tolerance = 10)
   expect_equal(nrow(seuratObj), 2168)
 

@@ -395,6 +395,9 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
                                            projectName = "simplemerge")
   }
 
+  #store method used
+  seuratObj@misc['MergeMethod'] <- method
+
   return(seuratObj)
 }
 
