@@ -49,3 +49,24 @@ AliasGeneNames <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_
 
     return(RenameGenesUsingCD(ret$Label))
 }
+
+
+.PrepareGeneNames <- function(data, doRhesusConvDavid, ENSMB.tag) {
+    #TODO: this should be converted to RDS, or ideally flow through the GeneNames.R code
+    if (doRhesusConvDavid) {
+        RhesusConvDavid.path <- "./data/Rhesus/David6.8_ConvertedRhesus_ENSMMUG.txt"
+        if (!file.exists(RhesusConvDavid.path)){
+            print("David file not found")
+        } else {
+            colnames(data)[grepl(ENSMB.tag, colnames(data))]<- RhesusGeneDavidConv(ColNames2Conv=colnames(data), RhesusConvDavid.path=RhesusConvDavid.path)
+        }
+    }
+
+    #for now because I did that with the training set, when new training is done,
+    #I will not do this, as its just fine to keep the dash and avoid dupes
+    if (cleanName) {
+        colnames(data)<- gsub("-", "", colnames(data))
+    }
+
+    return(data)
+}

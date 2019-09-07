@@ -24,11 +24,6 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
   #7) Yan 2017
   #8) Hermann 2018
 
-
-  getwd()
-
-
-
   SGS.LS <- list()
   #### IxNG to IFNG
   SGS.LS$WBC                      <- c("PTPRC")
@@ -165,17 +160,17 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
   AnnotationFiles <- list.files(QuickGO.path, pattern = "QuickGO", full.names = T)
   GeneLists <- list()
 
+  #TODO: Move to RDS
   for(AnnFile in AnnotationFiles){
-    # AnnFile = AnnotationFiles[1]
     tempName = gsub(".txt", "", gsub("_","",gsub("annotations-", "", gsub(".tsv","",gsub("-","",basename(AnnFile))))))
-    GeneLists$Extra[[tempName]] <-  utils::read.table(
-      AnnFile,
-      sep="\t", header=TRUE, row.names = NULL, fill = TRUE )
+    GeneLists$Extra[[tempName]] <-  utils::read.table(AnnFile, sep="\t", header=TRUE, fill = TRUE)
   }
 
-  SGS.LS$QuickGOgenes <- as.character(data.table::rbindlist(lapply(GeneLists$Extra, function(setX){
-    subset(setX, TAXON.ID == 9606)[,c("GO.NAME", "SYMBOL")] #10090 = mouse ; 9606 = human
-  }))$SYMBOL)
+  if (length(GeneLists) > 0) {
+    SGS.LS$QuickGOgenes <- as.character(data.table::rbindlist(lapply(GeneLists$Extra, function(setX){
+      subset(setX, TAXON.ID == 9606)[,c("GO.NAME", "SYMBOL")] #10090 = mouse ; 9606 = human
+    }))$SYMBOL)
+  }
 
   return(SGS.LS)
 }
