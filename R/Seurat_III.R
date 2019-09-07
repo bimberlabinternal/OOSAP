@@ -1,5 +1,6 @@
 #' @include LabKeySettings.R
 #' @include Seurat_III_Fixes.R
+#' @include Utils.R
 #' @import Seurat
 #' @import Rlabkey
 
@@ -211,132 +212,97 @@ doMergeCCA <- function(seuratObjs, nameList,
                        maxCCAspaceDim, 
                        assay = NULL, 
                        normalization.method = "LogNormalize", 
-                       useAllFeatures = F, includeCellCycleGenes = T, cc.genes=NULL, g2m.genes.orig=NULL, nVariableFeatures = NULL,
+                       useAllFeatures = F, includeCellCycleGenes = T, nVariableFeatures = NULL,
                        plotFigs = T, spike.genes = NULL, maxPCs2Weight=NULL){
-  
-  # options(future.globals.maxSize = 10000 * 1024^2)
-  
-  
-  #Pre process each object in list of objects 
-  for (exptNum in nameList) {
-    # exptNum = nameList[1]
-    print(paste0('adding dataset: ', exptNum))
-    prefix <- paste0(exptNum)
-    so <- seuratObjs[[exptNum]]
-    if (!('BarcodePrefix' %in% names(so@meta.data))) {
-      print(paste0('Adding barcode prefix: ', prefix))
-      so <- RenameCells(object = so, add.cell.id = prefix)
-      so[['BarcodePrefix']] <- c(prefix)
-    } else {
-      print('Barcode prefix already added')
-    }
-    
-    if (length(seuratObjs) > 1) {
-      
-      if (!HasStepRun(so, 'NormalizeData')) {
-        print('Normalizing')
-        so <- NormalizeData(object = so, verbose = F)
-      } else {
-        print('Normalization performed')
-      }
-      
-      if (!HasStepRun(so, 'FindVariableFeatures')) {
-        print('Finding variable features')
-        so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
-      } else {
-        print('FindVariableFeatures performed')
-      }
-      
-      # No scaling needed at this step. 
-      #
-      # if (HasStepRun(so, 'ScaleData') & doScaleEach) {
-      #   warning("doScaleEach = T and this object is scaled; adding to time complexity")
-      # } else {
-      #   print('ScaleData not prev. performed')
-      # }
-      
-      
-      
-      if(plotFigs) print(LabelPoints(plot = VariableFeaturePlot(so), points = head(VariableFeatures(so), 20), 
-                                     repel = TRUE, xnudge = 0, ynudge = 0))
-    }
-    
-    seuratObjs[[exptNum]] <- so
+
+
+  if (length(seuratObjs) == 1) {
+		print("Only one file in list. no need to merge. returning the single object")
+		return(seuratObjs[[1]])
+	}
+
+  #Pre process each object in list of objects
+	for (exptNum in nameList) {
+		print(paste0('adding dataset: ', exptNum))
+		so <- seuratObjs[[exptNum]]
+		if (!HasStepRun(so, 'NormalizeData')) {
+			print('Normalizing')
+			so <- NormalizeData(object = so, verbose = F)
+		} else {
+			print('Normalization performed')
+		}
+
+		if (!HasStepRun(so, 'FindVariableFeatures')) {
+			print('Finding variable features')
+			so <- FindVariableFeatures(object = so, verbose = F, selection.method = "vst", nfeatures = nVariableFeatures)
+		} else {
+			print('FindVariableFeatures performed')
+		}
+
+		# No scaling needed at this step.
+
+		if (plotFigs) {
+			print(LabelPoints(plot = VariableFeaturePlot(so), points = head(VariableFeatures(so), 20), repel = TRUE, xnudge = 0, ynudge = 0))
+		}
+
+		seuratObjs[[exptNum]] <- so
   }
   
   seuratObj <- NULL
-  
-  if (length(seuratObjs) > 1) {
-    CheckDuplicatedCellNames(seuratObjs)
+	CheckDuplicatedCellNames(seuratObjs)
     
-    print("Performing FindIntegrationAnchors to find anchors...")
+	print("Performing FindIntegrationAnchors to find anchors...")
     
-    # dims here means : Which dimensions to use from the CCA to specify the neighbor search space
-    anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, verbose = F, 
-                                      assay = assay, normalization.method = normalization.method)
-    
-    Allfeatures <- rownames(seuratObjs[[1]])
-    
-    #if all of the objects have the same genes, then above suffice
-    #if objects have different genes, their intersect is what we want, i.e., genes represented across samples
-    
-    #if (length(seuratObjs) > 1) {
-    for(i in 2:length(seuratObjs)) {
-      Allfeatures <- intersect(Allfeatures, rownames(seuratObjs[[i]]))
-    }
-    
+	# dims here means : Which dimensions to use from the CCA to specify the neighbor search space
+	anchors <- FindIntegrationAnchors(object.list = seuratObjs, dims = 1:maxCCAspaceDim, verbose = F,
+																		assay = assay)
 
+	allFeatures <- rownames(seuratObjs[[1]])
     
-    #run using intersection of all features
-    if (useAllFeatures) {
-      
-      features <- Allfeatures
-      
-      print(paste0('Total features in common: ', length(features)))
-    } else {
-      
-      #use the variable genes, across all samples, get the intersect
-      
-      features <- VariableFeatures(seuratObjs[[1]])
-      
-      #if (length(seuratObjs) > 1) {
-        for (i in 2:length(seuratObjs)) {
-          features <- intersect(features, VariableFeatures(seuratObjs[[i]]))
-        }
-      #}
-      
-      #now add the anchor.features, should be the same as variable features above, unless pipeline is changed
-      features <- unique(c(features, slot(object = anchors, name = "anchor.features")))
-      
-      if(includeCellCycleGenes) features <- unique(c(features, cc.genes, g2m.genes.orig))
-      if(!is.null(spike.genes)) features <- unique(c(features, spike.genes))
-      
-    }
-    
-    #canonicals or other spikes may not be in the set of genes, so errors are given. Needs to remove genes not in data.
-    features <- features[features %in% Allfeatures]
-    
-    print(paste0("Number of final feature kept: ", length(features) ))
-    
-    print("Starting IntegrateData to combine using cca")
-    
-    # dims here means : #Number of PCs to use in the weighting procedure
-    seuratObj <- IntegrateData(anchorset = anchors, dims = 1:maxPCs2Weight, 
-                               verbose = F, 
-                               features.to.integrate = features, 
-                               new.assay.name = "Integrated")
-    
-    DefaultAssay(seuratObj) <- "Integrated"
-    
-    # This will prevent repeating this step downstream
-    seuratObj <- MarkStepRun(seuratObj, 'NormalizeData')
-    
-    return(seuratObj)
-    
-  } else {
-      warning("only one file in list. no need to merge. returning the single object")
-      return(seuratObjs[[1]])
-    }
+	#if all of the objects have the same genes, then above suffice
+	#if objects have different genes, their intersect is what we want, i.e., genes represented across samples
+	for (i in 2:length(seuratObjs)) {
+		allFeatures <- intersect(allFeatures, rownames(seuratObjs[[i]]))
+	}
+
+	#run using intersection of all features
+	if (useAllFeatures) {
+		features <- allFeatures
+		print(paste0('Total features in common: ', length(features)))
+	} else {
+		#use the variable genes, across all samples, get the intersect
+		features <- VariableFeatures(seuratObjs[[1]])
+
+		for (i in 2:length(seuratObjs)) {
+			features <- intersect(features, VariableFeatures(seuratObjs[[i]]))
+		}
+
+		#now add the anchor.features, should be the same as variable features above, unless pipeline is changed
+		features <- unique(c(features, slot(object = anchors, name = "anchor.features")))
+
+		if (includeCellCycleGenes) features <- unique(c(features, .GetSPhaseGenes(), .GetG2MGenes()))
+		if (!is.null(spike.genes)) features <- unique(c(features, spike.genes))
+	}
+
+	#canonicals or other spikes may not be in the set of genes, so errors are given. Needs to remove genes not in data.
+	features <- features[features %in% allFeatures]
+
+	print(paste0("Number of final feature kept: ", length(features)))
+
+	print("Starting IntegrateData to combine using CCA")
+
+	# dims here means : #Number of PCs to use in the weighting procedure
+	seuratObj <- IntegrateData(anchorset = anchors, dims = 1:maxPCs2Weight,
+														 verbose = F,
+														 features.to.integrate = features,
+														 new.assay.name = "Integrated")
+
+	DefaultAssay(seuratObj) <- "Integrated"
+
+	# This will prevent repeating this step downstream
+	seuratObj <- MarkStepRun(seuratObj, 'NormalizeData')
+
+	return(seuratObj)
 }
 
 
@@ -345,7 +311,6 @@ doMergeCCA <- function(seuratObjs, nameList,
 #' @param seuratObjs A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)
 #' @param nameList A list of names from MergeSeuratObjs()
 doMergeSimple <- function(seuratObjs, nameList, projectName){
-  
   seuratObj <- NULL
   
   for (exptNum in nameList) {
@@ -357,8 +322,8 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
                          y = seuratObjs[[exptNum]],
                          project = projectName)
     }
-    
   }
+  
   return(seuratObj)
 }
 
@@ -379,46 +344,58 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
 #' @export
 #' @importFrom methods slot
 MergeSeuratObjs <- function(seuratObjs, metadata=NULL, 
-                            method = c("simple", "cca"), #"cca" or etc
+                            method = c("simple", "cca"),
                             maxCCAspaceDim = 20, maxPCs2Weight = 20, 
                             useAllFeatures = F, nVariableFeatures = 2000,
                             includeCellCycleGenes = T, assay = NULL,
                             normalization.method = "LogNormalize", 
                             spike.genes = NULL){
-  
 
-  
-  
-  if(!(method %in% c("simple", "cca"))) stop("method needs to be either simple or cca") else print(paste0("starting ", method, " merge"))
-  
-  
+
+  method <- match.arg(method)
+
+  print(paste0("Starting merge.  Method: ", method))
+
   nameList <- NULL
   if (is.null(metadata)){
     nameList <- names(seuratObjs)
   } else {
     nameList <- names(metadata)
   }
+
+  #ensure barcodes unique:
+  for (exptNum in nameList) {
+    print(paste0('adding dataset: ', exptNum))
+    prefix <- paste0(exptNum)
+    so <- seuratObjs[[exptNum]]
+    if (!('BarcodePrefix' %in% names(so@meta.data))) {
+      print(paste0('Adding barcode prefix: ', prefix))
+      so <- RenameCells(object = so, add.cell.id = prefix)
+      so[['BarcodePrefix']] <- c(prefix)
+    } else {
+      print('Barcode prefix already added')
+    }
+
+    seuratObjs[[exptNum]] <- so
+  }
   
-  if(method == "cca"){
+  if (method == "cca"){
     seuratObj <- doMergeCCA(seuratObjs = seuratObjs, 
                             nameList = nameList, 
                             plotFigs = T, 
                             maxCCAspaceDim = maxCCAspaceDim, 
                             assay = assay, 
                             normalization.method = normalization.method, 
-                            useAllFeatures = F, 
-                            includeCellCycleGenes = T, 
-                            cc.genes=cc.genes, g2m.genes.orig=g2m.genes.orig, 
+                            useAllFeatures = useAllFeatures,
+                            includeCellCycleGenes = includeCellCycleGenes,
                             nVariableFeatures = nVariableFeatures, 
-                            spike.genes = spike.genes, maxPCs2Weight=maxPCs2Weight)
-  } else { if(method == "simple") {
+                            spike.genes = spike.genes,
+                            maxPCs2Weight=maxPCs2Weight)
+  } else if (method == "simple") {
     seuratObj <- doMergeSimple(seuratObjs = seuratObjs, 
                                            nameList = nameList, 
                                            projectName = "simplemerge")
   }
-  }
-  
-  dim(seuratObj)
 
   return(seuratObj)
 }
@@ -531,7 +508,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     }
   }
   
-  if(!is.null(spikeGenes)){
+  if (!is.null(spikeGenes)){
     VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
   }
 
@@ -599,21 +576,9 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
                             useSCTransform = F, do.scale = T, do.center = T) {
   print("Performing cell cycle cleaning ...")
 
-  # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
-  # and stored using use_data(internal = T) (https://github.com/r-lib/usethis and use_data)
-  # cc.genes
-  # g2m.genes.orig
-  if (length(cc.genes) != 97) {
-    stop('Something went wrong loading cc.genes list')
-  }
-
-  if (length(g2m.genes.orig) != 200) {
-    stop('Something went wrong loading g2m.genes list')
-  }
-
   # We can segregate this list into markers of G2/M phase and markers of S-phase
-  s.genes <- cc.genes[1:43]
-  g2m.genes <- unique(c(g2m.genes.orig, cc.genes[44:97]))
+  s.genes <- .GetSPhaseGenes()
+  g2m.genes <- .GetG2MGenes()
 
   s.genes <- s.genes[which(s.genes %in% rownames(seuratObj))]
   g2m.genes <- g2m.genes[which(g2m.genes %in% rownames(seuratObj))]
@@ -1301,7 +1266,7 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = 
 
   ClustLS <- list()
 
-  for(lev in levels(AvlLevels)){
+  for (lev in levels(AvlLevels)){
     print(lev)
     ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, features = genes, slot = slot)[genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
   }
@@ -1440,7 +1405,7 @@ random.seed = 1, returnScore = F) {
 
   gc(verbose = FALSE)
 
-  if(!returnScore){
+  if (!returnScore){
     return(SeurObj)
   } else {
     SeurObj@meta.data$cID <- rownames(SeurObj@meta.data)

@@ -328,3 +328,20 @@ RunUMAP.Matrix <- function(
   
   return(umap_output)
 }
+
+.GetCCGenes <- function(){
+  # Cell cycle genes were obtained from the Seurat example (See regev_lab_cell_cycle_genes.txt)
+  # and stored using use_data(internal = T) (https://github.com/r-lib/usethis and use_data)
+  # cc.genes
+  # g2m.genes.orig
+
+  return(cc.genes)
+}
+
+.GetSPhaseGenes <- function(){
+  return (.GetCCGenes[1:43])
+}
+
+.GetG2MGenes <- function() {
+  return(unique(c(g2m.genes.orig, .GetCCGenes()[44:97])))
+}

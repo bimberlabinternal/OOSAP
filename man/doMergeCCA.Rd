@@ -6,9 +6,8 @@
 \usage{
 doMergeCCA(seuratObjs, nameList, maxCCAspaceDim, assay = NULL,
   normalization.method = "LogNormalize", useAllFeatures = F,
-  includeCellCycleGenes = T, cc.genes = NULL, g2m.genes.orig = NULL,
-  nVariableFeatures = NULL, plotFigs = T, spike.genes = NULL,
-  maxPCs2Weight = NULL)
+  includeCellCycleGenes = T, nVariableFeatures = NULL, plotFigs = T,
+  spike.genes = NULL, maxPCs2Weight = NULL)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects}
