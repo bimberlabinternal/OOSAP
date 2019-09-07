@@ -371,11 +371,10 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
       print(paste0('Adding barcode prefix: ', prefix))
       so <- RenameCells(object = so, add.cell.id = prefix)
       so[['BarcodePrefix']] <- c(prefix)
+      seuratObjs[[exptNum]] <- so
     } else {
       print('Barcode prefix already added')
     }
-
-    seuratObjs[[exptNum]] <- so
   }
   
   if (method == "cca"){
