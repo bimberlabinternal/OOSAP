@@ -14,5 +14,5 @@ RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), depend
     && echo -e "local({\noptions(repos = BiocManager::repositories(version = 'devel'))\n})\n" >> ~/.Rprofile.site \
     # NOTE: these seem to be required for garnett to succeed in docker. DESeq2/genefilter added for Seurat
     && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats', 'DESeq2', 'genefilter'), dependencies=TRUE, ask = FALSE)" \
-    && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always', ask=FALSE)" \
+    && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always')" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
