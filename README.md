@@ -18,7 +18,7 @@ The goal of this package is to provide a high-level wrapper around tools and pip
 install.packages("devtools", 'remotes')
 
 #Latest version:
-install_github("bimberlabinternal/OOSAP", tag = "Dev")
+install_github("bimberlabinternal/OOSAP", ref = "Dev")
 
 
 ```
