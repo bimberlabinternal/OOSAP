@@ -23,7 +23,16 @@ test_that("Highly Activated Cells Called", {
   expect_equal(sum(df[['HighlyActivated.Call']]), 78)
   
   unlink(f)
+
+  #Print single FeaturePlot
+  seuratObj2 <- ClassifySGSAndApply(
+    seuratObj,
+    geneSetName = 'HighlyActivated',
+    geneList = OOSAP::Phenotyping_GeneList()[['HighlyActivated']],
+    doPlot = T
+  )
   
+  #This will print two FeaturePlots using plot_grid
   seuratObj2 <- ClassifySGSAndApply(
     seuratObj,
     geneSetName = 'HighlyActivated',
