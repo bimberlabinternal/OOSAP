@@ -52,6 +52,7 @@ ClassifySGS_Multiple <- function(seuratObj,
 #' @param positivityThreshold If provided, a boolean column will be added to the dataframe scoring cells as positive or negative, depending on if their score is greater than this threshold
 #' @return The modified seurat object
 #' @import ggplot2
+#' @importFrom cowplot plot_grid
 #' @export
 ClassifySGSAndApply <- function(seuratObj,
 geneList = NULL,
@@ -66,8 +67,19 @@ positivityThreshold = NULL
 			stop('Cell barcodes do not match between seurat object and table')
 		}
 
+		plots <- list()
 		for (col in colnames(df)[colnames(df) != 'CellBarcode']) {
 			seuratObj[[col]] <- df[col]
+
+			if (doPlot && (all(grepl(pattern = '.Score', x = col)) || all(grepl(pattern = '.Call', x = col)))) {
+				plots[[col]] <- Seurat::FeaturePlot(seuratObj, features = c(col))
+			}
+		}
+
+		if (length(plots) > 1) {
+			print(cowplot::plot_grid(plotlist = plots, ncol = 2))
+		} else if (length(plots) == 1){
+			print(plots[[1]])
 		}
 	}
 
