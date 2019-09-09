@@ -460,6 +460,14 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
                             mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
                             spikeGenes = NULL){
 
+	if (!forceReCalc && HasStepRun(seuratObj, 'ProcessSeurat1', forceReCalc = forceReCalc)) {
+    if (printDefaultPlots){
+      .PrintSeuratPlots(seuratObj, doCellCycle)
+    }
+
+		return(seuratObj)
+	}
+
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells', forceReCalc = forceReCalc))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
@@ -541,27 +549,34 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (printDefaultPlots){
-    print(VizDimLoadings(object = seuratObj, dims = 1:2))
-    print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
-
-    print(DimPlot(object = seuratObj))
-    if (doCellCycle) {
-      print(cowplot::plot_grid(plotlist = list(
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5), group.by = 'Phase')
-      )))
-    }
-
-    print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-    print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-
-    print(JackStrawPlot(object = seuratObj, dims = 1:20))
-    print(ElbowPlot(object = seuratObj))
+    .PrintSeuratPlots(seuratObj, doCellCycle)
   }
 
+  seuratObj <- MarkStepRun(seuratObj, 'ProcessSeurat1', saveFile = saveFile)
+
   return(seuratObj)
+}
+
+
+.PrintSeuratPlots(seuratObj, doCellCycle) {
+  print(VizDimLoadings(object = seuratObj, dims = 1:2))
+  print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
+
+  print(DimPlot(object = seuratObj))
+  if (doCellCycle) {
+    print(cowplot::plot_grid(plotlist = list(
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5), group.by = 'Phase')
+    )))
+  }
+
+  print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+  print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+
+  print(JackStrawPlot(object = seuratObj, dims = 1:20))
+  print(ElbowPlot(object = seuratObj))
 }
 
 
