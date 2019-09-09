@@ -1004,7 +1004,10 @@ FindMatchedCellHashing <- function(loupeDataId){
 #' @import Rlabkey
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   
-  if(file.exists(outFile) & !overwrite) stop("file exists and not overwriting")
+  if(file.exists(outFile) & !overwrite) {
+    warning("file exists and not overwriting")
+    return(outFile)
+    }
   
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
