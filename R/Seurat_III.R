@@ -191,6 +191,9 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
     saveRDS(seuratObj, file = saveFile)
   }
 
+  #Write to logfile to keep record in case this crashes
+  .WriteLogMsg(paste0('Step complete: ', name))
+
   return(seuratObj)
 }
 
@@ -747,6 +750,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 #' @importFrom dplyr %>% coalesce group_by summarise filter top_n
 #' @import DESeq2
 #' @import MAST
+#' @importFrom knitr kable
 #' @export
 Find_Markers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
 testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
@@ -797,6 +801,8 @@ numGenesToSave = 20, onlyPos = F) {
             )
           }
 
+          print(paste0('Total genes: ', nrow(toBind)))
+
           if (all(is.na(seuratObj.markers))) {
             seuratObj.markers <- toBind
           } else {
@@ -839,8 +845,10 @@ numGenesToSave = 20, onlyPos = F) {
     } else {
       print(DimPlot(object = seuratObj, reduction = 'tsne'))
 
+      seuratObj.markers <- seuratObj.markers[!is.na(seuratObj.markers$p_val_adj) & !is.na(seuratObj.markers$avg_logFC),]
       topGene <- seuratObj.markers %>% filter(p_val_adj < 0.001) %>% filter(avg_logFC > 0.5) %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
       print(DoHeatmap(object = seuratObj, features = unique(topGene$gene)))
+  		print(kable(topGene))
     }
   }
 }

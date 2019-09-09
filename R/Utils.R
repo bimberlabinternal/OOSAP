@@ -345,3 +345,12 @@ RunUMAP.Matrix <- function(
 .GetG2MGenes <- function() {
   return(unique(c(g2m.genes.orig, .GetCCGenes()[44:97])))
 }
+
+
+.WriteLogMsg <- function(msg, prefixTime = TRUE, file = 'OOAP.log.txt') {
+  if (prefixTime) {
+    msg <- paste0(Sys.time(), ' ', msg)
+  }
+
+  write(msg, file = file, append = T)
+}
