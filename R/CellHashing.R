@@ -560,7 +560,7 @@ DoMULTIseqDemux <- function(seuratObj) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
-  seuratObj <- MULTIseqDemux(seuratObj, assay = "HTO", quantile = 0.7, autoThresh = T, maxiter = 50, qrange = seq(from = 0.1, to = 0.9, by = 0.05), verbose = TRUE)
+  seuratObj <- MULTIseqDemux(seuratObj, assay = "HTO", quantile = 0.7, verbose = TRUE)
 
   seuratObj$MULTI_classification.global <- as.character(seuratObj$MULTI_ID)
   seuratObj$MULTI_classification.global[!(seuratObj$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'

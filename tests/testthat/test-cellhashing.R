@@ -5,21 +5,21 @@ tests <- list(
         input = '../testdata/cellHashing/282-1-HTO_cellHashingRawCounts.txt',
         htos = c(2:3, 8, 10, 12),
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
-        CalledCells = 21263,
-        Singlet = 12176,
-        MultiSeq = 1206,
-        Seurat = 13550,
-        CallRows = 21263,
+        CalledCells = 24846,
+        Singlet = 14319,
+        MultiSeq = 419,
+        Seurat = 17133,
+        CallRows = 24846,
         DoRowFilter = T
     ),
     '283' = list(
         input = '../testdata/cellHashing/283-cellbarcodeToHTO.calls.citeSeqCounts.txt', htos = c(2:6),
         gexBarcodeFile = '../testdata/cellHashing/283-validCellIndexes.csv',
-        CalledCells = 5346,
-        Singlet = 2697,
-        MultiSeq = 853,
-        Seurat = 2900,
-        CallRows = 5346,
+        CalledCells = 5969,
+        Singlet = 2971,
+        MultiSeq = 230,
+        Seurat = 3523,
+        CallRows = 5969,
         DoRowFilter = T
     )
     # 'NewFormat' = list(
@@ -51,14 +51,14 @@ test_that("Cell hashing works", {
 
             GenerateQcPlots(barcodeData)
 
-            sc <- GenerateCellHashCallsSeurat(barcodeData)
+            sc <- OOSAP:::GenerateCellHashCallsSeurat(barcodeData)
 
-            mc <- GenerateCellHashCallsMultiSeq(barcodeData)
+            mc <- OOSAP:::GenerateCellHashCallsMultiSeq(barcodeData)
 
-            dt <- ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = callsFile)
+            dt <- OOSAP:::ProcessEnsemblHtoCalls(mc, sc, barcodeData, outFile = callsFile)
 
             if (!is.null(whitelistFile) && !is.null(summaryFile)){
-                GenerateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
+              OOSAP:::GenerateSummaryForExpectedBarcodes(dt, whitelistFile = whitelistFile, outputFile = summaryFile, barcodeData = barcodeData)
             }
 
             return(list(barcodeData = barcodeData, dt = dt))
@@ -77,7 +77,7 @@ test_that("Cell hashing works", {
         barcodeData <- l$barcodeData
 
         expectedHtos <- sort(paste0('HTO-', test$htos))
-        actualHtosMatrix <- sort(unname(simplifyHtoNames(rownames(barcodeData))))
+        actualHtosMatrix <- sort(unname(OOSAP:::simplifyHtoNames(rownames(barcodeData))))
 
         expect_equal(expectedHtos, actualHtosMatrix)
 
