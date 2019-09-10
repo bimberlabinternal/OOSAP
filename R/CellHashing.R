@@ -14,6 +14,7 @@
 #' @keywords CITE-Seq,
 #' @export
 #' @importFrom knitr kable
+#' @importFrom knitr kable
 ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   if (is.na(bFile)){
     stop("No file set: change bFile")
@@ -1003,6 +1004,12 @@ FindMatchedCellHashing <- function(loupeDataId){
 #'
 #' @import Rlabkey
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
+  
+  if (file.exists(outFile) & !overwrite) {
+    print("File exists and not overwriting")
+    return(outFile)
+	}
+  
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
     baseUrl=lkBaseUrl,
@@ -1016,6 +1023,8 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
     containerFilter=NULL,
     colNameOpt="rname"
   )
+  
+  
 
   if (nrow(rows) != 1) {
     stop(paste0('More than one matching file found, this should not occur.  RowId: ', outputFileId))
@@ -1036,8 +1045,8 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
     localFilePath = outFile
   )
 
-  if (!success | !file.exists(outFile)) {
-    stop(paste0('failed to download file: ', remotePath))
+  if (!success || !file.exists(outFile)) {
+    stop(paste0('labkey.webdav.get failed for file: ', remotePath))
   }
 
   return(outFile)
