@@ -18,10 +18,10 @@ test_that("SingleR works as expected", {
     expect_true(file.exists(sr2))
     unlink(sr2)
 
-    expect_equal(120, sum(seuratObj$SingleR_Labels == 'NK_cell'))
+    expect_equal(114, sum(seuratObj$SingleR_Labels == 'NK_cell'))
     expect_equal(0, sum(seuratObj$SingleR_Labels == 'B_cell'))
     expect_equal(0, sum(seuratObj$SingleR_Labels == 'Neutrophils'))
-    expect_equal(22, sum(seuratObj$SingleR_Labels == 'Unknown'))
+    expect_equal(21, sum(seuratObj$SingleR_Labels == 'Unknown'))
 
     expect_equal(188, sum(seuratObj$SingleR_Labels_Fine == 'T_cell:CD8+_Central_memory'))
     expect_equal(62, sum(seuratObj$SingleR_Labels_Fine == 'T_cell:CD8+_naive'))

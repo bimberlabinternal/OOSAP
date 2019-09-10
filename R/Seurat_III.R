@@ -191,6 +191,9 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
     saveRDS(seuratObj, file = saveFile)
   }
 
+  #Write to logfile to keep record in case this crashes
+  .WriteLogMsg(paste0('Step complete: ', name))
+
   return(seuratObj)
 }
 
@@ -460,6 +463,14 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
                             mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
                             spikeGenes = NULL){
 
+	if (!forceReCalc && HasStepRun(seuratObj, 'ProcessSeurat1', forceReCalc = forceReCalc)) {
+    if (printDefaultPlots){
+      .PrintSeuratPlots(seuratObj, doCellCycle)
+    }
+
+		return(seuratObj)
+	}
+
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells', forceReCalc = forceReCalc))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
@@ -541,27 +552,34 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   if (printDefaultPlots){
-    print(VizDimLoadings(object = seuratObj, dims = 1:2))
-    print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
-
-    print(DimPlot(object = seuratObj))
-    if (doCellCycle) {
-      print(cowplot::plot_grid(plotlist = list(
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4), group.by = 'Phase'),
-        DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5), group.by = 'Phase')
-      )))
-    }
-
-    print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-    print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-
-    print(JackStrawPlot(object = seuratObj, dims = 1:20))
-    print(ElbowPlot(object = seuratObj))
+    .PrintSeuratPlots(seuratObj, doCellCycle)
   }
 
+  seuratObj <- MarkStepRun(seuratObj, 'ProcessSeurat1', saveFile = saveFile)
+
   return(seuratObj)
+}
+
+
+.PrintSeuratPlots <- function(seuratObj, doCellCycle) {
+  print(VizDimLoadings(object = seuratObj, dims = 1:2))
+  print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
+
+  print(DimPlot(object = seuratObj))
+  if (doCellCycle) {
+    print(cowplot::plot_grid(plotlist = list(
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(3, 4), group.by = 'Phase'),
+      DimPlot(object = seuratObj, reduction = "pca", dims = c(4, 5), group.by = 'Phase')
+    )))
+  }
+
+  print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+  print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+
+  print(JackStrawPlot(object = seuratObj, dims = 1:20))
+  print(ElbowPlot(object = seuratObj))
 }
 
 
@@ -732,6 +750,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 #' @importFrom dplyr %>% coalesce group_by summarise filter top_n
 #' @import DESeq2
 #' @import MAST
+#' @importFrom knitr kable
 #' @export
 Find_Markers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
 testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
@@ -782,6 +801,8 @@ numGenesToSave = 20, onlyPos = F) {
             )
           }
 
+          print(paste0('Total genes: ', nrow(toBind)))
+
           if (all(is.na(seuratObj.markers))) {
             seuratObj.markers <- toBind
           } else {
@@ -824,8 +845,10 @@ numGenesToSave = 20, onlyPos = F) {
     } else {
       print(DimPlot(object = seuratObj, reduction = 'tsne'))
 
+      seuratObj.markers <- seuratObj.markers[!is.na(seuratObj.markers$p_val_adj) & !is.na(seuratObj.markers$avg_logFC),]
       topGene <- seuratObj.markers %>% filter(p_val_adj < 0.001) %>% filter(avg_logFC > 0.5) %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
       print(DoHeatmap(object = seuratObj, features = unique(topGene$gene)))
+  		print(kable(topGene))
     }
   }
 }
