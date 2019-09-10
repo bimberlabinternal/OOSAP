@@ -536,14 +536,17 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- MarkStepRun(seuratObj, 'ProjectDim')
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'JackStraw', forceReCalc = forceReCalc)) {
-    seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
-    seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
+  #Verify data exists.  This appears to get reset, possibly by DimRedux steps
+  runJackStraw <- forceReCalc | !HasStepRun(seuratObj, 'JackStraw', forceReCalc = forceReCalc)
+  if (!runJackStraw && length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
+    warning('JackStraw marked as complete, but seurat object lacks data')
+    runJackStraw <- TRUE
   }
 
-  if (forceReCalc | !HasStepRun(seuratObj, 'ScoreJackStraw', forceReCalc = forceReCalc)) {
+  if (runJackStraw) {
+    seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
     seuratObj <- ScoreJackStraw(object = seuratObj, dims = 1:20)
-    seuratObj <- MarkStepRun(seuratObj, 'ScoreJackStraw')
+    seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
   }
 
   print(paste0('Total variable genes: ', length(vg)))
