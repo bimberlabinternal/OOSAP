@@ -22,7 +22,6 @@ RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), depend
 ADD . /OOSAP
 
 RUN cd /OOSAP \
-    && ls && cat ~/.Rprofile.site \
     && R CMD build . \
     && R CMD INSTALL --build *.tar.gz \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds

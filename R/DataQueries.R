@@ -94,9 +94,17 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   })
 
   origBarcodes <- colnames(seuratObj)
-  df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
-  names(df) <- c(htoLabel, 'BarcodePrefix', 'Barcode', 'SortOrder')
-  df <- merge(df, rows, by = c(htoLabel, 'BarcodePrefix'), all.x = T)
+  hasHTO <- !all(is.na(rows[htoLabel]))
+  if (hasHTO) {
+    df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
+    names(df) <- c(htoLabel, 'BarcodePrefix', 'Barcode', 'SortOrder')
+    df <- merge(df, rows, by = c(htoLabel, 'BarcodePrefix'), all.x = T)
+  } else {
+    df <- data.frame(HTO = NA, BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
+    names(df) <- c(htoLabel, 'BarcodePrefix', 'Barcode', 'SortOrder')
+    df <- merge(df, rows, by = c('BarcodePrefix'), all.x = T)
+  }
+
   df <- dplyr::arrange(df, SortOrder)
   df <- df[colnames(df) != 'SortOrder']
   rownames(df) <- df$Barcode
