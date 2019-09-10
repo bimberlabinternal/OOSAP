@@ -561,7 +561,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 }
 
 
-.PrintSeuratPlots(seuratObj, doCellCycle) {
+.PrintSeuratPlots <- function(seuratObj, doCellCycle) {
   print(VizDimLoadings(object = seuratObj, dims = 1:2))
   print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
 
