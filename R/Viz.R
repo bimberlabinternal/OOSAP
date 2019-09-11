@@ -109,5 +109,96 @@ PlotBin2D <- function(DF, bins = 75, ncol = 3){
 }
                       
 
+#' @title PlotBin2D
+#'
+#' @description This function from a seurat object, takes the gene expression of a single gene and provides a vizualization for thresholding and corresponding descritized tabulation.
+#' @param SeuratObj, A Seurat object.
+#' @param GeneName, the Gene name of interest. 
+#' @param CutThresh, cutting threshold.
+#' @param TitleExtra, title from user.
+#' @return plot with ggplot tabulated bar plots. 
+#' @export
+ExprThrTab <- function(SeuratObj, GeneName = NULL, CutThresh = NULL, PlotBar = T,
+                       MetaDataName = NULL, TitleExtra = "", PlotHist = F, 
+                       col_vector = col_vector){
+  
+  if(is.null(GeneName)) stop("GeneName is NULL")
+  if(is.null(MetaDataName)) stop("MetaDataName is NULL")
+  if(is.null(CutThresh)) stop("CutThresh is NULL")
+  if(length(GeneName) != 1) stop ("GeneName Length != 1")
+  
+  
+  # tempTab <- table(SeuratObj@assays$RNA@data[GeneName, ]>CutThresh, SeuratObj@meta.data[,MetaDataName])
+  tempTab <- table(GetAssayData(object = SeuratObj, slot = 'data')[GeneName, ]>CutThresh, 
+                   SeuratObj@meta.data[,MetaDataName])
+  
+  
+  
+  print(addmargins(tempTab))
+  
+  if(!PlotHist){
+    if(PlotBar) p2 <- ggplot(melt(tempTab)) +
+      geom_bar(aes(x=Var2, y=value, fill=factor(Var1)), stat="identity", width = 0.7) +
+      theme_bw()  + scale_fill_manual(values=col_vector) +
+      theme(legend.position="bottom",
+            legend.direction="horizontal",
+            legend.title = element_blank(),
+            axis.text.x = element_text(angle = 90)) +
+      ggtitle(paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells")
+    
+    print(p2)
+    
+  } else {
+    
+    tempDF  <- as.data.frame(cbind(Expr = SeuratObj@assays$RNA@data[GeneName, ], CellN = colnames(SeuratObj@assays$RNA@data)), stringsAsFactors = F)
+    tempDF$Expr <- as.numeric(tempDF$Expr)
+    
+    vp <- VlnPlot(SeuratObj, features = GeneName, group.by = MetaDataName, cols = col_vector) + theme(legend.position = "none") +
+      geom_hline(aes(yintercept=CutThresh),
+                 color="blue", linetype="dashed", size=1)
+    
+    p1 <- cowplot::plot_grid(
+      ggplot(tempDF, aes(x=Expr)) + 
+        geom_histogram(aes(y=..density..), colour="black", fill="white", binwidth = .3) +
+        geom_density(alpha=.2, fill="#E69F00") + theme_bw() + 
+        geom_vline(aes(xintercept=CutThresh ),
+                   color="blue", linetype="dashed", size=1) +
+        theme(legend.position="bottom",
+              legend.direction="horizontal",
+              legend.title = element_blank(),
+              axis.text.x = element_text(angle = 90)),
+      ggplot(melt(tempTab)) +
+        geom_bar(aes(x=Var2, y=value, fill=factor(Var1)), stat="identity", width = 0.7) +
+        theme_bw()  + scale_fill_manual(values=col_vector) +
+        theme(legend.position="bottom",
+              legend.direction="horizontal",
+              legend.title = element_blank(),
+              axis.text.x = element_text(angle = 90)) +
+        ggtitle(paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells"),
+      
+      vp,
+      
+      ggplot(melt(tempTab)) +
+        geom_bar(aes(x=Var2, y=value, fill=factor(Var1)), stat="identity", width = 0.7, position="fill") +
+        theme_bw()  + scale_fill_manual(values=col_vector) +
+        theme(legend.position="bottom",
+              legend.direction="horizontal",
+              legend.title = element_blank(),
+              axis.text.x = element_text(angle = 90))+
+        scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
+                           labels = scales::percent(c(0, 0.25, 0.5, 0.75, 1))) +
+        ggtitle("\n Relative Contribution") + ylab("Relative % cells"),
+      
+      ncol = 2)
+    
+    print(p1)
+    
+    
+    
+  }
+  
+  
+  
+}
 
 
