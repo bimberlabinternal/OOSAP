@@ -5,11 +5,19 @@
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @param dataset Passed directly to biomaRt::useEnsembl
 #' @importFrom biomaRt useEnsembl getBM
+#' @importFrom dplyr %>% group_by summarise
 #' @export
 QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id')) {
     ensembl = useEnsembl(biomart=biomart, dataset=dataset)
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
     homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
+
+    homologs <- homologs %>% group_by(ensembl_gene_id) %>% summarise(
+        ensembl_transcript_id = paste(sort(unique(ensembl_transcript_id)), collapse=','),
+        external_gene_name = paste(sort(unique(external_gene_name)), collapse=','),
+        hsapiens_homolog_ensembl_gene = paste(sort(unique(hsapiens_homolog_ensembl_gene)), collapse=','),
+        hsapiens_homolog_associated_gene_name = paste(sort(unique(hsapiens_homolog_associated_gene_name)), collapse=',')
+    )
     homologs[homologs == ''] <- NA
 
     ret <- data.frame(ensembl_gene_id = ensemblIds, SortOrder = 1:length(ensemblIds))
