@@ -1006,7 +1006,7 @@ FindMatchedCellHashing <- function(loupeDataId){
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   
   if (file.exists(outFile) & !overwrite) {
-    print("File exists and not overwriting")
+    print("File exists, will not overwrite")
     return(outFile)
 	}
   

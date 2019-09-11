@@ -13,4 +13,8 @@ test_that("All aliases preserved", {
 
     aliased <- AliasGeneNames(c('ENSMMUG00000040244', 'ENSMMUG00000008350', 'CD8', 'DPP4'))
     expect_equal(aliased, c('TRAV1-1', 'MDK', 'CD8', 'DPP4 (CD26,ADCP2)'))
+
+    #verify concat works when it returns two hits:
+    aliased <- AliasGeneNames(c('ENSMMUG00000029821'))
+    expect_equal(aliased, c('HSPA1A,HSPA1B'))
 })

@@ -750,14 +750,14 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 #' @param testsToUse A vector of tests to be used.  Each will be used to run FindAllMarkers() and the results merged
 #' @param numGenesToSave The number of top markers per cluster to save
 #' @param onlyPos If true, only positive markers will be saved
-#' @importFrom dplyr %>% coalesce group_by summarise filter top_n
+#' @importFrom dplyr %>% coalesce group_by summarise filter top_n select everything
 #' @import DESeq2
 #' @import MAST
 #' @importFrom knitr kable
 #' @export
-Find_Markers <- function(seuratObj, resolutionToUse, outFile, saveFileMarkers = NULL,
+Find_Markers <- function(seuratObj, resolutionToUse, outFile = NULL, saveFileMarkers = NULL,
 testsToUse = c('wilcox', 'bimod', 'roc', 't', 'negbinom', 'poisson', 'LR', 'MAST', 'DESeq2'),
-numGenesToSave = 20, onlyPos = F) {
+numGenesToSave = 20, onlyPos = F, includeNameTranslation = T) {
 
   Idents(seuratObj) <- seuratObj[[paste0('ClusterNames_',resolutionToUse)]]
 
@@ -820,7 +820,7 @@ numGenesToSave = 20, onlyPos = F) {
       })
     }
 
-    if (is.na(seuratObj.markers)) {
+    if (all(is.na(seuratObj.markers))) {
       print('All tests failed, no markers returned')
       return()
     }
@@ -841,16 +841,22 @@ numGenesToSave = 20, onlyPos = F) {
     return()
   } else {
     toWrite <- seuratObj.markers %>% filter(p_val_adj < 0.001) %>% filter(avg_logFC > 0.5) %>% group_by(cluster, test) %>% top_n(numGenesToSave, avg_logFC)
-    write.table(toWrite, file = outFile, sep = '\t', row.names = F, quote = F)
-
     if (nrow(toWrite) == 0) {
       print('No significant markers were found')
     } else {
+      if (includeNameTranslation) {
+        toWrite$translatedName <- AliasGeneNames(toWrite$gene)
+        toWrite <- toWrite %>% select(gene, translatedName, everything())
+      }
+
+      if (!is.null(outFile)) {
+        write.table(toWrite, file = outFile, sep = '\t', row.names = F, quote = F)
+      }
+
       print(DimPlot(object = seuratObj, reduction = 'tsne'))
 
-      seuratObj.markers <- seuratObj.markers[!is.na(seuratObj.markers$p_val_adj) & !is.na(seuratObj.markers$avg_logFC),]
-      topGene <- seuratObj.markers %>% filter(p_val_adj < 0.001) %>% filter(avg_logFC > 0.5) %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
-      print(DoHeatmap(object = seuratObj, features = unique(topGene$gene)))
+      topGene <- toWrite %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
+      print(DoHeatmap(object = seuratObj, features = unique(as.character(topGene$gene))))
   		print(kable(topGene))
     }
   }
