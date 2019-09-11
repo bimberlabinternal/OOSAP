@@ -71,5 +71,6 @@ Collate:
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
     'SingleR_Seurat.R'
+    'Viz.R'
     'data.R'
     'mcl.R'
