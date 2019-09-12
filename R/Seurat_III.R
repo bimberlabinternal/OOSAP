@@ -210,13 +210,14 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @param spike.genes If NULL ignored, but a vector of unique genes
+#' @param spikeImmuneGenes If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object
 #' @return A modified Seurat object.
 doMergeCCA <- function(seuratObjs, nameList, 
                        maxCCAspaceDim, 
                        assay = NULL, 
                        normalization.method = "LogNormalize", 
                        useAllFeatures = F, includeCellCycleGenes = T, nVariableFeatures = NULL,
-                       plotFigs = T, spike.genes = NULL, maxPCs2Weight=NULL){
+                       plotFigs = T, spike.genes = NULL, spikeImmuneGenes=T, maxPCs2Weight=NULL){
 
 
   if (length(seuratObjs) == 1) {
