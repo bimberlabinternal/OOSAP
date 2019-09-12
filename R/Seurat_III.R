@@ -210,13 +210,14 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @param spike.genes If NULL ignored, but a vector of unique genes
+#' @param spikeImmuneGenes If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object
 #' @return A modified Seurat object.
 doMergeCCA <- function(seuratObjs, nameList, 
                        maxCCAspaceDim, 
                        assay = NULL, 
                        normalization.method = "LogNormalize", 
                        useAllFeatures = F, includeCellCycleGenes = T, nVariableFeatures = NULL,
-                       plotFigs = T, spike.genes = NULL, maxPCs2Weight=NULL){
+                       plotFigs = T, spike.genes = NULL, spikeImmuneGenes=T, maxPCs2Weight=NULL){
 
 
   if (length(seuratObjs) == 1) {
@@ -284,7 +285,30 @@ doMergeCCA <- function(seuratObjs, nameList,
 
 		if (includeCellCycleGenes) features <- unique(c(features, .GetSPhaseGenes(), .GetG2MGenes()))
 		if (!is.null(spike.genes)) features <- unique(c(features, spike.genes))
-	}
+    if (spikeImmuneGenes) {
+      SGS.LS <- Phenotyping_GeneList()
+      immuneSpikeGenes <- unique(c(
+        SGS.LS$WBC,
+        SGS.LS$Erythrocyte,
+        SGS.LS$Lymphoid,
+        SGS.LS$TCellCanonical, SGS.LS$TCellSecondary,
+        SGS.LS$CD8Canonical, SGS.LS$CD8Subphenos1, SGS.LS$MAIT,
+        SGS.LS$CD4Canonical, SGS.LS$CD4Subphenos1, SGS.LS$CD4Subphenos2,
+        SGS.LS$BCellCanonical, SGS.LS$BCellSecondary, SGS.LS$BCellCanonicalV3,
+        SGS.LS$NKCanonical,
+        SGS.LS$HA_ImpGenes, SGS.LS$HA_CART_gini, SGS.LS$HighlyActivated3, SGS.LS$LessActivated,
+        SGS.LS$Myeloid,
+        SGS.LS$Monocytes, SGS.LS$MonocytesCD34p, SGS.LS$MonocytesFCGR3A,
+        SGS.LS$Vilani_Mono1_classical_CD14high_CD16neg,
+        SGS.LS$Vilani_Mono2_nonclassical_CD14posCD16high,
+        SGS.LS$Vilani_Mono3_undef1,
+        SGS.LS$Vilani_Mono4_undef2,
+        SGS.LS$Macrophage
+      ))
+
+      features <- unique(c(features, immuneSpikeGenes))
+	  }
+  }
 
 	#canonicals or other spikes may not be in the set of genes, so errors are given. Needs to remove genes not in data.
 	features <- features[features %in% allFeatures]
@@ -342,6 +366,8 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
 #' @param useAllFeatures If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended due to complexity). Also having all genes, means possibly more unwanted noise. Consider Spiking interesting/canonical genes as oppose to all. 
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
+#' @param spike.genes If CCA is used, this list of list of genes will be spiked into the merged object, beyond the default VariableGenes()
+#' @param spikeImmuneGenes If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom methods slot
@@ -351,7 +377,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
                             useAllFeatures = F, nVariableFeatures = 2000,
                             includeCellCycleGenes = T, assay = NULL,
                             normalization.method = "LogNormalize", 
-                            spike.genes = NULL){
+                            spike.genes = NULL, spikeImmuneGenes = T){
 
 
   method <- match.arg(method)
@@ -391,6 +417,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
                             includeCellCycleGenes = includeCellCycleGenes,
                             nVariableFeatures = nVariableFeatures, 
                             spike.genes = spike.genes,
+                            spikeImmuneGenes = spikeImmuneGenes,
                             maxPCs2Weight=maxPCs2Weight)
   } else if (method == "simple") {
     seuratObj <- doMergeSimple(seuratObjs = seuratObjs, 
@@ -503,7 +530,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
       seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), verbose = F)
-      seuratObj <- MarkStepRun(seuratObj, 'ScaleData')
+      seuratObj <- MarkStepRun(seuratObj, 'ScaleData', saveFile)
     }
 
     if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle', forceReCalc = forceReCalc))) {
@@ -1338,6 +1365,11 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   PlotMarkerSet(seuratObj, reduction, 'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
   PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3'))
+
+  PlotMarkerSet(seuratObj, reduction, 'Inhibitory Markers', c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'))
+
+  #DAP10/12
+  PlotMarkerSet(seuratObj, reduction, 'Signaling', c('HCST', 'TYROBP'))
 
   #LILR/KIR:
   PlotMarkerSeries(seuratObj, reduction, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR'), 'KIR/LILR')
