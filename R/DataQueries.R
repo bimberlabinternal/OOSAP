@@ -17,7 +17,7 @@ utils::globalVariables(
 #' @importFrom dplyr %>% group_by_at summarise_at arrange
 QueryAndApplyCdnaMetadata <- function(seuratObj,
                                       fieldSelect = c('rowid', 'sortid/population', 'sortid/stimid/animalId', 'sortid/stimid/date', 'sortid/stimid/stim'),
-                                      fieldNames = c('cDNA ID', 'Population', 'SubjectId', 'SampleDate', 'Stim'), overwriteExisting = F) {
+                                      fieldNames = c('cDNA_ID', 'Population', 'SubjectId', 'SampleDate', 'Stim'), overwriteExisting = F) {
   if (length(fieldSelect) != length(fieldNames)) {
     stop('The length of fields must equal the length of fieldNames')
   }
@@ -587,6 +587,11 @@ utils::globalVariables(
       toUpdate <- unlist(seuratObject[[colName]])
     }
 
+    # Convert to string in case levels do not match:
+    if (is.factor(toUpdate)) {
+      toUpdate <- as.character(toUpdate)
+    }
+
     names(toUpdate) <- colnames(seuratObject)
     toUpdate[datasetSelect] <- toAdd
     seuratObject[[colName]] <- as.factor(toUpdate)
@@ -597,16 +602,16 @@ utils::globalVariables(
 
 .FindMatchedVloupe <- function(loupeDataId) {
   rows <- labkey.selectRows(
-  baseUrl=lkBaseUrl,
-  folderPath=lkDefaultFolder,
-  schemaName="sequenceanalysis",
-  queryName="outputfiles",
-  viewName="",
-  colSort="-rowid",
-  colSelect="readset/cdna/enrichedReadsetId",
-  colFilter=makeFilter(c("rowid", "EQUAL", loupeDataId)),
-  containerFilter=NULL,
-  colNameOpt="rname"
+		baseUrl=lkBaseUrl,
+		folderPath=lkDefaultFolder,
+		schemaName="sequenceanalysis",
+		queryName="outputfiles",
+		viewName="",
+		colSort="-rowid",
+		colSelect="readset/cdna/enrichedReadsetId",
+		colFilter=makeFilter(c("rowid", "EQUAL", loupeDataId)),
+		containerFilter=NULL,
+		colNameOpt="rname"
   )
 
   if (nrow(rows) != 1) {
@@ -619,16 +624,16 @@ utils::globalVariables(
   }
 
   rows <- labkey.selectRows(
-  baseUrl=lkBaseUrl,
-  folderPath=lkDefaultFolder,
-  schemaName="sequenceanalysis",
-  queryName="outputfiles",
-  viewName="",
-  colSort="-rowid",
-  colSelect="rowid,",
-  colFilter=makeFilter(c("readset", "EQUAL", tcrReadsetId), c("category", "EQUAL", "10x VLoupe")),
-  containerFilter=NULL,
-  colNameOpt="rname"
+		baseUrl=lkBaseUrl,
+		folderPath=lkDefaultFolder,
+		schemaName="sequenceanalysis",
+		queryName="outputfiles",
+		viewName="",
+		colSort="-rowid",
+		colSelect="rowid,",
+		colFilter=makeFilter(c("readset", "EQUAL", tcrReadsetId), c("category", "EQUAL", "10x VLoupe")),
+		containerFilter=NULL,
+		colNameOpt="rname"
   )
 
   if (nrow(rows) > 1){
@@ -641,16 +646,16 @@ utils::globalVariables(
 .DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
-  baseUrl=lkBaseUrl,
-  folderPath=lkDefaultFolder,
-  schemaName="sequenceanalysis",
-  queryName="outputfiles",
-  viewName="",
-  colSort="-rowid",
-  colSelect="rowid,workbook/workbookid,dataid/webdavurlrelative",
-  colFilter=makeFilter(c("rowid", "EQUAL", vLoupeId)),
-  containerFilter=NULL,
-  colNameOpt="rname"
+		baseUrl=lkBaseUrl,
+		folderPath=lkDefaultFolder,
+		schemaName="sequenceanalysis",
+		queryName="outputfiles",
+		viewName="",
+		colSort="-rowid",
+		colSelect="rowid,workbook/workbookid,dataid/webdavurlrelative",
+		colFilter=makeFilter(c("rowid", "EQUAL", vLoupeId)),
+		containerFilter=NULL,
+		colNameOpt="rname"
   )
 
   if (nrow(rows) != 1) {
@@ -666,11 +671,11 @@ utils::globalVariables(
   remotePath <- paste0(dirname(remotePath), '/all_contig_annotations.csv')
 
   success <- labkey.webdav.get(
-  baseUrl=lkBaseUrl,
-  folderPath=paste0(lkDefaultFolder,wb),
-  remoteFilePath = remotePath,
-  overwrite = overwrite,
-  localFilePath = outFile
+		baseUrl=lkBaseUrl,
+		folderPath=paste0(lkDefaultFolder,wb),
+		remoteFilePath = remotePath,
+		overwrite = overwrite,
+		localFilePath = outFile
   )
 
   if (!success | !file.exists(outFile)) {
@@ -700,14 +705,14 @@ add = TRUE
   #Download named clonotypes and merge:
   # Add clone names:
   labelDf <- labkey.selectRows(
-  baseUrl=lkBaseUrl,
-  folderPath=lkDefaultFolder,
-  schemaName="tcrdb",
-  queryName="clones",
-  showHidden=TRUE,
-  colSelect=c('clonename','chain','cdr3','animals', 'displayname', 'vgene'),
-  containerFilter=NULL,
-  colNameOpt='rname'
+		baseUrl=lkBaseUrl,
+		folderPath=lkDefaultFolder,
+		schemaName="tcrdb",
+		queryName="clones",
+		showHidden=TRUE,
+		colSelect=c('clonename','chain','cdr3','animals', 'displayname', 'vgene'),
+		containerFilter=NULL,
+		colNameOpt='rname'
   )
 
   labelDf$LabelCol <- coalesce(as.character(labelDf$displayname), as.character(labelDf$clonename))
@@ -734,18 +739,18 @@ add = TRUE
 
   # Summarise, grouping by barcode
   tcr <- tcr %>% group_by(barcode) %>% summarise(
-  ChainCDR3s = paste0(sort(unique(ChainCDR3s)), collapse = ","),
-  CDR3s = paste0(sort(unique(cdr3)), collapse = ","),
-  TRA = paste0(sort(unique(as.character(TRA))), collapse = ","),
-  TRB = paste0(sort(unique(as.character(TRB))), collapse = ","),
-  TRD = paste0(sort(unique(as.character(TRD))), collapse = ","),
-  TRG = paste0(sort(unique(as.character(TRG))), collapse = ","),
-  TRAV = paste0(sort(unique(as.character(TRAV))), collapse = ","),
-  TRBV = paste0(sort(unique(as.character(TRBV))), collapse = ","),
-  TRDV = paste0(sort(unique(as.character(TRDV))), collapse = ","),
-  TRGV = paste0(sort(unique(as.character(TRGV))), collapse = ","),
+		ChainCDR3s = paste0(sort(unique(ChainCDR3s)), collapse = ","),
+		CDR3s = paste0(sort(unique(cdr3)), collapse = ","),
+		TRA = paste0(sort(unique(as.character(TRA))), collapse = ","),
+		TRB = paste0(sort(unique(as.character(TRB))), collapse = ","),
+		TRD = paste0(sort(unique(as.character(TRD))), collapse = ","),
+		TRG = paste0(sort(unique(as.character(TRG))), collapse = ","),
+		TRAV = paste0(sort(unique(as.character(TRAV))), collapse = ","),
+		TRBV = paste0(sort(unique(as.character(TRBV))), collapse = ","),
+		TRDV = paste0(sort(unique(as.character(TRDV))), collapse = ","),
+		TRGV = paste0(sort(unique(as.character(TRGV))), collapse = ","),
 
-  CloneNames = paste0(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
+		CloneNames = paste0(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
   )
 
   # Note: we should attempt to produce a more specfic call, assuming we have data from multiple chains
