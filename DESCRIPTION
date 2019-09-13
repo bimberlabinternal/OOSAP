@@ -67,7 +67,6 @@ Collate:
     'GSEA_Seurat.R'
     'GeneNames.R'
     'Monocle_III.R'
-    'Phenotyping.R'
     'PhenotypingGeneSets.R'
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
