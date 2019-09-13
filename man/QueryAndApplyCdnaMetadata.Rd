@@ -6,7 +6,7 @@
 \usage{
 QueryAndApplyCdnaMetadata(seuratObj, fieldSelect = c("rowid",
   "sortid/population", "sortid/stimid/animalId", "sortid/stimid/date",
-  "sortid/stimid/stim"), fieldNames = c("cDNA ID", "Population",
+  "sortid/stimid/stim"), fieldNames = c("cDNA_ID", "Population",
   "SubjectId", "SampleDate", "Stim"), overwriteExisting = F)
 }
 \arguments{

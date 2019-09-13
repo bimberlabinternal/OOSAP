@@ -7,7 +7,7 @@
 doMergeCCA(seuratObjs, nameList, maxCCAspaceDim, assay = NULL,
   normalization.method = "LogNormalize", useAllFeatures = F,
   includeCellCycleGenes = T, nVariableFeatures = NULL, plotFigs = T,
-  spike.genes = NULL, maxPCs2Weight = NULL)
+  spike.genes = NULL, spikeImmuneGenes = T, maxPCs2Weight = NULL)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects}
@@ -25,6 +25,8 @@ doMergeCCA(seuratObjs, nameList, maxCCAspaceDim, assay = NULL,
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
 
 \item{spike.genes}{If NULL ignored, but a vector of unique genes}
+
+\item{spikeImmuneGenes}{If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object}
 
 \item{maxPCs2Weight}{The number of dims to use with IntegrateData()}
 }
