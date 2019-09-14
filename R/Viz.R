@@ -110,7 +110,6 @@ PlotBin2D <- function(DF, bins = 75, ncol = 3){
                       
 
 #' @title PlotExprThrTab
-#'
 #' @description This function from a seurat object, takes the gene expression of a single gene and provides a vizualization for thresholding and corresponding descritized tabulation.
 #' @param SeuratObj, A Seurat object.
 #' @param GeneName, the Gene name of interest. 
@@ -206,7 +205,6 @@ PlotExprThrTab <- function(SeuratObj, GeneName = NULL, CutThresh = NULL, PlotBar
 
 
 #' @title PlotHistDensOptima
-#'
 #' @description This function plots histogram+density and finds all optima from a df usually from FetchData() of Seurat. 
 #' @param dftemp, a dataframe with column var1 to be plotted. 
 #' @param col_vector, color vector.
@@ -245,7 +243,6 @@ PlotHistDensOptima <- function(dftemp, Print = F, col_vector = col_vector, nn = 
 
 
 #' @title PlotFeatThrTab
-#'
 #' @description This function from a seurat object, takes the feature selected and provides a vizualization for thresholding and corresponding descritized tabulation.
 #' @param SeuratObj, A Seurat object.
 #' @param FeatName, the Feature name of interest. 
@@ -329,9 +326,6 @@ PlotFeatThrTab <- function(SeuratObj, FeatName = NULL, CutThresh = NULL, PlotBar
       ncol = 2)
     
     print(p1)
-    
-    
-    
   }
   
   
