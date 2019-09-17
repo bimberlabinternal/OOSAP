@@ -8,7 +8,8 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, method = c("simple",
   "cca"), maxCCAspaceDim = 20, maxPCs2Weight = 20,
   useAllFeatures = F, nVariableFeatures = 2000,
   includeCellCycleGenes = T, assay = NULL,
-  normalization.method = "LogNormalize", spike.genes = NULL)
+  normalization.method = "LogNormalize", spike.genes = NULL,
+  spikeImmuneGenes = T)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)}
@@ -26,6 +27,10 @@ MergeSeuratObjs(seuratObjs, metadata = NULL, method = c("simple",
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
+
+\item{spike.genes}{If CCA is used, this list of list of genes will be spiked into the merged object, beyond the default VariableGenes()}
+
+\item{spikeImmuneGenes}{If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object}
 
 \item{projectName}{The project name when creating the final seuratObj}
 }

@@ -319,3 +319,24 @@ RunUMAP.Matrix <- function(
 
   write(msg, file = file, append = T)
 }
+
+
+#' @title find_peaks
+#' @description Returns the maxima of points. To get minima, -1*x
+#' @param x, A vector of numbers, if small or not very smooth, use a smoothing function. Like density(x).
+#' @param m, An integer that acts as a loose hand for resolution.
+#' @return vector of peaks positions.
+find_peaks <- function (x, m = 4){
+  #https://github.com/stas-g/findPeaks
+  shape <- diff(sign(diff(x, na.pad = FALSE)))
+  pks <- sapply(which(shape < 0), FUN = function(i){
+    z <- i - m + 1
+    z <- ifelse(z > 0, z, 1)
+    w <- i + m + 1
+    w <- ifelse(w < length(x), w, length(x))
+    if(all(x[c(z : i, (i + 2) : w)] <= x[i + 1])) return(i + 1) else return(numeric(0))
+  })
+  pks <- unlist(pks)
+  pks
+}
+
