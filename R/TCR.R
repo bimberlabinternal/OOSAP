@@ -43,7 +43,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		schemaName="sequenceanalysis",
 		queryName="outputfiles",
 		colSort="-rowid",
-		colSelect="rowid",
+		colSelect="rowid,readset",
 		colFilter=makeFilter(
 			c("readset", "IN", paste0(unique(rows$readsetid), collapse = ';')),
 			c("category", "EQUAL", "Seurat Data")
@@ -52,8 +52,12 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		colNameOpt="rname"
 	)
 
-	if (nrow(rows) != length(cDndIds)) {
-		print(paste0('Not all requested cDNAs found.  Row IDs found: ', paste0(unique(rows$rowid), collapse = ',')))
+	if (nrow(seuratRows) != length(cDndIds)) {
+		gexReadsets <- unique(rows$readsetid)
+		seuratReadsets <- unique(seuratRows$readset)
+		missing <- gexReadsets[!(gexReadsets %in% seuratReadsets)]
+		print(paste0('Not all requested cDNAs have seurat objects.  Readsets missing: ', paste0(unique(missing), collapse = ',')))
+
 		return(NA)
 	}
 
@@ -61,6 +65,11 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 	ret <- NA
 	for (idx in 1:nrow(seuratRows)) {
 		row <- seuratRows[idx,,drop = F]
+		if (is.na(row[['rowid']])) {
+			warning(paste0('Error: RowID was NA, skipping'))
+			print(row)
+			next
+		}
 
 		f <- paste0(outPrefix, row[['rowid']], '.seurat.rds')
 		DownloadOutputFile(row[['rowid']], f, overwrite = F)
@@ -82,11 +91,6 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		i <- 0
 		for (barcodePrefix in unique(unique(unlist(seuratObj[['BarcodePrefix']])))) {
 			i <- i + 1
-
-			cDNA <- unique(seuratObj$cDNA_ID[seuratObj$BarcodePrefix == barcodePrefix])
-			if (length(cDNA) > 1) {
-				stop(paste0('More than one cDNA ID found for barcodePrefix: ', barcodePrefix))
-			}
 
 			vloupeId <- .FindMatchedVloupe(barcodePrefix)
 			if (is.na(vloupeId)){

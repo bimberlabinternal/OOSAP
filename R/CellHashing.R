@@ -1028,7 +1028,10 @@ FindMatchedCellHashing <- function(loupeDataId){
 #'
 #' @import Rlabkey
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
-  
+  if (is.na(outputFileId)) {
+    stop('Output file ID cannot be NA')
+  }
+
   if (file.exists(outFile) & !overwrite) {
     print("File exists, will not overwrite")
     return(outFile)
@@ -1047,8 +1050,6 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
     containerFilter=NULL,
     colNameOpt="rname"
   )
-  
-  
 
   if (nrow(rows) != 1) {
     stop(paste0('More than one matching file found, this should not occur.  RowId: ', outputFileId))

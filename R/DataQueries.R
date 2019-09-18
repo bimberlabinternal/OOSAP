@@ -138,7 +138,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
       next
     }
 
-    print(paste0('Adding column: ', fieldName, ' (', fieldKey, ')'))
+    #print(paste0('Adding column: ', fieldName, ' (', fieldKey, ')'))
     v <- df[[fieldName]]
     names(v) <- names(df)
     seuratObj[[fieldName]] <- v
