@@ -893,10 +893,13 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
   }
 
   for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
-    print(paste0('Adding cell hashing data for prefix: ', barcodePrefix))
+    print(paste0('Possibly adding cell hashing data for prefix: ', barcodePrefix))
 
     cellHashingId <- FindMatchedCellHashing(barcodePrefix)
-    if (is.na(cellHashingId)){
+    if (is.null(cellHashingId)){
+      print(paste0('Cell hashing not used for prefix: ', barcodePrefix, ', skipping'))
+      return(seuratObject)
+    } else if (is.na(cellHashingId)){
       stop(paste0('Unable to find cellHashing calls table file for prefix: ', barcodePrefix))
     }
 
@@ -946,7 +949,28 @@ FindMatchedCellHashing <- function(loupeDataId){
   }
   
   libraryId <- rows[['library_id']]
-  
+
+  #determine whether we expect cell hashing to be used:
+  cDNAs <- labkey.selectRows(
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
+    schemaName="tcrdb",
+    queryName="cdnas",
+    viewName="",
+    colSort="-rowid",
+    colFilter = makeFilter(c("readsetId", "EQUALS", readset)),
+    colSelect="rowid,readsetid,hashingreadsetid",
+    containerFilter=NULL,
+    colNameOpt="rname"
+  )
+
+  if (nrow(cDNAs) == 0) {
+    stop(paste0('No cDNA records found for GEX readset: ', readset))
+  } else if (sum(!is.na(cDNAs$hashingreadsetid)) == 0) {
+    print(paste0('The cDNA library does not use cell hashing, aborting'))
+    return(NULL)
+  }
+
   rowsB <- labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,

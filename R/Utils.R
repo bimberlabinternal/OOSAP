@@ -312,7 +312,7 @@ RunUMAP.Matrix <- function(
 }
 
 
-.WriteLogMsg <- function(msg, prefixTime = TRUE, file = 'OOAP.log.txt') {
+.WriteLogMsg <- function(msg, prefixTime = TRUE, file = 'OOSAP.log.txt') {
   if (prefixTime) {
     msg <- paste0(Sys.time(), ' ', msg)
   }
