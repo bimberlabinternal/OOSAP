@@ -100,7 +100,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		}
 
 		i <- 0
-		for (barcodePrefix in unique(unique(unlist(seuratObj[['BarcodePrefix']])))) {
+		for (barcodePrefix in unique(unlist(seuratObj[['BarcodePrefix']]))) {
 			i <- i + 1
 
 			vloupeId <- .FindMatchedVloupe(barcodePrefix)
