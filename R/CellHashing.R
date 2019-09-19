@@ -941,14 +941,14 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NA)
   }
   
-  readset <- rows[['readset']]
+  readset <- unique(rows[['readset']])
   
   if (is.na(readset) || is.null(readset)) {
     print("readset is NA/NULL")
     return(NA)
   }
   
-  libraryId <- rows[['library_id']]
+  libraryId <- unique(rows[['library_id']])
 
   #determine whether we expect cell hashing to be used:
   cDNAs <- labkey.selectRows(
@@ -977,7 +977,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     colSort="-rowid",
-    colSelect="rowid,",
+    colSelect="rowid",
     colFilter=makeFilter(c("readset", "EQUAL", readset), 
                          c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
                          c("library_id", "EQUAL", libraryId)),
@@ -992,7 +992,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     ret <- rowsB[1]
   }
 
-  if (is.null(ret)){
+  if (all(is.null(ret))){
     print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
     rowsB <- labkey.selectRows(
       baseUrl=lkBaseUrl,
@@ -1016,10 +1016,14 @@ FindMatchedCellHashing <- function(loupeDataId){
     }
   }
 
-  if (is.null(ret)) {
+  if (all(is.null(ret))) {
     return(NA)
   } else {
-    return(ret[['rowid']])
+    if (length(ret) > 0){
+      print('More than one matching file found, using most recent')
+    }
+
+    return(ret$rowid[1])
   }
 }
 
@@ -1033,7 +1037,7 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
   }
 
   if (file.exists(outFile) & !overwrite) {
-    print("File exists, will not overwrite")
+    print(paste0("File exists, will not overwrite: ", outFile))
     return(outFile)
 	}
   
