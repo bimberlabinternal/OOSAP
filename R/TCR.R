@@ -54,6 +54,9 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		colNameOpt="rname"
 	)
 
+	# Possible to have a duplicate:
+	seuratRows <- unique(seuratRows)
+
 	if (nrow(seuratRows) != length(gexReadsets)) {
 		missing <- gexReadsets[!(gexReadsets %in% unique(seuratRows$readset))]
 		print(paste0('Not all requested cDNAs have seurat objects.  Readsets missing: ', paste0(unique(missing), collapse = ',')))
@@ -63,8 +66,13 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 
 	downloadedFiles <- c()
 	ret <- NA
-	for (idx in 1:nrow(seuratRows)) {
-		row <- seuratRows[idx,,drop = F]
+	for (gexReadset in gexReadsets) {
+		row <- seuratRows[seuratRows$readset == gexReadset,,drop = F]
+		if (nrow(row) > 1) {
+			print('More than one seurat row found, using the most recent')
+			row <- row[1,,drop = F]
+		}
+
 		if (is.na(row[['rowid']])) {
 			warning(paste0('Error: RowID was NA, skipping'))
 			print(row)
@@ -130,9 +138,11 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 			)
 			if (nrow(bamRows) == 0) {
 				stop('Unable to find alignment')
+			} else if (nrow(bamRows) > 1) {
+				print('More than one BAM found')
 			}
 
-			alignmentId <- bamRows[1][['dataid']]
+			alignmentId <- bamRows$dataid[1]
 
 			#All clonotypes
 			clonotypeFile <- file.path(outPrefix, paste0(barcodePrefix, '_all_contig_annotations.csv'))
