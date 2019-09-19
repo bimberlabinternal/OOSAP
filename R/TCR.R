@@ -288,7 +288,7 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 
 		if (nrow(df) > 0) {
 			print('run passed, adding')
-			run <- labkey.experiment.createRun(list(name = paste0('AnalysisId: ', analysisId), properties = list(assayName = '10x', analysisId = analysisId)), dataRows = df)
+			run <- labkey.experiment.createRun(list(name = paste0('AnalysisId: ', analysisId, populationNameSuffix), properties = list(assayName = '10x', analysisId = analysisId)), dataRows = df)
 			runList <- append(runList, list(run))
 		} else {
 			print('no rows passed, skipping')
