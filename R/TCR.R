@@ -36,6 +36,8 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		return(NA)
 	}
 
+	gexReadsets <- unique(rows$readsetid)
+
 	# Identify, download seuratObj, created from the appropriate readsetId:
 	seuratRows <- labkey.selectRows(
 		baseUrl=lkBaseUrl,
@@ -45,17 +47,15 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		colSort="-rowid",
 		colSelect="rowid,readset",
 		colFilter=makeFilter(
-			c("readset", "IN", paste0(unique(rows$readsetid), collapse = ';')),
+			c("readset", "IN", paste0(gexReadsets, collapse = ';')),
 			c("category", "EQUAL", "Seurat Data")
 		),
 		containerFilter=NULL,
 		colNameOpt="rname"
 	)
 
-	if (nrow(seuratRows) != length(cDndIds)) {
-		gexReadsets <- unique(rows$readsetid)
-		seuratReadsets <- unique(seuratRows$readset)
-		missing <- gexReadsets[!(gexReadsets %in% seuratReadsets)]
+	if (nrow(seuratRows) != length(gexReadsets)) {
+		missing <- gexReadsets[!(gexReadsets %in% unique(seuratRows$readset))]
 		print(paste0('Not all requested cDNAs have seurat objects.  Readsets missing: ', paste0(unique(missing), collapse = ',')))
 
 		return(NA)
