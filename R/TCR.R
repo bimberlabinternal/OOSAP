@@ -265,7 +265,7 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 	runList <- list()
 	for (analysisId in analysisIds) {
 		df <- resultDataFrame[resultDataFrame$analysisId == analysisId,]
-		print(paste0('Preparing run for analysis Id: ',analysisId,', total rows: ', nrow(df)))
+		print(paste0('Preparing run for analysis Id: ',analysisId,', total rows: ', nrow(df), ', total cells: ', sum(df$count)))
 		if (!is.null(minCells)) {
 			totals <- df %>% group_by(cdna) %>% summarize(total = sum(count))
 			toKeep <- unique(totals$cdna[totals$total >= minCells])
@@ -274,13 +274,15 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 				print(paste0(totals$cdna[totals$total < minCells], ': ', totals$total[totals$total < minCells]))
 
 				df <- df[df$cdna %in% toKeep,]
-				print(paste0('after filter: ', nrow(df)))
 			}
 		}
 
 		if (nrow(df) > 0) {
+			print('run passed, adding')
 			run <- labkey.experiment.createRun(list(name = paste0('AnalysisId: ', analysisId), properties = list(assayName = '10x', analysisId = analysisId)), dataRows = df)
 			runList <- append(runList, list(run))
+		} else {
+			print('no rows passed, skipping')
 		}
 	}
 
