@@ -94,9 +94,9 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 		seuratObj <- ClassifySGSAndApply(seuratObj = seuratObj, geneSetName = 'Positive', geneList = OOSAP::Phenotyping_GeneList()[[geneSetName]], positivityThreshold = positivityThreshold)
 		if (invert) {
 			print('Selecting cells without the provided signature')
-			barcodeWhitelist <- colnames(seuratObj)[!seuratObj$Positive.Call]
+			barcodeWhitelist <- colnames(seuratObj)[!seuratObj$Positive.Call & !is.na(seuratObj$cDNA_ID)]
 		} else {
-			barcodeWhitelist <- colnames(seuratObj)[seuratObj$Positive.Call]
+			barcodeWhitelist <- colnames(seuratObj)[seuratObj$Positive.Call & !is.na(seuratObj$cDNA_ID)]
 		}
 
 		i <- 0
@@ -183,17 +183,9 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 				next
 			}
 
-			# Group
-			tcrData$barcodePrefix <- barcodePrefix
-			tcrData <- tcrData %>% group_by(barcodePrefix, chain, cdr3, v_gene, d_gene, j_gene, c_gene, raw_clonotype_id, raw_consensus_id) %>% summarize(count = dplyr::n())
-			names(tcrData) <- c('barcodePrefix', 'locus', 'cdr3', 'vHit', 'dHit', 'jHit', 'cHit', 'cloneId', 'consensus_id', 'count')
-
-			tcrData <- tcrData %>% group_by(barcodePrefix) %>% mutate(totalCells = dplyr::n())
-			tcrData$fraction = tcrData$count / tcrData$totalCells
-
 			#summarize metadata
 			meta <- data.frame(
-				barcodePrefix = barcodePrefix,
+				barcode = colnames(seuratObj)[seuratObj$BarcodePrefix == barcodePrefix],
 				SubjectId = as.character(seuratObj$SubjectId[seuratObj$BarcodePrefix == barcodePrefix]),
 				Stim = as.character(seuratObj$Stim[seuratObj$BarcodePrefix == barcodePrefix]),
 				population = as.character(seuratObj$Population[seuratObj$BarcodePrefix == barcodePrefix]),
@@ -203,17 +195,28 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 				alignmentId = c(alignmentId),
 				analysisId = c(analysisId)
 			)
-
-			meta <- unique(meta)
 			meta$SampleName <- paste0(meta$SubjectId, '_', meta$Stim)
-			tcrData <- merge(tcrData, meta, by = c('barcodePrefix'), all.x = T)
+			tcrData <- merge(tcrData, meta, by = c('barcode'), all.x = T)
+
+			if (sum(is.na(tcrData$SubjectId)) > 0) {
+				f <- paste0(outPrefix, 'temp.txt')
+				write.table(tcrData, file = f, sep = '\t', quote = F, row.names = F)
+				stop(paste0('Missing subject IDs!  See ', f, ' for table of results'))
+			}
+
+			# Group
+			tcrData <- tcrData %>% group_by(SampleName, SubjectId, population, date, cdna, libraryId, alignmentId, analysisId, chain, cdr3, v_gene, d_gene, j_gene, c_gene, raw_clonotype_id, raw_consensus_id) %>% summarize(count = dplyr::n())
+			names(tcrData) <- c('SampleName', 'SubjectId', 'population', 'date', 'cdna', 'libraryId', 'alignmentId', 'analysisId', 'locus', 'cdr3', 'vHit', 'dHit', 'jHit', 'cHit', 'cloneId', 'consensus_id', 'count')
+
+			tcrData <- tcrData %>% group_by(cdna) %>% mutate(totalCells = dplyr::n())
+			tcrData$fraction = tcrData$count / tcrData$totalCells
 
 			# Merge sequence:
 			fastaData <- Biostrings::readDNAStringSet(fastaFile)
 			seqDf <- data.frame(consensus_id = names(fastaData), sequence = paste(fastaData))
 
 			tcrData <- merge(tcrData, seqDf, by = c('consensus_id'), all.x = T)
-			tcrData <- tcrData[!(names(tcrData) %in% c('consensus_id', 'totalCells', 'Stim', 'barcodePrefix'))]
+			tcrData <- tcrData[!(names(tcrData) %in% c('consensus_id', 'totalCells', 'Stim'))]
 			tcrData[tcrData == 'None'] <- NA
 
 			if (all(is.na(ret))) {
@@ -275,6 +278,12 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 
 				df <- df[df$cdna %in% toKeep,]
 			}
+		}
+
+		if (sum(is.na(df$SubjectId)) > 0) {
+			f <- paste0(outPrefix, 'temp.txt')
+			write.table(df, file = f, sep = '\t', quote = F, row.names = F)
+			stop(paste0('Missing subject IDs!  See ', f, ' for table of results'))
 		}
 
 		if (nrow(df) > 0) {

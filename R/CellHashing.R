@@ -971,7 +971,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NULL)
   }
 
-  rowsB <- labkey.selectRows(
+  rowsB <- suppressWarnings(labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
@@ -983,7 +983,7 @@ FindMatchedCellHashing <- function(loupeDataId){
                          c("library_id", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
-  )
+  ))
 
   ret <- NULL
   if (nrow(rowsB) == 0){
@@ -994,7 +994,7 @@ FindMatchedCellHashing <- function(loupeDataId){
 
   if (all(is.null(ret))){
     print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
-    rowsB <- labkey.selectRows(
+    rowsB <- suppressWarnings(labkey.selectRows(
       baseUrl=lkBaseUrl,
       folderPath=lkDefaultFolder,
       schemaName="sequenceanalysis",
@@ -1006,7 +1006,7 @@ FindMatchedCellHashing <- function(loupeDataId){
                            c("library_ld", "EQUAL", libraryId)),
       containerFilter=NULL,
       colNameOpt="rname"
-    )
+    ))
     
     if (nrow(rowsB) == 0){
       print("Not found")
