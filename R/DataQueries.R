@@ -138,7 +138,7 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
       next
     }
 
-    print(paste0('Adding column: ', fieldName, ' (', fieldKey, ')'))
+    #print(paste0('Adding column: ', fieldName, ' (', fieldKey, ')'))
     v <- df[[fieldName]]
     names(v) <- names(df)
     seuratObj[[fieldName]] <- v
@@ -643,8 +643,8 @@ utils::globalVariables(
   return(rows[['rowid']])
 }
 
-.DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T) {
-  #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
+.DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T, fileName = 'all_contig_annotations.csv') {
+  #The file will be in the same directory as the VLoupe file
   rows <- labkey.selectRows(
 		baseUrl=lkBaseUrl,
 		folderPath=lkDefaultFolder,
@@ -668,7 +668,7 @@ utils::globalVariables(
   }
 
   remotePath <- rows[['dataid_webdavurlrelative']]
-  remotePath <- paste0(dirname(remotePath), '/all_contig_annotations.csv')
+  remotePath <- paste0(dirname(remotePath), '/', fileName)
 
   success <- labkey.webdav.get(
 		baseUrl=lkBaseUrl,
@@ -692,27 +692,27 @@ package = 'OOSAP',
 add = TRUE
 )
 
-#' @import Rlabkey
-#' @importFrom dplyr %>% coalesce group_by summarise
-#' @importFrom naturalsort naturalsort
-.ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
+.ProcessTcrClonotypes <- function(clonotypeFile){
   tcr <- utils::read.table(clonotypeFile, header=T, sep = ',')
   tcr <- tcr[tcr$cdr3 != 'None',]
 
   # drop cellranger '-1' suffix
   tcr$barcode <- gsub("-1", "", tcr$barcode)
 
+  # Many TRDV genes can be used as either alpha or delta TCRs.  10x classifies and TRDV/TRAJ/TRAC clones as 'Multi'.  Re-classify these:
+  tcr$chain[tcr$chain == 'Multi' & grepl(pattern = 'TRD', x = tcr$v_gene) & grepl(pattern = 'TRAJ', x = tcr$j_gene) & grepl(pattern = 'TRAC', x = tcr$c_gene)] <- c('TRA')
+
   #Download named clonotypes and merge:
   # Add clone names:
   labelDf <- labkey.selectRows(
-		baseUrl=lkBaseUrl,
-		folderPath=lkDefaultFolder,
-		schemaName="tcrdb",
-		queryName="clones",
-		showHidden=TRUE,
-		colSelect=c('clonename','chain','cdr3','animals', 'displayname', 'vgene'),
-		containerFilter=NULL,
-		colNameOpt='rname'
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="tcrdb",
+  queryName="clones",
+  showHidden=TRUE,
+  colSelect=c('clonename','chain','cdr3','displayname'),
+  containerFilter=NULL,
+  colNameOpt='rname'
   )
 
   labelDf$LabelCol <- coalesce(as.character(labelDf$displayname), as.character(labelDf$clonename))
@@ -723,9 +723,6 @@ add = TRUE
 
   tcr <- merge(tcr, labelDf, by.x = c('chain', 'cdr3'), by.y = c('chain', 'cdr3'), all.x = TRUE, all.y = FALSE)
 
-  # Many TRDV genes can be used as either alpha or delta TCRs.  10x classifies and TRDV/TRAJ/TRAC clones as 'Multi'.  Re-classify these:
-  tcr$chain[tcr$chain == 'Multi' & grepl(pattern = 'TRD', x = tcr$v_gene) & grepl(pattern = 'TRAJ', x = tcr$j_gene) & grepl(pattern = 'TRAC', x = tcr$c_gene)] <- c('TRA')
-
   # Add chain-specific columns:
   tcr$ChainCDR3s <- paste0(tcr$chain, ':', tcr$cdr3)
   for (l in c('TRA', 'TRB', 'TRD', 'TRG')){
@@ -735,7 +732,30 @@ add = TRUE
     target <- paste0(l, 'V')
     tcr[[target]] <- c(NA)
     tcr[[target]][tcr$chain == l] <- as.character(tcr$v_gene[tcr$chain == l])
+
+    target <- paste0(l, 'J')
+    tcr[[target]] <- c(NA)
+    tcr[[target]][tcr$chain == l] <- as.character(tcr$j_gene[tcr$chain == l])
+
+    if (l %in% c('TRB', 'TRD')) {
+      target <- paste0(l, 'D')
+      tcr[[target]] <- c(NA)
+      tcr[[target]][tcr$chain == l] <- as.character(tcr$d_gene[tcr$chain == l])
+    }
+
+    target <- paste0(l, 'C')
+    tcr[[target]] <- c(NA)
+    tcr[[target]][tcr$chain == l] <- as.character(tcr$c_gene[tcr$chain == l])
   }
+
+  return(tcr)
+}
+
+#' @import Rlabkey
+#' @importFrom dplyr %>% coalesce group_by summarise
+#' @importFrom naturalsort naturalsort
+.ProcessAndAggregateTcrClonotypes <- function(clonotypeFile){
+  tcr <- .ProcessTcrClonotypes(clonotypeFile)
 
   # Summarise, grouping by barcode
   tcr <- tcr %>% group_by(barcode) %>% summarise(
@@ -749,7 +769,16 @@ add = TRUE
 		TRBV = paste0(sort(unique(as.character(TRBV))), collapse = ","),
 		TRDV = paste0(sort(unique(as.character(TRDV))), collapse = ","),
 		TRGV = paste0(sort(unique(as.character(TRGV))), collapse = ","),
-
+    TRAJ = paste0(sort(unique(as.character(TRAJ))), collapse = ","),
+    TRBJ = paste0(sort(unique(as.character(TRBJ))), collapse = ","),
+    TRDJ = paste0(sort(unique(as.character(TRDJ))), collapse = ","),
+    TRGJ = paste0(sort(unique(as.character(TRGJ))), collapse = ","),
+    TRAC = paste0(sort(unique(as.character(TRAC))), collapse = ","),
+    TRBC = paste0(sort(unique(as.character(TRBC))), collapse = ","),
+    TRDC = paste0(sort(unique(as.character(TRDC))), collapse = ","),
+    TRGC = paste0(sort(unique(as.character(TRGC))), collapse = ","),
+    TRBD = paste0(sort(unique(as.character(TRBD))), collapse = ","),
+    TRDD = paste0(sort(unique(as.character(TRDD))), collapse = ","),
 		CloneNames = paste0(sort(unique(CloneName)), collapse = ",")  #this is imprecise b/c we count a hit if we match any chain, but this is probably what we often want
   )
 

@@ -893,10 +893,13 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
   }
 
   for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
-    print(paste0('Adding cell hashing data for prefix: ', barcodePrefix))
+    print(paste0('Possibly adding cell hashing data for prefix: ', barcodePrefix))
 
     cellHashingId <- FindMatchedCellHashing(barcodePrefix)
-    if (is.na(cellHashingId)){
+    if (is.null(cellHashingId)){
+      print(paste0('Cell hashing not used for prefix: ', barcodePrefix, ', skipping'))
+      return(seuratObject)
+    } else if (is.na(cellHashingId)){
       stop(paste0('Unable to find cellHashing calls table file for prefix: ', barcodePrefix))
     }
 
@@ -938,28 +941,49 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NA)
   }
   
-  readset <- rows[['readset']]
+  readset <- unique(rows[['readset']])
   
   if (is.na(readset) || is.null(readset)) {
     print("readset is NA/NULL")
     return(NA)
   }
   
-  libraryId <- rows[['library_id']]
-  
-  rowsB <- labkey.selectRows(
+  libraryId <- unique(rows[['library_id']])
+
+  #determine whether we expect cell hashing to be used:
+  cDNAs <- labkey.selectRows(
+    baseUrl=lkBaseUrl,
+    folderPath=lkDefaultFolder,
+    schemaName="tcrdb",
+    queryName="cdnas",
+    viewName="",
+    colSort="-rowid",
+    colFilter = makeFilter(c("readsetId", "EQUALS", readset)),
+    colSelect="rowid,readsetid,hashingreadsetid",
+    containerFilter=NULL,
+    colNameOpt="rname"
+  )
+
+  if (nrow(cDNAs) == 0) {
+    stop(paste0('No cDNA records found for GEX readset: ', readset))
+  } else if (sum(!is.na(cDNAs$hashingreadsetid)) == 0) {
+    print(paste0('The cDNA library does not use cell hashing, aborting'))
+    return(NULL)
+  }
+
+  rowsB <- suppressWarnings(labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
     queryName="outputfiles",
     colSort="-rowid",
-    colSelect="rowid,",
+    colSelect="rowid",
     colFilter=makeFilter(c("readset", "EQUAL", readset), 
                          c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
                          c("library_id", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
-  )
+  ))
 
   ret <- NULL
   if (nrow(rowsB) == 0){
@@ -968,9 +992,9 @@ FindMatchedCellHashing <- function(loupeDataId){
     ret <- rowsB[1]
   }
 
-  if (is.null(ret)){
+  if (all(is.null(ret))){
     print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
-    rowsB <- labkey.selectRows(
+    rowsB <- suppressWarnings(labkey.selectRows(
       baseUrl=lkBaseUrl,
       folderPath=lkDefaultFolder,
       schemaName="sequenceanalysis",
@@ -982,7 +1006,7 @@ FindMatchedCellHashing <- function(loupeDataId){
                            c("library_ld", "EQUAL", libraryId)),
       containerFilter=NULL,
       colNameOpt="rname"
-    )
+    ))
     
     if (nrow(rowsB) == 0){
       print("Not found")
@@ -992,10 +1016,14 @@ FindMatchedCellHashing <- function(loupeDataId){
     }
   }
 
-  if (is.null(ret)) {
+  if (all(is.null(ret))) {
     return(NA)
   } else {
-    return(ret[['rowid']])
+    if (length(ret) > 0){
+      print('More than one matching file found, using most recent')
+    }
+
+    return(ret$rowid[1])
   }
 }
 
@@ -1004,9 +1032,12 @@ FindMatchedCellHashing <- function(loupeDataId){
 #'
 #' @import Rlabkey
 DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
-  
+  if (is.na(outputFileId)) {
+    stop('Output file ID cannot be NA')
+  }
+
   if (file.exists(outFile) & !overwrite) {
-    print("File exists, will not overwrite")
+    print(paste0("File exists, will not overwrite: ", outFile))
     return(outFile)
 	}
   
@@ -1023,8 +1054,6 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
     containerFilter=NULL,
     colNameOpt="rname"
   )
-  
-  
 
   if (nrow(rows) != 1) {
     stop(paste0('More than one matching file found, this should not occur.  RowId: ', outputFileId))

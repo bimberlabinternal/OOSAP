@@ -43,7 +43,8 @@ Imports:
     biomaRt,
     DESeq2,
     MAST,
-    kernlab
+    kernlab,
+    Biostrings
 Suggests:
     ggvis,
     testthat (>= 2.1.0)
@@ -71,6 +72,7 @@ Collate:
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
     'SingleR_Seurat.R'
+    'TCR.R'
     'Viz.R'
     'data.R'
     'mcl.R'
