@@ -57,7 +57,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 	# Possible to have a duplicate:
 	seuratRows <- unique(seuratRows)
 
-	if (nrow(seuratRows) != length(gexReadsets)) {
+	if (length(unique(seuratRows$readset)) != length(gexReadsets)) {
 		missing <- gexReadsets[!(gexReadsets %in% unique(seuratRows$readset))]
 		print(paste0('Not all requested cDNAs have seurat objects.  Readsets missing: ', paste0(unique(missing), collapse = ',')))
 
