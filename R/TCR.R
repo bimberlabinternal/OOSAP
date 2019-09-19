@@ -18,6 +18,7 @@
 #' @importFrom Biostrings readDNAStringSet
 #' @importFrom dplyr %>% group_by select n summarize
 CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActivated', positivityThreshold = 0.5, outPrefix = './', invert = FALSE, doCleanup = FALSE) {
+	print(paste0('Total cDNA records: ', length(cDndIds)))
 	rows <- labkey.selectRows(
 		baseUrl=lkBaseUrl,
 		folderPath=lkDefaultFolder,
@@ -37,6 +38,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 	}
 
 	gexReadsets <- unique(rows$readsetid)
+	print(paste0('total GEX readsets: ', length(gexReadsets)))
 
 	# Identify, download seuratObj, created from the appropriate readsetId:
 	seuratRows <- labkey.selectRows(
@@ -67,6 +69,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 	downloadedFiles <- c()
 	ret <- NA
 	for (gexReadset in gexReadsets) {
+		print(paste0('processing readset: ', gexReadset))
 		row <- seuratRows[seuratRows$readset == gexReadset,,drop = F]
 		if (nrow(row) > 1) {
 			print('More than one seurat row found, using the most recent')
@@ -219,15 +222,16 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 				ret <- rbind(ret, tcrData)
 			}
 		}
-
-		if (doCleanup) {
-			print('Cleaning up downloaded files')
-			for (f in downloadedFiles) {
-				unlink(f)
-			}
-		}
-		return(ret)
 	}
+
+	if (doCleanup) {
+		print('Cleaning up downloaded files')
+		for (f in downloadedFiles) {
+			unlink(f)
+		}
+	}
+
+	return(ret)
 }
 
 #' @title CalculateTCRFreqForActivatedCellsAndImport
@@ -242,10 +246,11 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 #' @param populationNameSuffix This string will be added to the end of the population field on the saved assay rows, appended to the associated cDNA population
 #' @param invert If TRUE, those cells NOT positive for the gene set will be summarized, instead of positive cells
 #' @param doCleanup If TRUE, any downloaded files will be deleted on completion
+#' @param minCells If provided, data will only be imported if at least this many cells exist for the cDNA library
 #' @export
 #' @import Seurat
 #' @importFrom dplyr %>% group_by select n summarize
-CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL, geneSetName = 'HighlyActivated', positivityThreshold = 0.5, outPrefix = './', assayName = 'TCRdb', populationNameSuffix = '-HA', invert = FALSE, doCleanup = FALSE) {
+CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL, geneSetName = 'HighlyActivated', positivityThreshold = 0.5, outPrefix = './', assayName = 'TCRdb', populationNameSuffix = '-HA', invert = FALSE, doCleanup = FALSE, minCells = NULL) {
 	folder <- lkDefaultFolder
 	if (!is.null(workbook)) {
 		folder <- paste0(folder, workbook)
@@ -261,16 +266,33 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 	for (analysisId in analysisIds) {
 		df <- resultDataFrame[resultDataFrame$analysisId == analysisId,]
 		print(paste0('Preparing run for analysis Id: ',analysisId,', total rows: ', nrow(df)))
-		run <- labkey.experiment.createRun(list(name = paste0('AnalysisId: ', analysisId), properties = list(assayName = '10x', analysisId = analysisId)), dataRows = df)
-		runList <- append(runList, list(run))
+		if (!is.null(minCells)) {
+			totals <- df %>% group_by(cdna) %>% summarize(total = sum(count))
+			toKeep <- unique(totals$cdna[totals$total >= minCells])
+			if (length(toKeep) != length(unique(df$cdna))) {
+				print('The following cDNA libraries will be skipped due to low cells:')
+				print(paste0(totals$cdna[totals$total < minCells], ': ', totals$total[totals$total < minCells]))
+
+				df <- df[df$cdna %in% toKeep,]
+				print(paste0('after filter: ', nrow(df)))
+			}
+		}
+
+		if (nrow(df) > 0) {
+			run <- labkey.experiment.createRun(list(name = paste0('AnalysisId: ', analysisId), properties = list(assayName = '10x', analysisId = analysisId)), dataRows = df)
+			runList <- append(runList, list(run))
+		}
 	}
 
 	print(paste0('total runs: ', length(runList)))
-
-	labkey.experiment.saveBatch(
-		baseUrl=lkBaseUrl,
-		folderPath=folder,
-		assayConfig=list(assayName=assayName, providerName='TCRdb'),
-		runList = runList
-	)
+	if (length(runList) > 0) {
+		labkey.experiment.saveBatch(
+			baseUrl=lkBaseUrl,
+			folderPath=folder,
+			assayConfig=list(assayName=assayName, providerName='TCRdb'),
+			runList = runList
+		)
+	} else {
+		print('no runs to save')
+	}
 }

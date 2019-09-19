@@ -7,7 +7,8 @@
 CalculateTCRFreqForActivatedCellsAndImport(cDndIds, workbook = NULL,
   geneSetName = "HighlyActivated", positivityThreshold = 0.5,
   outPrefix = "./", assayName = "TCRdb",
-  populationNameSuffix = "-HA", invert = FALSE, doCleanup = FALSE)
+  populationNameSuffix = "-HA", invert = FALSE, doCleanup = FALSE,
+  minCells = NULL)
 }
 \arguments{
 \item{cDndIds}{A vector of cDNA rowIDs}
@@ -27,6 +28,8 @@ CalculateTCRFreqForActivatedCellsAndImport(cDndIds, workbook = NULL,
 \item{invert}{If TRUE, those cells NOT positive for the gene set will be summarized, instead of positive cells}
 
 \item{doCleanup}{If TRUE, any downloaded files will be deleted on completion}
+
+\item{minCells}{If provided, data will only be imported if at least this many cells exist for the cDNA library}
 }
 \value{
 Returns the object representation of the experiment batch (from Rlabkey::labkey.experiment.saveBatch)
