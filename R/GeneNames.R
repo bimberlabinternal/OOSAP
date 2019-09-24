@@ -4,7 +4,7 @@
 #' @param ensemblFilters A vector of ensembl IDs, passed to the getBM() filters argument.
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @param dataset Passed directly to biomaRt::useEnsembl
-#' @param Attributes A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.
+#' @param extraAttrs A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.
 #' @importFrom biomaRt useEnsembl getBM
 #' @importFrom dplyr %>% group_by summarise
 #' @export
@@ -12,10 +12,13 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds,
                                                biomart = "ensembl", 
                                                dataset = "mmulatta_gene_ensembl", 
                                                ensemblFilters = c('ensembl_gene_id'),
-                                               Attributes =NULL) {
+                                               extraAttrs =NULL) {
     
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
-    if(!is.null(Attributes)) homologAttrs <- c(homologAttrs, Attributes)
+    if(!is.null(extraAttrs)) homologAttrs <- c(homologAttrs, extraAttrs)
+    
+    ensembl = useEnsembl(biomart=biomart, dataset=dataset)
+    
     homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
 
     homologs <- homologs %>% group_by(ensembl_gene_id) %>% summarise(

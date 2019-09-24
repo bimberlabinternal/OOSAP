@@ -6,7 +6,7 @@
 \usage{
 QueryEnsemblSymbolAndHumanHomologs(ensemblIds, biomart = "ensembl",
   dataset = "mmulatta_gene_ensembl",
-  ensemblFilters = c("ensembl_gene_id"), Attributes = NULL)
+  ensemblFilters = c("ensembl_gene_id"), extraAttrs = NULL)
 }
 \arguments{
 \item{ensemblIds}{A vector of ensembl IDs, passed to the getBM() filters argument}
@@ -17,7 +17,7 @@ QueryEnsemblSymbolAndHumanHomologs(ensemblIds, biomart = "ensembl",
 
 \item{ensemblFilters}{A vector of ensembl IDs, passed to the getBM() filters argument.}
 
-\item{Attributes}{A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.}
+\item{extraAttrs}{A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.}
 }
 \description{
 QueryEnsemblSymbolAndHumanHomologs
