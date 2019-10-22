@@ -12,11 +12,13 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds,
                                                biomart = "ensembl", 
                                                dataset = "mmulatta_gene_ensembl", 
                                                ensemblFilters = c('ensembl_gene_id'),
-                                               extraAttrs =NULL) {
+                                               extraAttrs = NULL) {
     
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
-    if(!is.null(extraAttrs)) homologAttrs <- unique(c(homologAttrs, extraAttrs))
-    
+    if(!is.null(extraAttrs)) {
+      homologAttrs <- unique(c(homologAttrs, extraAttrs))
+    }
+  
     ensembl = useEnsembl(biomart=biomart, dataset=dataset)
     
     homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
