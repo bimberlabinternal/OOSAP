@@ -18,7 +18,10 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
         hsapiens_homolog_ensembl_gene = paste(sort(unique(hsapiens_homolog_ensembl_gene)), collapse=','),
         hsapiens_homolog_associated_gene_name = paste(sort(unique(hsapiens_homolog_associated_gene_name)), collapse=',')
     )
-    homologs[homologs == ''] <- NA
+
+    if (nrow(homologs) > 0 && length(homologs[homologs == '']) > 0) {
+        homologs[homologs == ''] <- NA
+    }
 
     ret <- data.frame(ensembl_gene_id = ensemblIds, SortOrder = 1:length(ensemblIds))
     ret <- merge(ret, homologs, by = c('ensembl_gene_id'), all.x = T)

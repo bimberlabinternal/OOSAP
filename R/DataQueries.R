@@ -509,7 +509,7 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 #' @return A modified Seurat object.
 #' @export
 DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T){
-  if (is.null(seuratObject[['BarcodePrefix']])){
+  if (all(is.null(seuratObject[['BarcodePrefix']]))){
     stop('Seurat object lacks BarcodePrefix column')
   }
 
