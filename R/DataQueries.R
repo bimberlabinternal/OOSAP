@@ -557,9 +557,10 @@ utils::globalVariables(
   gexBarcodes <- colnames(seuratObject)[datasetSelect]
 
   tcr <- tcr[tcr$barcode %in% gexBarcodes,]
-  pct <- nrow(tcr) / origRows * 100
+  pct <- round(nrow(tcr) / origRows * 100, 2)
+  pct2 <- round(nrow(tcr) / length(gexBarcodes) * 100, 2)
 
-  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data: ', nrow(tcr), " (", pct, "%)"))
+  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data (total ', length(gexBarcodes),'): ', nrow(tcr), " (", pct, "% / ", pct2, "%)"))
 
   merged <- merge(data.frame(barcode = gexBarcodes, sortOrder = 1:length(gexBarcodes)), tcr, by = c('barcode'), all.x = T)
   rownames(merged) <- merged$barcode
@@ -568,7 +569,6 @@ utils::globalVariables(
 
   # Check barcodes match before merge
   if (sum(merged$barcode != gexBarcodes) > 0) {
-    #stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
     stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != gexBarcodes )))
   }
 
