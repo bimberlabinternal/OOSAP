@@ -5,7 +5,8 @@
 \title{ClassifySGSAndApply}
 \usage{
 ClassifySGSAndApply(seuratObj, geneList = NULL, geneSetName = NULL,
-  saveFilePath = NULL, doPlot = T, positivityThreshold = NULL)
+  saveFilePath = NULL, doPlot = T, positivityThreshold = NULL,
+  reduction = NULL)
 }
 \arguments{
 \item{geneList}{A character vector of the genes to test}
@@ -17,6 +18,8 @@ ClassifySGSAndApply(seuratObj, geneList = NULL, geneSetName = NULL,
 \item{doPlot}{If true, a QC plot will be created}
 
 \item{positivityThreshold}{If provided, a boolean column will be added to the dataframe scoring cells as positive or negative, depending on if their score is greater than this threshold}
+
+\item{reduction}{The reduction (i.e. tsne or umap) that will be used when plotting}
 }
 \value{
 The modified seurat object

@@ -50,6 +50,7 @@ ClassifySGS_Multiple <- function(seuratObj,
 #' @param saveFilePath If provided, the dataframe will be saved here
 #' @param doPlot If true, a QC plot will be created
 #' @param positivityThreshold If provided, a boolean column will be added to the dataframe scoring cells as positive or negative, depending on if their score is greater than this threshold
+#' @param reduction The reduction (i.e. tsne or umap) that will be used when plotting
 #' @return The modified seurat object
 #' @import ggplot2
 #' @importFrom cowplot plot_grid
@@ -59,7 +60,8 @@ geneList = NULL,
 geneSetName = NULL,
 saveFilePath = NULL,
 doPlot = T,
-positivityThreshold = NULL
+positivityThreshold = NULL,
+reduction = NULL
 ) {
 	df <- ClassifySGS(seuratObj, geneList, geneSetName, saveFilePath, doPlot, positivityThreshold)
 	if (!all(is.na(df))) {
@@ -72,7 +74,7 @@ positivityThreshold = NULL
 			seuratObj[[col]] <- df[col]
 
 			if (doPlot && (all(grepl(pattern = '.Score', x = col)) || all(grepl(pattern = '.Call', x = col)))) {
-				plots[[col]] <- Seurat::FeaturePlot(seuratObj, features = c(col))
+				plots[[col]] <- Seurat::FeaturePlot(seuratObj, features = c(col), reduction = reduction)
 			}
 		}
 

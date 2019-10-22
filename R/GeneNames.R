@@ -41,7 +41,8 @@ RenameGenesUsingCD <- function(geneSymbols) {
     ret <- ret[order(ret$SortOrder),]
 
     ret$Label <- as.character(ret$GeneSymbol)
-    ret$Label[!is.na(ret$PreviousSymbols)] <- paste0(ret$Label[!is.na(ret$PreviousSymbols)], ' (', as.character(ret$PreviousSymbols[!is.na(ret$PreviousSymbols)]), ')')
+    sel <- !is.na(ret$PreviousSymbols) & !is.null(ret$PreviousSymbols) & ret$PreviousSymbols != ''
+    ret$Label[sel] <- paste0(ret$Label[sel], ' (', as.character(ret$PreviousSymbols[sel]), ')')
 
     return(ret$Label)
 }

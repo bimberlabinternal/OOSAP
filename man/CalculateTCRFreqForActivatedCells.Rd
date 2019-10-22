@@ -6,7 +6,8 @@
 \usage{
 CalculateTCRFreqForActivatedCells(cDndIds,
   geneSetName = "HighlyActivated", positivityThreshold = 0.5,
-  outPrefix = "./", invert = FALSE, doCleanup = FALSE)
+  outPrefix = "./", invert = FALSE, doCleanup = FALSE,
+  reduction = NULL)
 }
 \arguments{
 \item{cDndIds}{A vector of cDNA rowIDs}
@@ -20,6 +21,8 @@ CalculateTCRFreqForActivatedCells(cDndIds,
 \item{invert}{If TRUE, those cells NOT positive for the gene set will be summarized, instead of positive cells}
 
 \item{doCleanup}{If TRUE, any downloaded files will be deleted on completion}
+
+\item{reduction}{The reduction (i.e. tsne or umap) that will be used when plotting}
 }
 \value{
 A dataframe of results
