@@ -19,7 +19,7 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
         hsapiens_homolog_associated_gene_name = paste(sort(unique(hsapiens_homolog_associated_gene_name)), collapse=',')
     )
 
-    if (nrow(homologs) > 0 && length(homologs[homologs == '']) > 0) {
+    if (nrow(homologs) > 0 && sum(homologs == '') > 0) {
         homologs[homologs == ''] <- NA
     }
 
