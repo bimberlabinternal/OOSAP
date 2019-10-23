@@ -13,11 +13,12 @@
 #' @param outPrefix A string that will be prepended to all saved files
 #' @param invert If TRUE, those cells NOT positive for the gene set will be summarized, instead of positive cells
 #' @param doCleanup If TRUE, any downloaded files will be deleted on completion
+#' @param reduction The reduction (i.e. tsne or umap) that will be used when plotting
 #' @export
 #' @import Seurat
 #' @importFrom Biostrings readDNAStringSet
 #' @importFrom dplyr %>% group_by select n summarize
-CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActivated', positivityThreshold = 0.5, outPrefix = './', invert = FALSE, doCleanup = FALSE) {
+CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActivated', positivityThreshold = 0.5, outPrefix = './', invert = FALSE, doCleanup = FALSE, reduction = NULL) {
 	print(paste0('Total cDNA records: ', length(cDndIds)))
 	rows <- labkey.selectRows(
 		baseUrl=lkBaseUrl,
@@ -91,7 +92,7 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 
 		seuratObj <- DownloadAndAppendCellHashing(seuratObject = seuratObj)
 		seuratObj <- QueryAndApplyCdnaMetadata(seuratObj)
-		seuratObj <- ClassifySGSAndApply(seuratObj = seuratObj, geneSetName = 'Positive', geneList = OOSAP::Phenotyping_GeneList()[[geneSetName]], positivityThreshold = positivityThreshold)
+		seuratObj <- ClassifySGSAndApply(seuratObj = seuratObj, geneSetName = 'Positive', geneList = OOSAP::Phenotyping_GeneList()[[geneSetName]], positivityThreshold = positivityThreshold, reduction = reduction)
 		if (invert) {
 			print('Selecting cells without the provided signature')
 			barcodeWhitelist <- colnames(seuratObj)[!seuratObj$Positive.Call & !is.na(seuratObj$cDNA_ID)]

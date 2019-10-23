@@ -506,10 +506,11 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 #' @param seuratObject A Seurat object
 #' @param outPath The output filepath
 #' @param dropExisting If true, any existing clonotype data will be replaced
+#' @param overwriteTcrTable If true, any existing table(s) of TCR clones will be overwritten and re-downloaded
 #' @return A modified Seurat object.
 #' @export
-DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T){
-  if (is.null(seuratObject[['BarcodePrefix']])){
+DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExisting = T, overwriteTcrTable = F){
+  if (all(is.null(seuratObject[['BarcodePrefix']]))){
     stop('Seurat object lacks BarcodePrefix column')
   }
 
@@ -523,8 +524,8 @@ DownloadAndAppendTcrClonotypes <- function(seuratObject, outPath = '.', dropExis
       stop(paste0('Unable to find VLoupe file for loupe file: ', barcodePrefix))
     }
 
-    clonotypeFile <- file.path(outPath, paste0(barcodePrefix, '_clonotypes.csv'))
-    .DownloadCellRangerClonotypes(vLoupeId = vloupeId, outFile = clonotypeFile, overwrite = T)
+    clonotypeFile <- file.path(outPath, paste0(barcodePrefix, '.', vloupeId, '.clonotypes.csv'))
+    .DownloadCellRangerClonotypes(vLoupeId = vloupeId, outFile = clonotypeFile, overwrite = overwriteTcrTable)
     if (!file.exists(clonotypeFile)){
       stop(paste0('Unable to download clonotype file for prefix: ', barcodePrefix))
     }
@@ -544,7 +545,6 @@ utils::globalVariables(
 
 .AppendTcrClonotypes <- function(seuratObject = NA, clonotypeFile = NA, barcodePrefix = NULL, dropExisting = F){
   tcr <- .ProcessAndAggregateTcrClonotypes(clonotypeFile)
-
   if (!is.null(barcodePrefix)){
     tcr$barcode <- as.character(tcr$barcode)
     tcr$barcode <- paste0(barcodePrefix, '_', tcr$barcode)
@@ -557,9 +557,10 @@ utils::globalVariables(
   gexBarcodes <- colnames(seuratObject)[datasetSelect]
 
   tcr <- tcr[tcr$barcode %in% gexBarcodes,]
-  pct <- nrow(tcr) / origRows * 100
+  pct <- round(nrow(tcr) / origRows * 100, 2)
+  pct2 <- round(nrow(tcr) / length(gexBarcodes) * 100, 2)
 
-  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data: ', nrow(tcr), " (", pct, "%)"))
+  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data (total ', length(gexBarcodes),'): ', nrow(tcr), " (", pct, "% / ", pct2, "%)"))
 
   merged <- merge(data.frame(barcode = gexBarcodes, sortOrder = 1:length(gexBarcodes)), tcr, by = c('barcode'), all.x = T)
   rownames(merged) <- merged$barcode
@@ -568,9 +569,7 @@ utils::globalVariables(
 
   # Check barcodes match before merge
   if (sum(merged$barcode != gexBarcodes) > 0) {
-    #stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != colnames(seuratObject)[datasetSelect])))
     stop(paste0('Seurat and TCR barcodes do not match after merge, total different: ', sum(merged$barcode != gexBarcodes )))
-
   }
 
   for (colName in colnames(tcr)[colnames(tcr) != 'barcode']) {
@@ -637,10 +636,14 @@ utils::globalVariables(
   )
 
   if (nrow(rows) > 1){
-    rows <- rows[1]
+    print(paste0('more than one matching VLoupe file found, using most recent: ', tcrReadsetId))
+    rows <- rows[1,,drop = F]
+  } else if (nrow(rows) == 0) {
+    print(paste0('Vloupe file not found for TCR readset: ', tcrReadsetId))
+    return(NA)
   }
 
-  return(rows[['rowid']])
+  return(rows$rowid[1])
 }
 
 .DownloadCellRangerClonotypes <- function(vLoupeId, outFile, overwrite = T, fileName = 'all_contig_annotations.csv') {

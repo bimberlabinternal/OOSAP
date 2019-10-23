@@ -5,7 +5,7 @@
 \title{DownloadAndAppendTcrClonotypes}
 \usage{
 DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
-  dropExisting = T)
+  dropExisting = T, overwriteTcrTable = F)
 }
 \arguments{
 \item{seuratObject}{A Seurat object}
@@ -13,6 +13,8 @@ DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
 \item{outPath}{The output filepath}
 
 \item{dropExisting}{If true, any existing clonotype data will be replaced}
+
+\item{overwriteTcrTable}{If true, any existing table(s) of TCR clones will be overwritten and re-downloaded}
 }
 \value{
 A modified Seurat object.

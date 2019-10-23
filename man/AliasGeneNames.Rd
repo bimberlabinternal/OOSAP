@@ -6,7 +6,7 @@
 \usage{
 AliasGeneNames(ensemblIds, biomart = "ensembl",
   dataset = "mmulatta_gene_ensembl",
-  ensemblFilters = c("ensembl_gene_id"))
+  ensemblFilters = c("ensembl_gene_id"), ensemblVersion = NULL)
 }
 \arguments{
 \item{ensemblIds}{A vector of ensembl IDs, passed to the getBM() filters argument}
@@ -16,6 +16,8 @@ AliasGeneNames(ensemblIds, biomart = "ensembl",
 \item{dataset}{Passed directly to biomaRt::useEnsembl}
 
 \item{ensemblFilters}{A vector of ensembl IDs, passed to the getBM() filters argument.}
+
+\item{ensemblVersion}{Passed directly as version to biomaRt::useEnsembl}
 }
 \description{
 This function accepts a vector of gene names. It will first query Ensembl to attempt to translate ID to gene symbol. Any names not translated will be compared for human homologs. Finally, these symbols will be compared to CD genes, and the CD name appended (if found).
