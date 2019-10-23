@@ -4,11 +4,12 @@
 #' @param ensemblFilters A vector of ensembl IDs, passed to the getBM() filters argument.
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @param dataset Passed directly to biomaRt::useEnsembl
+#' @param version Passed directly to biomaRt::useEnsembl
 #' @importFrom biomaRt useEnsembl getBM
 #' @importFrom dplyr %>% group_by summarise
 #' @export
-QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id')) {
-    ensembl = useEnsembl(biomart=biomart, dataset=dataset)
+QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id'), version = NULL) {
+    ensembl = useEnsembl(biomart=biomart, dataset=dataset, version = version)
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
     homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
 
@@ -54,10 +55,11 @@ RenameGenesUsingCD <- function(geneSymbols) {
 #' @param ensemblFilters A vector of ensembl IDs, passed to the getBM() filters argument.
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @param dataset Passed directly to biomaRt::useEnsembl
+#' @param ensemblVersion Passed directly as version to biomaRt::useEnsembl
 #' @importFrom biomaRt useEnsembl getBM
 #' @export
-AliasGeneNames <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id')) {
-    ret <- QueryEnsemblSymbolAndHumanHomologs(ensemblIds, biomart = biomart, dataset = dataset, ensemblFilters = ensemblFilters)
+AliasGeneNames <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id'), ensemblVersion = NULL) {
+    ret <- QueryEnsemblSymbolAndHumanHomologs(ensemblIds, biomart = biomart, dataset = dataset, ensemblFilters = ensemblFilters, version = ensemblVersion)
 
     return(RenameGenesUsingCD(ret$Label))
 }
