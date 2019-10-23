@@ -8,8 +8,8 @@ test_that("All aliases preserved", {
     expect_equal(homologs$Label, c('TRAV1-1', 'MDK', 'CD8'))
 
     # This is a private method, but test directly anyway
-    cdGenes <- OOSAP:::RenameGenesUsingCD(c('PTPR', '12345', 'DPP4', 'ENSMMUG00000040244'))
-    expect_equal(cdGenes, c('PTPR', '12345', 'DPP4 (CD26,ADCP2)', 'ENSMMUG00000040244'))
+    cdg <- OOSAP:::RenameGenesUsingCD(c('PTPR', '12345', 'DPP4', 'ENSMMUG00000040244'))
+    expect_equal(cdg, c('PTPR', '12345', 'DPP4 (CD26,ADCP2)', 'ENSMMUG00000040244'))
 
     aliased <- AliasGeneNames(c('ENSMMUG00000040244', 'ENSMMUG00000008350', 'CD8', 'DPP4'), ensemblVersion = '97')
     expect_equal(aliased, c('TRAV1-1', 'MDK', 'CD8', 'DPP4 (CD26,ADCP2)'))
