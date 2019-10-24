@@ -10,14 +10,19 @@ test_that("Serat processing works as expected", {
 
   expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
+  #for speed, subset:
+  cellsToUse <- sort(colnames(seuratObj))[1:500]
+  seuratObj <- seuratObj[,cellsToUse]
+
   vgFile <- 'variableGenes.txt'
   seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile, doCellFilter = T)
+  expect_equal(ncol(seuratObj), 485)
 
   expect_equal(file.exists(vgFile), T)
   expect_equal(nrow(utils::read.table(vgFile, sep = '\t', header = F)), 2000)
 
   seuratObj <- FindClustersAndDimRedux(seuratObj)
-  expect_equal(ncol(seuratObj), 1557)
+  expect_equal(ncol(seuratObj), 485)
   expect_equal(length(unique(seuratObj$ClusterNames_0.6)), 7)
 
   expect_equal(length(rownames(seuratObj@assays$RNA@scale.data)), length(rownames(seuratObj@assays$RNA@counts)))
