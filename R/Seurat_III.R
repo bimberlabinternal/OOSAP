@@ -501,18 +501,36 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   if (doCellFilter & (forceReCalc | !HasStepRun(seuratObj, 'FilterCells', forceReCalc = forceReCalc))) {
     print("Filtering Cells...")
     seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
+    print(paste0('Initial cells: ', length(colnames(x = seuratObj))))
+
+    P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito")
+    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=pMito.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=pMito.high), color="blue", linetype="dashed", size=1)
+    print(P1)
+
+    P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=nUMI.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=nUMI.high), color="blue", linetype="dashed", size=1)
+    print(P1)
 
     #See: https://github.com/satijalab/seurat/issues/1053#issuecomment-454512002
     expr <- Seurat::FetchData(object = seuratObj, vars = 'nCount_RNA')
     seuratObj <- seuratObj[, which(x = expr > nGene.low & expr < nGene.high)]
+    print(paste0('After nCount_RNA filter: ', length(colnames(x = seuratObj))))
 
     expr <- Seurat::FetchData(object = seuratObj, vars = 'nFeature_RNA')
     seuratObj <- seuratObj[, which(x = expr > nUMI.low & expr < nUMI.high)]
+    print(paste0('After nFeature_RNA filter: ', length(colnames(x = seuratObj))))
 
     expr <- Seurat::FetchData(object = seuratObj, vars = 'p.mito')
     seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
+    print(paste0('After p.mito filter: ', length(colnames(x = seuratObj))))
 
-    print(paste0('Initial cells: ', seuratObj@misc$OriginalCells, ', after filter: ', length(colnames(x = seuratObj))))
+    print(paste0('Final: ', length(colnames(x = seuratObj))))
 
     seuratObj <- MarkStepRun(seuratObj, 'FilterCells')
   }
@@ -1356,7 +1374,7 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   PlotMarkerSeries(seuratObj, reduction, c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4'), 'Effector vs. Memory')
 
   #CD8 Activation
-  PlotMarkerSeries(seuratObj, reduction, c('CCL4', 'IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L2', 'NR4A3', 'CD82', 'CD83'), 'CD8 Activation Markers')
+  PlotMarkerSeries(seuratObj, reduction, c('CCL4', 'IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L2', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'RGCC', 'PD1', 'TNFSF14'), 'CD8 Activation Markers')
 
   PlotMarkerSeries(seuratObj, reduction, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
