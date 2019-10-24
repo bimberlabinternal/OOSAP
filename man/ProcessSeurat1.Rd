@@ -5,8 +5,8 @@
 \title{Run the primary seurat processing steps.}
 \usage{
 ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
-  doCellFilter = F, nUMI.high = 20000, nGene.high = 3000,
-  pMito.high = 0.15, nUMI.low = 0.99, nGene.low = 200,
+  doCellFilter = F, nUMI.high = 20000, nFeature.high = 3000,
+  pMito.high = 0.15, nUMI.low = 0.99, nFeature.low = 200,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
   variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
   printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL,
@@ -22,11 +22,11 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
 
 \item{doCellFilter}{If true, basic filtering will be performed using nCount_RNA, nFeature_RNA, and pMito}
 
-\item{nGene.high}{If doCellFilter=T, cells with nGene above this value will be filtered}
+\item{nFeature.high}{If doCellFilter=T, cells with nFeature above this value will be filtered}
 
 \item{pMito.high}{If doCellFilter=T, cells with percent mito above this value will be filtered}
 
-\item{nGene.low}{If doCellFilter=T, cells with nGene below this value will be filtered}
+\item{nFeature.low}{If doCellFilter=T, cells with nFeature below this value will be filtered}
 
 \item{pMito.low}{If doCellFilter=T, cells with percent mito  below this value will be filtered}
 

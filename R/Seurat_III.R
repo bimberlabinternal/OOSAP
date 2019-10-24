@@ -467,8 +467,8 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param doCellFilter If true, basic filtering will be performed using nCount_RNA, nFeature_RNA, and pMito
 #' @param uUMI.high If doCellFilter=T, cells with nUMI above this value will be filtered
 #' @param uUMI.low If doCellFilter=T, cells with nUMI below this value will be filtered
-#' @param nGene.high If doCellFilter=T, cells with nGene above this value will be filtered
-#' @param nGene.low If doCellFilter=T, cells with nGene below this value will be filtered
+#' @param nFeature.high If doCellFilter=T, cells with nFeature above this value will be filtered
+#' @param nFeature.low If doCellFilter=T, cells with nFeature below this value will be filtered
 #' @param pMito.high If doCellFilter=T, cells with percent mito above this value will be filtered
 #' @param pMito.low If doCellFilter=T, cells with percent mito  below this value will be filtered
 #' @param forceReCalc If true, all steps will be repeated even if already marked as complete
@@ -482,8 +482,8 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @return A modified Seurat object.
 #' @export
 ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFilter = F,
-                            nUMI.high = 20000, nGene.high = 3000, pMito.high = 0.15,
-                            nUMI.low = 0.99, nGene.low = 200, pMito.low = -Inf, forceReCalc = F,
+                            nUMI.high = 20000, nFeature.high = 3000, pMito.high = 0.15,
+                            nUMI.low = 0.99, nFeature.low = 200, pMito.low = -Inf, forceReCalc = F,
                             variableGeneTable = NULL, variableFeatureSelectionMethod = 'vst', 
                             nVariableFeatures = 2000, printDefaultPlots = T,
                             npcs = 50, ccPcaResultFile = NULL, useSCTransform = F, 
@@ -504,26 +504,26 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     print(paste0('Initial cells: ', length(colnames(x = seuratObj))))
 
     P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito")
-    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
-    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nUMI.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nUMI.low), color="blue", linetype="dashed", size=1)
     P1 <- P1 + geom_hline(aes(yintercept=pMito.low), color="blue", linetype="dashed", size=1)
     P1 <- P1 + geom_hline(aes(yintercept=pMito.high), color="blue", linetype="dashed", size=1)
     print(P1)
 
     P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
-    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
-    P1 <- P1 + geom_vline(aes(xintercept=nGene.low), color="blue", linetype="dashed", size=1)
-    P1 <- P1 + geom_hline(aes(yintercept=nUMI.low), color="blue", linetype="dashed", size=1)
-    P1 <- P1 + geom_hline(aes(yintercept=nUMI.high), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nUMI.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_vline(aes(xintercept=nUMI.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=nFeature.low), color="blue", linetype="dashed", size=1)
+    P1 <- P1 + geom_hline(aes(yintercept=nFeature.high), color="blue", linetype="dashed", size=1)
     print(P1)
 
     #See: https://github.com/satijalab/seurat/issues/1053#issuecomment-454512002
     expr <- Seurat::FetchData(object = seuratObj, vars = 'nCount_RNA')
-    seuratObj <- seuratObj[, which(x = expr > nGene.low & expr < nGene.high)]
+    seuratObj <- seuratObj[, which(x = expr > nUMI.low & expr < nUMI.high)]
     print(paste0('After nCount_RNA filter: ', length(colnames(x = seuratObj))))
 
     expr <- Seurat::FetchData(object = seuratObj, vars = 'nFeature_RNA')
-    seuratObj <- seuratObj[, which(x = expr > nUMI.low & expr < nUMI.high)]
+    seuratObj <- seuratObj[, which(x = expr > nFeature.low & expr < nFeature.high)]
     print(paste0('After nFeature_RNA filter: ', length(colnames(x = seuratObj))))
 
     expr <- Seurat::FetchData(object = seuratObj, vars = 'p.mito')
