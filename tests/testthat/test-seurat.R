@@ -10,6 +10,9 @@ test_that("Serat processing works as expected", {
 
   expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
+  #for speed, select the first 1000.  not sure if this will be deterministic?
+  seuratObj <- seuratObj[,1:1000]
+
   vgFile <- 'variableGenes.txt'
   seuratObj <- ProcessSeurat1(seuratObj, doCellCycle = T, variableGeneTable = vgFile, doCellFilter = T)
 

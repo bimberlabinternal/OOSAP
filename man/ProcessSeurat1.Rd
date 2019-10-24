@@ -5,8 +5,8 @@
 \title{Run the primary seurat processing steps.}
 \usage{
 ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
-  doCellFilter = F, nUMI.high = 20000, nFeature.high = 3000,
-  pMito.high = 0.15, nUMI.low = 0.99, nFeature.low = 200,
+  doCellFilter = F, nCount_RNA.high = 20000, nFeature.high = 3000,
+  pMito.high = 0.15, nCount_RNA.low = 0.99, nFeature.low = 200,
   pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
   variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
   printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL,
@@ -46,9 +46,9 @@ ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
 
 \item{useSCTransform}{If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)}
 
-\item{uUMI.high}{If doCellFilter=T, cells with nUMI above this value will be filtered}
+\item{uUMI.high}{If doCellFilter=T, cells with nCount_RNA above this value will be filtered}
 
-\item{uUMI.low}{If doCellFilter=T, cells with nUMI below this value will be filtered}
+\item{uUMI.low}{If doCellFilter=T, cells with nCount_RNA below this value will be filtered}
 }
 \value{
 A modified Seurat object.
