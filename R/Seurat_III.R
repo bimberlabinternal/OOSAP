@@ -508,7 +508,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 			pMito.low = pMito.low
     )
 
-    seuratObj <- MarkStepRun(seuratObj, 'FilterCells')
+    seuratObj <- MarkStepRun(seuratObj, 'FilterCells', saveFile)
   }
 
   if (!useSCTransform) {
@@ -552,12 +552,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   
   if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA', forceReCalc = forceReCalc)) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
-    seuratObj <- MarkStepRun(seuratObj, 'RunPCA')
+    seuratObj <- MarkStepRun(seuratObj, 'RunPCA', saveFile)
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'ProjectDim', forceReCalc = forceReCalc)) {
     seuratObj <- ProjectDim(object = seuratObj)
-    seuratObj <- MarkStepRun(seuratObj, 'ProjectDim')
+    seuratObj <- MarkStepRun(seuratObj, 'ProjectDim', saveFile)
   }
 
   #Verify data exists.  This appears to get reset, possibly by DimRedux steps
@@ -643,7 +643,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
   print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
 
-  print(JackStrawPlot(object = seuratObj, dims = 1:20))
+  if (length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
+    print('Unable to display JackStrawPlot, data not available')
+  } else {
+    print(JackStrawPlot(object = seuratObj, dims = 1:20))
+  }
+
   print(ElbowPlot(object = seuratObj))
 }
 

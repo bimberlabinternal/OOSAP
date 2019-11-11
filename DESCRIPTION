@@ -43,7 +43,6 @@ Imports:
     biomaRt,
     DESeq2,
     MAST,
-    kernlab,
     Biostrings
 Suggests:
     ggvis,
