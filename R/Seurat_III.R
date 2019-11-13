@@ -1396,7 +1396,7 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   PlotMarkerSeries(seuratObj, reduction, c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4'), 'Effector vs. Memory')
 
   #CD8 Activation
-  PlotMarkerSeries(seuratObj, reduction, c('CCL4', 'IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L2', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'RGCC', 'PD1', 'TNFSF14'), 'CD8 Activation Markers')
+  PlotMarkerSeries(seuratObj, reduction, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'ENSMMUG00000013779', 'ENSMMUG00000060218', 'ENSMMUG00000008111'), 'CD8 Activation Markers')
 
   PlotMarkerSeries(seuratObj, reduction, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
@@ -1404,7 +1404,7 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
 
   PlotMarkerSet(seuratObj, reduction, 'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
-  PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3'))
+  PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6'))
 
   PlotMarkerSet(seuratObj, reduction, 'Inhibitory Markers', c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'))
 
@@ -1412,7 +1412,7 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   PlotMarkerSet(seuratObj, reduction, 'Signaling', c('HCST', 'TYROBP'))
 
   #LILR/KIR:
-  PlotMarkerSeries(seuratObj, reduction, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR'), 'KIR/LILR')
+  PlotMarkerSeries(seuratObj, reduction, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'KIR/LILR')
 
   PlotMarkerSeries(seuratObj, reduction, c('FCGR1A','FCGR2B','FCGR3'), 'FCGR')
 
@@ -1420,13 +1420,13 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   cytokines <- c('IL1A','IL1B','IL1R1','IL1R2','IL1RAP','IL1RAPL1','IL1RAPL2','IL1RL1','IL1RL2','IL1RN','IL2','IL2RA','IL2RB','IL2RG','IL3','IL3RA','IL4','IL4I1','IL4R','IL5','IL5RA','IL6','IL6R','IL6ST','IL7','IL7R','IL9','IL10','IL10RA','IL11','IL12A','IL12B','IL12RB1','IL12RB2','IL13','IL13RA2','IL15','IL15Ra','IL16','IL17A','IL17B','IL17C','IL17D','IL17F','IL17RA','IL17RB','IL17RC','IL17RD','IL17RE','IL18BP','IL18R1','IL18RAP','IL19','IL20','IL20RA','IL20RB','IL21','IL21R','IL22','IL22RA2','IL23A','IL24','IL25','IL26','IL27','IL27RA','IL31','IL31RA','IL33','IL34','IL36A','IL36B','IL36G','IL37','ILDR1','ILDR2','ILF2','ILF3','ILK','ILKAP','ILVBL')
   PlotMarkerSeries(seuratObj, reduction, cytokines, 'Cytokines/Receptors')
 
-  klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2')
+  klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'ENSMMUG00000050862')
   PlotMarkerSeries(seuratObj, reduction, klrs, 'KLRs')
 
   #chemokines
-  chemokines <- c('CCL1','CCL2','CCL4','CCL4L2','CCL5','CCL8','CCL11','CCL13','CCL14','CCL16','CCL17','CCL18','CCL19','CCL20','CCL21','CCL22','CCL23','CCL24','CCL25','CCL26','CCL27','CCL28')
+  chemokines <- c('CCL1','CCL11','CCL13','CCL16','CCL17','CCL18','CCL19','CCL2','CCL20','CCL21','CCL22','CCL24','CCL25','CCL26','CCL27','CCL28','CCL5','CCL7','CCL8')
   chemokines <- c(chemokines, c('CCR1','CCR2','CCR3','CCR4','CCR5','CCR6','CCR7','CCR8','CCR9','CCR10','CCRL2'))
-  chemokines <- c(chemokines, c('CXCL1','CXCL3','CXCL9','CXCL10','CXCL13','CXCL14','CXCL16','CXCR1','CXCR2','CXCR3','CXCR4','CXCR5','CXCR6','XCR1'))
+  chemokines <- c(chemokines, c('CXCL1','CXCL10','CXCL11','CXCL12','CXCL13','CXCL14','CXCL16','CXCL17','CXCL5','CXCL6','CXCL8','CXCL9','CXCR1','CXCR2','CXCR3','CXCR4','CXCR5','CXCR6','XCR1'))
 
   PlotMarkerSeries(seuratObj, reduction, chemokines, 'Chemokines/Receptors')
 }
