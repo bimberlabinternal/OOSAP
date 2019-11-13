@@ -40,4 +40,5 @@ addons:
     packages:
       - ccache
       - r-cran-data.table
+      - r-cran-kernlab
       - python-pip
