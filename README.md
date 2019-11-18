@@ -15,13 +15,21 @@ The goal of this package is to provide a high-level wrapper around tools and pip
 ```{r }
 
 # Install requirements.  Other dependencies will be downloaded automatically
-install.packages("devtools", 'remotes')
+install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)
+
+# Make sure to update your Rprofile i.e., ~/.Rprofile.site
+# local({options(repos = BiocManager::repositories())})
+
+# Get some of the core packages
+BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats', 'DESeq2', 'genefilter'), dependencies=TRUE, ask = FALSE)
 
 #Latest version:
-install_github("bimberlabinternal/OOSAP", ref = "Dev")
+devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always')
 
 
 ```
+    
+    
 Pre-packaged Docker images with all needed dependencies installed can be found on our [dockerhub repository](https://hub.docker.com/r/bimberlab/oosap): 
 
 ```
