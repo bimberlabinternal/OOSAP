@@ -56,8 +56,8 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
       SGS.LS$MonocytesCD34p     <- c("CD34", "THY1", "ENG", "KIT", "PROM1" )
 
 
-    SGS.LS$HighlyActivated    <- c("TNFRSF9", "NFKBID", "CCL4", "CCL4L2", "IRF8", "IFNG", "CD83", "CD82", "PLEK", "RGCC") #"ENSMMUG00000013779"
-    SGS.LS$HighlyActivated2   <- c("TNFRSF9", "NFKBID", "CCL4", "CCL4L2", "IRF8", "IFNG", "CD82", "PLEK", "RGCC", "PIGT")
+    SGS.LS$HighlyActivated    <- c("TNFRSF9", "NFKBID", "ENSMMUG00000008111", "CCL4L1", "IRF8", "IFNG", "CD83", "CD82", "PLEK", "RGCC") #"ENSMMUG00000013779"
+    SGS.LS$HighlyActivated2   <- c("TNFRSF9", "NFKBID", "ENSMMUG00000008111", "IRF8", "IFNG", "CD82", "PLEK", "RGCC", "PIGT")
     #SGS.LS$HighlyActivated3   <- c("TNFRSF9", "NFKBID", "CCL4", "CCL4L2", "IRF8", "CD83", "CD82", "PLEK", "RGCC") #same as first without IFNG due to typo in original set
     # SGS.LS$HighlyActivated2   <- c("NR4A2", "NR4A1", "LMNA", "SDC4", "SLA", "JARID2",
     #                                "IRF4", "RGS16", "ENSMMUG00000045612", "TXNIP", "ENSMMUG00000031417", "LTB",

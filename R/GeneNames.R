@@ -43,7 +43,7 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
 #Based on: https://www.genenames.org/data/genegroup/#!/group/471
 RenameGenesUsingCD <- function(geneSymbols) {
     df <- data.frame(GeneSymbol = geneSymbols, SortOrder = 1:length(geneSymbols), stringsAsFactors = F)
-    ret <- merge(df, cdGenes, all.x = T, by = c('GeneSymbol'))
+    ret <- merge(df, OOSAP::cdGenes, all.x = T, by = c('GeneSymbol'))
     ret <- ret[order(ret$SortOrder),]
 
     ret$Label <- as.character(ret$GeneSymbol)
