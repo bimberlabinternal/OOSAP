@@ -5,7 +5,15 @@ test_that("SingleR works as expected", {
 
     results <- 'singleR.txt'
     singleRPrefix <- 'singleR.results'
+
+    nGene <- nrow(seuratObj)
+    nCell <- ncol(seuratObj)
     seuratObj <- RunSingleR(seuratObj = seuratObj, resultTableFile = results, singlerSavePrefix = singleRPrefix)
+    nGene2 <- nrow(seuratObj)
+    nCell2 <- ncol(seuratObj)
+
+    expect_equal(nGene, nGene2)
+    expect_equal(nCell, nCell2)
 
     print(table(seuratObj$SingleR_Labels))
     print(table(seuratObj$SingleR_Labels_Fine))
