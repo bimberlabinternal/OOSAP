@@ -53,7 +53,7 @@ test_that("Seurat-merge works as expected", {
   expectedSpike = intersect(rownames(seuratObjs[[1]]), spikeGenes)
 
   #Not all genes will be present:
-  expect_equal(length(intersect(rownames(seuratObj), expectedSpike)), 45)
+  expect_equal(length(intersect(rownames(seuratObj), expectedSpike)), 44)
 
 
   #Repeat with spike genes
