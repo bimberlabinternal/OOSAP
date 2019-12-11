@@ -28,6 +28,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     genesPresent <- intersect(rownames(seuratObj), rownames(ref))
     ref <- ref[genesPresent,]
     seuratObjSubset <- seuratObj[genesPresent,]
+    print(paste0('Total genes shared with reference data: ', length(genesPresent)))
 
     #Note: if these data were integrated with CCA, counts will be null for the default assay
     if (is.null(assay)) {
