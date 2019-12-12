@@ -18,8 +18,10 @@ test_that("Highly Activated Cells Called", {
   expect_equal(names(ret), c("CellBarcode", "HighlyActivated.Score", "HighlyActivated.Call"))
   expect_equal(nrow(df), ncol(seuratObj))
   expect_equal(ncol(df), 3)
-  expect_equal(max(df['HighlyActivated.Score']), 1.3, tolerance = 0.0001)
-  expect_equal(min(df['HighlyActivated.Score']), -0.334, tolerance = 0.0001)
+  print(max(df['HighlyActivated.Score']))
+  print(min(df['HighlyActivated.Score']))
+  expect_equal(max(df['HighlyActivated.Score']), 1.3, tolerance = 0.01)
+  expect_equal(min(df['HighlyActivated.Score']), -0.334, tolerance = 0.001)
   expect_equal(sum(df[['HighlyActivated.Call']]), 30)
   
   unlink(f)
