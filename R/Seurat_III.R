@@ -584,6 +584,8 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   seuratObj <- MarkStepRun(seuratObj, 'ProcessSeurat1', saveFile = saveFile)
 
+  print(seuratObj)
+
   return(seuratObj)
 }
 
@@ -1404,12 +1406,12 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
 
   PlotMarkerSet(seuratObj, reduction, 'Monocyte', c('LYZ', 'CST3', 'S100A6', 'VIM'))
 
-  PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6'))
+  PlotMarkerSet(seuratObj, reduction, 'Transcription Factors', c('TBX21', 'GATA3', 'RORC', 'FOXP3', 'BCL6', 'EOMES', 'TOX'))
 
   PlotMarkerSet(seuratObj, reduction, 'Inhibitory Markers', c('TIGIT', 'CTLA4', 'BTLA', 'PDCD1', 'CD274'))
 
   #DAP10/12
-  PlotMarkerSet(seuratObj, reduction, 'Signaling', c('HCST', 'TYROBP'))
+  PlotMarkerSet(seuratObj, reduction, 'Signaling', c('HCST', 'TYROBP', 'SYK', 'ZAP70'))
 
   #LILR/KIR:
   PlotMarkerSeries(seuratObj, reduction, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'KIR/LILR')

@@ -27,25 +27,27 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     #Subset genes:
     genesPresent <- intersect(rownames(seuratObj), rownames(ref))
     ref <- ref[genesPresent,]
-    seuratObj <- seuratObj[genesPresent,]
+    seuratObjSubset <- seuratObj[genesPresent,]
+    print(paste0('Total genes shared with reference data: ', length(genesPresent)))
 
     #Note: if these data were integrated with CCA, counts will be null for the default assay
     if (is.null(assay)) {
-        assay <- Seurat::DefaultAssay(seuratObj)
+        assay <- Seurat::DefaultAssay(seuratObjSubset)
     }
 
-    if (length(seuratObj@assays[[assay]]@counts) == 0) {
+    if (length(seuratObjSubset@assays[[assay]]@counts) == 0) {
         print('Selected assay has no count data, trying RNA')
         assay <- 'RNA'
-        if (length(seuratObj@assays[[assay]]@counts) == 0) {
+        if (length(seuratObjSubset@assays[[assay]]@counts) == 0) {
             warning('Unable to find counts for the seurat object, aborting SingleR')
             return(seuratObj)
         }
     }
 
     #Convert to SingleCellExperiment
-    sce <- Seurat::as.SingleCellExperiment(seuratObj, assay = assay)
+    sce <- Seurat::as.SingleCellExperiment(seuratObjSubset, assay = assay)
     sce <- scater:::logNormCounts(sce)
+    rm(seuratObjSubset)
 
     refAssay <- 'logcounts'
     if (!('logcounts' %in% names(SummarizedExperiment::assays(ref)))) {

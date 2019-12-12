@@ -124,29 +124,8 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 			libraryId <- tcrLibRows$library_id[1]
 			analysisId <- tcrLibRows$analysis_id[1]
 			tcrReadset <- tcrLibRows$readset[1]
-
-			bamRows <- labkey.selectRows(
-				baseUrl=lkBaseUrl,
-				folderPath=lkDefaultFolder,
-				schemaName="sequenceanalysis",
-				queryName="outputfiles",
-				colSort="-rowid",
-				colSelect="dataid",
-				colFilter=makeFilter(
-					c("library_id", "EQUALS", libraryId),
-					c("readset", "EQUALS", tcrReadset),
-					c("category", "EQUALS", "Alignment")
-				),
-				containerFilter=NULL,
-				colNameOpt="rname"
-			)
-			if (nrow(bamRows) == 0) {
-				stop('Unable to find alignment')
-			} else if (nrow(bamRows) > 1) {
-				print('More than one BAM found')
-			}
-
-			alignmentId <- bamRows$dataid[1]
+			print(paste0('TCR library ID: ', libraryId))
+			print(paste0('TCR readset: ', tcrReadset))
 
 			#All clonotypes
 			clonotypeFile <- file.path(outPrefix, paste0(barcodePrefix, '_all_contig_annotations.csv'))
@@ -193,7 +172,6 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 				date = as.character(seuratObj$SampleDate[seuratObj$BarcodePrefix == barcodePrefix]),
 				cdna = as.character(seuratObj$cDNA_ID[seuratObj$BarcodePrefix == barcodePrefix]),
 				libraryId = c(libraryId),
-				alignmentId = c(alignmentId),
 				analysisId = c(analysisId)
 			)
 			meta$SampleName <- paste0(meta$SubjectId, '_', meta$Stim)
@@ -206,8 +184,8 @@ CalculateTCRFreqForActivatedCells <- function(cDndIds, geneSetName = 'HighlyActi
 			}
 
 			# Group
-			tcrData <- tcrData %>% group_by(SampleName, SubjectId, population, date, cdna, libraryId, alignmentId, analysisId, chain, cdr3, v_gene, d_gene, j_gene, c_gene, raw_clonotype_id, raw_consensus_id) %>% summarize(count = dplyr::n())
-			names(tcrData) <- c('SampleName', 'SubjectId', 'population', 'date', 'cdna', 'libraryId', 'alignmentId', 'analysisId', 'locus', 'cdr3', 'vHit', 'dHit', 'jHit', 'cHit', 'cloneId', 'consensus_id', 'count')
+			tcrData <- tcrData %>% group_by(SampleName, SubjectId, population, date, cdna, libraryId, analysisId, chain, cdr3, v_gene, d_gene, j_gene, c_gene, raw_clonotype_id, raw_consensus_id) %>% summarize(count = dplyr::n())
+			names(tcrData) <- c('SampleName', 'SubjectId', 'population', 'date', 'cdna', 'libraryId', 'analysisId', 'locus', 'cdr3', 'vHit', 'dHit', 'jHit', 'cHit', 'cloneId', 'consensus_id', 'count')
 
 			tcrData <- tcrData %>% group_by(cdna) %>% mutate(totalCells = dplyr::n())
 			tcrData$fraction = tcrData$count / tcrData$totalCells
@@ -261,6 +239,11 @@ CalculateTCRFreqForActivatedCellsAndImport <- function(cDndIds, workbook = NULL,
 	}
 
 	resultDataFrame <- CalculateTCRFreqForActivatedCells(cDndIds, geneSetName = geneSetName, positivityThreshold = positivityThreshold, outPrefix = outPrefix, invert = invert)
+	if (all(is.na(resultDataFrame))) {
+		print('no results, skipping')
+		return(NULL)
+	}
+
 	resultDataFrame$calculatedPopulation <- paste0(as.character(resultDataFrame$population), populationNameSuffix)
 
 	analysisIds <- unique(resultDataFrame$analysisId)
