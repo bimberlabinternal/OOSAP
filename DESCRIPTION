@@ -50,10 +50,10 @@ Suggests:
     testthat (>= 2.1.0)
 Remotes:
     cole-trapnell-lab/garnett,
-    bioc::devel/DropletUtils,
-    bioc::devel/DESeq2,
-    bioc::devel/MAST,
-    LTLA/SingleR
+    bioc::release/DropletUtils,
+    bioc::release/DESeq2,
+    bioc::release/MAST,
+    bioc::release/SingleR
 RoxygenNote: 6.1.1
 Collate: 
     'LabKeySettings.R'
