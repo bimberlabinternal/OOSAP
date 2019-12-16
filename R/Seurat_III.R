@@ -643,7 +643,8 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
 
   print(DimHeatmap(object = seuratObj, dims = 1, cells = 500, balanced = TRUE, fast = F) + NoLegend())
-  print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend())
+  Try2Prit <-try(print(DimHeatmap(object = seuratObj, dims = 1:20, cells = 500, balanced = TRUE, fast = F) + NoLegend()), silent = T)
+  if(class(Try2Prit) == "try-error") try(print(DimHeatmap(object = seuratObj, dims = 1:6, cells = 500, balanced = TRUE, fast = F) + NoLegend()), silent = T)
 
   if (length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
     print('Unable to display JackStrawPlot, data not available')
