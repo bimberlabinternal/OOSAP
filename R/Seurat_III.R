@@ -1389,7 +1389,8 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = 
 #' @export
 #' @import Seurat
 PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
-  PlotMarkerSet(seuratObj, reduction, 'CD8/CD4 Markers', c('CD8A', 'CD8B', 'CD4', 'IL7R'))
+  #ENSMMUG00000003532=CD8b
+  PlotMarkerSet(seuratObj, reduction, 'CD8/CD4 Markers', c('CD8A', 'ENSMMUG00000003532', 'CD4', 'IL7R'))
 
   #Eff v. Mem:
   #IL7R = CD127
