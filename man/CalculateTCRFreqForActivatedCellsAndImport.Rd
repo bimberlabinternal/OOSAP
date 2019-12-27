@@ -4,11 +4,18 @@
 \alias{CalculateTCRFreqForActivatedCellsAndImport}
 \title{CalculateTCRFreqForActivatedCellsAndImport}
 \usage{
-CalculateTCRFreqForActivatedCellsAndImport(cDndIds, workbook = NULL,
-  geneSetName = "HighlyActivated", positivityThreshold = 0.5,
-  outPrefix = "./", assayName = "TCRdb",
-  populationNameSuffix = "-HA", invert = FALSE, doCleanup = FALSE,
-  minCells = NULL)
+CalculateTCRFreqForActivatedCellsAndImport(
+  cDndIds,
+  workbook = NULL,
+  geneSetName = "HighlyActivated",
+  positivityThreshold = 0.5,
+  outPrefix = "./",
+  assayName = "TCRdb",
+  populationNameSuffix = "-HA",
+  invert = FALSE,
+  doCleanup = FALSE,
+  minCells = NULL
+)
 }
 \arguments{
 \item{cDndIds}{A vector of cDNA rowIDs}

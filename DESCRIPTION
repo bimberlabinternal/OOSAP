@@ -54,7 +54,7 @@ Remotes:
     bioc::release/DESeq2,
     bioc::release/MAST,
     bioc::release/SingleR
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Collate: 
     'LabKeySettings.R'
     'CellHashing.R'

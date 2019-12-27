@@ -4,14 +4,29 @@
 \alias{ProcessSeurat1}
 \title{Run the primary seurat processing steps.}
 \usage{
-ProcessSeurat1(seuratObj, saveFile = NULL, doCellCycle = T,
-  doCellFilter = F, nCount_RNA.high = 20000, nFeature.high = 3000,
-  pMito.high = 0.15, nCount_RNA.low = 0.99, nFeature.low = 200,
-  pMito.low = -Inf, forceReCalc = F, variableGeneTable = NULL,
-  variableFeatureSelectionMethod = "vst", nVariableFeatures = 2000,
-  printDefaultPlots = T, npcs = 50, ccPcaResultFile = NULL,
-  useSCTransform = F, mean.cutoff = c(0.0125, 3),
-  dispersion.cutoff = c(0.5, Inf), spikeGenes = NULL)
+ProcessSeurat1(
+  seuratObj,
+  saveFile = NULL,
+  doCellCycle = T,
+  doCellFilter = F,
+  nCount_RNA.high = 20000,
+  nFeature.high = 3000,
+  pMito.high = 0.15,
+  nCount_RNA.low = 0.99,
+  nFeature.low = 200,
+  pMito.low = -Inf,
+  forceReCalc = F,
+  variableGeneTable = NULL,
+  variableFeatureSelectionMethod = "vst",
+  nVariableFeatures = 2000,
+  printDefaultPlots = T,
+  npcs = 50,
+  ccPcaResultFile = NULL,
+  useSCTransform = F,
+  mean.cutoff = c(0.0125, 3),
+  dispersion.cutoff = c(0.5, Inf),
+  spikeGenes = NULL
+)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}

@@ -4,8 +4,7 @@
 \alias{GenerateSummaryForExpectedBarcodes}
 \title{GenerateSummaryForExpectedBarcodes}
 \usage{
-GenerateSummaryForExpectedBarcodes(dt, whitelistFile, outputFile,
-  barcodeData)
+GenerateSummaryForExpectedBarcodes(dt, whitelistFile, outputFile, barcodeData)
 }
 \description{
 A description

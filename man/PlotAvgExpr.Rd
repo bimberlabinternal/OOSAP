@@ -4,9 +4,16 @@
 \alias{PlotAvgExpr}
 \title{PlotAvgExpr}
 \usage{
-PlotAvgExpr(GenesNames2Show, X_avg, Y_avg, features = NULL,
-  Xlab = "Xlab", Ylab = "Ylab", Title = "Title",
-  HighColor = "dodgerblue")
+PlotAvgExpr(
+  GenesNames2Show,
+  X_avg,
+  Y_avg,
+  features = NULL,
+  Xlab = "Xlab",
+  Ylab = "Ylab",
+  Title = "Title",
+  HighColor = "dodgerblue"
+)
 }
 \arguments{
 \item{x, }{numbers.}

@@ -4,8 +4,13 @@
 \alias{FindSeuratElbow}
 \title{FindSeuratElbow}
 \usage{
-FindSeuratElbow(object, ndims = 25, reduction = "pca",
-  print.plot = T, min.y = 1.3)
+FindSeuratElbow(
+  object,
+  ndims = 25,
+  reduction = "pca",
+  print.plot = T,
+  min.y = 1.3
+)
 }
 \arguments{
 \item{object}{A seurat object}

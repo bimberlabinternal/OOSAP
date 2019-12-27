@@ -4,9 +4,14 @@
 \alias{RunSingleR}
 \title{generate SingleR object}
 \usage{
-RunSingleR(seuratObj = NULL, dataset = "hpca", assay = NULL,
-  resultTableFile = NULL, singlerSavePrefix = NULL,
-  minFraction = 0.01)
+RunSingleR(
+  seuratObj = NULL,
+  dataset = "hpca",
+  assay = NULL,
+  resultTableFile = NULL,
+  singlerSavePrefix = NULL,
+  minFraction = 0.01
+)
 }
 \arguments{
 \item{seuratObj}{A Seurat object}

@@ -4,10 +4,20 @@
 \alias{doMergeCCA}
 \title{doMergeCCA}
 \usage{
-doMergeCCA(seuratObjs, nameList, maxCCAspaceDim, assay = NULL,
-  normalization.method = "LogNormalize", useAllFeatures = F,
-  includeCellCycleGenes = T, nVariableFeatures = NULL, plotFigs = T,
-  spike.genes = NULL, spikeImmuneGenes = T, maxPCs2Weight = NULL)
+doMergeCCA(
+  seuratObjs,
+  nameList,
+  maxCCAspaceDim,
+  assay = NULL,
+  normalization.method = "LogNormalize",
+  useAllFeatures = F,
+  includeCellCycleGenes = T,
+  nVariableFeatures = NULL,
+  plotFigs = T,
+  spike.genes = NULL,
+  spikeImmuneGenes = T,
+  maxPCs2Weight = NULL
+)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects}

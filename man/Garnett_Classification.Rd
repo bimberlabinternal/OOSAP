@@ -4,9 +4,12 @@
 \alias{Garnett_Classification}
 \title{A Title}
 \usage{
-Garnett_Classification(SerObj,
+Garnett_Classification(
+  SerObj,
   marker_file_path = "./data/Garnett/pbmc_classification.txt",
-  reutrnMonObj = F, returnTrainedClassifier = T)
+  reutrnMonObj = F,
+  returnTrainedClassifier = T
+)
 }
 \arguments{
 \item{SerObj, }{A Seurat object.}

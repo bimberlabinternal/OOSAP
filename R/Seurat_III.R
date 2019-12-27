@@ -21,7 +21,7 @@ utils::globalVariables(
 #' @keywords ReadAndFilter10X
 #' @export
 #' @importFrom Seurat Read10X
-ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
+ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, RetrieveENSIDs=T) {
   if (!file.exists(dataDir)){
     stop(paste0("File does not exist: ", dataDir))
   }
@@ -31,6 +31,8 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
   }
 
   seuratRawData <- Read10X(data.dir = dataDir)
+  
+  if(RetrieveENSIDs) ENDIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
 
   #Cannot have underscores in feature names, Seurat will replace with hyphen anyway.  Perform upfront to avoid warning
   if (sum(grepl(x = rownames(seuratRawData), pattern = '_')) > 0) {
@@ -42,6 +44,8 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
 
   seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
   PrintQcPlots(seuratObj)
+  
+  if(RetrieveENSIDs) seuratObj@misc$ENS <- list(ENSIDs=ENDIds, ver="unk") else seuratObj@misc$ENS <- list(ENSIDs="NULL", ver="unk")
 
   return(seuratObj)
 }

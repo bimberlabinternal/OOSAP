@@ -4,8 +4,15 @@
 \alias{bimodal_posDist1D}
 \title{bimodal_posDist1D}
 \usage{
-bimodal_posDist1D(n = 1000, cpct = 0.4, mu1 = log(1),
-  mu2 = log(100), sig1 = log(3), sig2 = log(2), p = 0.5)
+bimodal_posDist1D(
+  n = 1000,
+  cpct = 0.4,
+  mu1 = log(1),
+  mu2 = log(100),
+  sig1 = log(3),
+  sig2 = log(2),
+  p = 0.5
+)
 }
 \description{
 1D bimodal Dist given parameters

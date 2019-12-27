@@ -4,8 +4,11 @@
 \alias{ClassifySGS_Multiple}
 \title{ClassifySGS_Multiple}
 \usage{
-ClassifySGS_Multiple(seuratObj, moduleScoreGeneLists = NULL,
-  saveFilePath = NULL)
+ClassifySGS_Multiple(
+  seuratObj,
+  moduleScoreGeneLists = NULL,
+  saveFilePath = NULL
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}

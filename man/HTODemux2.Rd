@@ -4,8 +4,15 @@
 \alias{HTODemux2}
 \title{HTODemux2}
 \usage{
-HTODemux2(object, assay = "HTO", positive.quantile = 0.99,
-  nstarts = 100, kfunc = "clara", nsamples = 100, verbose = TRUE)
+HTODemux2(
+  object,
+  assay = "HTO",
+  positive.quantile = 0.99,
+  nstarts = 100,
+  kfunc = "clara",
+  nsamples = 100,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object, }{A Seurat object.}

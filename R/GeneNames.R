@@ -1,4 +1,31 @@
 
+#' @title GetEnsembl
+#' @param seuratObj A Seurat Object
+#' @param MmulV A numeric value 8 or 10
+#' @export
+GetEnsembl <- function(seuratObj, MmulV = 8){
+  if(!MmulV %in% c(8, 10)) stop("MmulV needs to be either 8 or 10")
+  
+  if(MmulV == 10){
+    data("Mmul10_conv1")
+    out <- Mmul10_conv1
+    
+  } else if(MmulV == 8){
+    data("Mmul8_conv1")
+    out <- Mmul8_conv1
+  }
+  
+  #test if seuratObj has ENSID
+  if(!is.null(seuratObj@misc$ENS)){
+    if((seuratObj@misc$ENS$ENSIDs[1]) != "NULL"){
+      return(list(ENS_found = rownames(out)[rownames(out) %in% seuratObj@misc$ENS$ENSIDs],
+                  ENS_notfound = rownames(out)[!rownames(out) %in% seuratObj@misc$ENS$ENSIDs]))
+    } else warning("seuratObj@misc$ENS$ENSIDs == 'NULL'")
+  } else warning("seuratObj@misc$ENS == NULL")
+  
+  
+}
+
 #' @title QueryEnsemblSymbolAndHumanHomologs
 #' @param ensemblIds A vector of ensembl IDs, passed to the getBM() filters argument
 #' @param ensemblFilters A vector of ensembl IDs, passed to the getBM() filters argument.

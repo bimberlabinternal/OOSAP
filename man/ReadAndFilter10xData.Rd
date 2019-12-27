@@ -4,7 +4,12 @@
 \alias{ReadAndFilter10xData}
 \title{Read and Filter 10X files.}
 \usage{
-ReadAndFilter10xData(dataDir, datasetName, emptyDropNIters = 10000)
+ReadAndFilter10xData(
+  dataDir,
+  datasetName,
+  emptyDropNIters = 10000,
+  RetrieveENSIDs = T
+)
 }
 \arguments{
 \item{dataDir}{The directory holding raw count data}

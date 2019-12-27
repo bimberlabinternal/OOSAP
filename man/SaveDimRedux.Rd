@@ -4,8 +4,13 @@
 \alias{SaveDimRedux}
 \title{SaveDimRedux}
 \usage{
-SaveDimRedux(seuratObj, reductions = c("pca", "tsne", "umap"),
-  file = NA, maxPCAcomps = 10, returnResults = F)
+SaveDimRedux(
+  seuratObj,
+  reductions = c("pca", "tsne", "umap"),
+  file = NA,
+  maxPCAcomps = 10,
+  returnResults = F
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}

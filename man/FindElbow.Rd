@@ -4,8 +4,7 @@
 \alias{FindElbow}
 \title{FindElbow}
 \usage{
-FindElbow(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA,
-  min.x = NA)
+FindElbow(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min.x = NA)
 }
 \description{
 FindElbow

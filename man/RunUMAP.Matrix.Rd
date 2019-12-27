@@ -4,14 +4,29 @@
 \alias{RunUMAP.Matrix}
 \title{RunUMAP.Matrix}
 \usage{
-\method{RunUMAP}{Matrix}(DGEmat, assay = NULL, n.neighbors = 30L,
-  n.components = 2L, metric = "correlation", n.epochs = NULL,
-  learning.rate = 1, min.dist = 0.3, spread = 1,
-  set.op.mix.ratio = 1, local.connectivity = 1L,
-  repulsion.strength = 1, negative.sample.rate = 5, a = NULL,
-  b = NULL, seed.use = 42, metric.kwds = NULL,
-  angular.rp.forest = FALSE, reduction.key = "UMAP_", verbose = TRUE,
-  ...)
+\method{RunUMAP}{Matrix}(
+  DGEmat,
+  assay = NULL,
+  n.neighbors = 30L,
+  n.components = 2L,
+  metric = "correlation",
+  n.epochs = NULL,
+  learning.rate = 1,
+  min.dist = 0.3,
+  spread = 1,
+  set.op.mix.ratio = 1,
+  local.connectivity = 1L,
+  repulsion.strength = 1,
+  negative.sample.rate = 5,
+  a = NULL,
+  b = NULL,
+  seed.use = 42,
+  metric.kwds = NULL,
+  angular.rp.forest = FALSE,
+  reduction.key = "UMAP_",
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{DGEmat, }{A matrix rows are cells}

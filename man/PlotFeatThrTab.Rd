@@ -4,9 +4,16 @@
 \alias{PlotFeatThrTab}
 \title{PlotFeatThrTab}
 \usage{
-PlotFeatThrTab(SeuratObj, FeatName = NULL, CutThresh = NULL,
-  PlotBar = T, MetaDataName = NULL, TitleExtra = "", PlotHist = F,
-  col_vector = col_vector)
+PlotFeatThrTab(
+  SeuratObj,
+  FeatName = NULL,
+  CutThresh = NULL,
+  PlotBar = T,
+  MetaDataName = NULL,
+  TitleExtra = "",
+  PlotHist = F,
+  col_vector = col_vector
+)
 }
 \arguments{
 \item{SeuratObj, }{A Seurat object.}
