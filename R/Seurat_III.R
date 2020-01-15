@@ -1427,6 +1427,8 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'ENSMMUG00000050862')
   PlotMarkerSeries(seuratObj, reduction, klrs, 'KLRs')
 
+  PlotMarkerSet(seuratObj, reduction, 'Resident Memory', c('ITGAE', 'CD69', 'CXCR6'))
+
   #chemokines
   chemokines <- c('CCL1','CCL11','CCL13','CCL16','CCL17','CCL18','CCL19','CCL2','CCL20','CCL21','CCL22','CCL24','CCL25','CCL26','CCL27','CCL28','CCL5','CCL7','CCL8')
   chemokines <- c(chemokines, c('CCR1','CCR2','CCR3','CCR4','CCR5','CCR6','CCR7','CCR8','CCR9','CCR10','CCRL2'))

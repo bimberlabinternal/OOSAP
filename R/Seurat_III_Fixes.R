@@ -89,7 +89,7 @@ HTODemux2 <- function(
     # This indicates the only non-zero cluster is the primary one.
     # It's not especially likely, but could occur when there are only 2 possible HTOs
     if (minNonZero == maxNonZero){
-      print('Min. non-zero value is the same as max value, using cutoff of 1 read')
+      warning('Min. non-zero value is the same as max value, using cutoff of 1 read')
       cutoff <- 1
     } else {
       values.use <- values[WhichCells(
