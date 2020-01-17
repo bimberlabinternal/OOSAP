@@ -17,7 +17,14 @@ test_that("Seurat-merge works as expected", {
   seuratObj <- MergeSeuratObjs(seuratObjs, data, method = NULL)
   expect_equal("RNA", Seurat::DefaultAssay(seuratObj))
   expect_equal("simple", seuratObj@misc$MergeMethod)
-  
+
+  #Gene IDs preserved:
+  expect_equal(nrow(seuratObj), length(seuratObj@misc$geneIds))
+  expect_equal(rownames(seuratObj), names(seuratObj@misc$geneIds))
+  geneIds <- GetGeneIds(seuratObj, c('HES4', 'CALML6'))
+  names(geneIds) <- NULL
+  expect_equal(geneIds, c('ENSMMUG00000001817', 'ENSMMUG00000012392'))
+
   #barcodes should have prefix:
   expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
 
