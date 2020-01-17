@@ -4,10 +4,15 @@
 \alias{CalculateTCRFreqForActivatedCells}
 \title{CalculateTCRFreqForActivatedCells}
 \usage{
-CalculateTCRFreqForActivatedCells(cDndIds,
-  geneSetName = "HighlyActivated", positivityThreshold = 0.5,
-  outPrefix = "./", invert = FALSE, doCleanup = FALSE,
-  reduction = NULL)
+CalculateTCRFreqForActivatedCells(
+  cDndIds,
+  geneSetName = "HighlyActivated",
+  positivityThreshold = 0.5,
+  outPrefix = "./",
+  invert = FALSE,
+  doCleanup = FALSE,
+  reduction = NULL
+)
 }
 \arguments{
 \item{cDndIds}{A vector of cDNA rowIDs}

@@ -4,8 +4,13 @@
 \alias{ProcessEnsemblHtoCalls}
 \title{ProcessEnsemblHtoCalls}
 \usage{
-ProcessEnsemblHtoCalls(mc, sc, barcodeData,
-  outFile = "combinedHtoCalls.txt", allCallsOutFile = NA)
+ProcessEnsemblHtoCalls(
+  mc,
+  sc,
+  barcodeData,
+  outFile = "combinedHtoCalls.txt",
+  allCallsOutFile = NA
+)
 }
 \value{
 A modified Seurat object.

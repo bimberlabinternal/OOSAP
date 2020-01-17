@@ -4,8 +4,14 @@
 \alias{ClassifySGS}
 \title{ClassifySGS}
 \usage{
-ClassifySGS(seuratObj, geneList = NULL, geneSetName = NULL,
-  saveFilePath = NULL, doPlot = T, positivityThreshold = NULL)
+ClassifySGS(
+  seuratObj,
+  geneList = NULL,
+  geneSetName = NULL,
+  saveFilePath = NULL,
+  doPlot = T,
+  positivityThreshold = NULL
+)
 }
 \arguments{
 \item{geneList}{A character vector of the genes to test}

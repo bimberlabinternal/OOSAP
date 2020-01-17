@@ -10,6 +10,12 @@ test_that("Serat processing works as expected", {
 
   expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
+  expect_equal(nrow(seuratObj), length(seuratObj@misc$geneIds))
+  expect_equal(rownames(seuratObj), names(seuratObj@misc$geneIds))
+  geneIds <- GetGeneIds(seuratObj, c('HES4', 'CALML6'))
+  expect_equal(geneIds, c('ENSMMUG00000001817', 'ENSMMUG00000012392'))
+
+
   #for speed, subset:
   cellsToUse <- sort(colnames(seuratObj))[1:500]
   seuratObj <- seuratObj[,cellsToUse]

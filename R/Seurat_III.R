@@ -17,11 +17,12 @@ utils::globalVariables(
 #' @param dataDir The directory holding raw count data
 #' @param datasetName A name to use when creating the Seurat object
 #' @param emptyDropNIters The number of iterations to use with PerformEmptyDrops()
+#' @param storeGeneIds If true, a map to translate geneId and name (by default rownames will use gene name)
 #' @return A Seurat object.
 #' @keywords ReadAndFilter10X
 #' @export
 #' @importFrom Seurat Read10X
-ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
+ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, storeGeneIds=TRUE) {
   if (!file.exists(dataDir)){
     stop(paste0("File does not exist: ", dataDir))
   }
@@ -43,9 +44,39 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000) {
   seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
   PrintQcPlots(seuratObj)
 
+  if (storeGeneIds) {
+    seuratObj@misc$geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
+    names(seuratObj@misc$geneIds) <- rownames(seuratObj)
+  }
+
   return(seuratObj)
 }
 
+
+#' @title Retrieve the gene IDs from a seuratObj created using ReadAndFilter10xData.
+#'
+#' @description Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
+#' @param seuratObj The seurat object
+#' @param datasetName A name to use when creating the Seurat object
+#' @param throwIfGenesNotFound If true and any of the requested gene names are not found, an error will be thrown.  Otherwise, the result will contain NAs
+#' @return A named vector of the gene IDs
+#' @export
+GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
+  if (is.null(seuratObj@misc$geneIds)) {
+    stop('Expected gene IDs to be stored under seuratObj@misc$geneIds')
+  }
+
+  ret <- seuratObj@misc$geneIds[geneNames]
+
+  if (throwIfGenesNotFound & sum(is.na(ret)) > 0) {
+    notFound <- paste0(geneNames[is.na(ret)], collapse = ',')
+    stop(paste0('Gene names not found: ', notFound))
+  } else {
+    names(ret) <- geneNames
+  }
+
+  return(ret)
+}
 
 #' @title Create a Seurat 3 object
 #'

@@ -4,7 +4,12 @@
 \alias{ReadAndFilter10xData}
 \title{Read and Filter 10X files.}
 \usage{
-ReadAndFilter10xData(dataDir, datasetName, emptyDropNIters = 10000)
+ReadAndFilter10xData(
+  dataDir,
+  datasetName,
+  emptyDropNIters = 10000,
+  storeGeneIds = TRUE
+)
 }
 \arguments{
 \item{dataDir}{The directory holding raw count data}
@@ -12,6 +17,8 @@ ReadAndFilter10xData(dataDir, datasetName, emptyDropNIters = 10000)
 \item{datasetName}{A name to use when creating the Seurat object}
 
 \item{emptyDropNIters}{The number of iterations to use with PerformEmptyDrops()}
+
+\item{storeGeneIds}{If true, a map to translate geneId and name (by default rownames will use gene name)}
 }
 \value{
 A Seurat object.

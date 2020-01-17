@@ -4,9 +4,15 @@
 \alias{CalculateModuleScoreAvg}
 \title{CalculateModuleScoreAvg}
 \usage{
-CalculateModuleScoreAvg(seuratObj, genes.list = NULL,
-  genes.pool = NULL, n.bin = 25, ctrl.size = 100, assay = NULL,
-  seed.use = 1)
+CalculateModuleScoreAvg(
+  seuratObj,
+  genes.list = NULL,
+  genes.pool = NULL,
+  n.bin = 25,
+  ctrl.size = 100,
+  assay = NULL,
+  seed.use = 1
+)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}

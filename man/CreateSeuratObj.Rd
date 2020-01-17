@@ -4,8 +4,13 @@
 \alias{CreateSeuratObj}
 \title{Create a Seurat 3 object}
 \usage{
-CreateSeuratObj(seuratData = NA, project = NA, minFeatures = 25,
-  minCells = 0, mitoGenesPattern = "^MT-")
+CreateSeuratObj(
+  seuratData = NA,
+  project = NA,
+  minFeatures = 25,
+  minCells = 0,
+  mitoGenesPattern = "^MT-"
+)
 }
 \arguments{
 \item{seuratData, }{Seurat input data, usually from Read10X().}

@@ -4,9 +4,16 @@
 \alias{ggUMAP}
 \title{ggUMAP}
 \usage{
-ggUMAP(object, colFac = NULL, col_vector = NULL, ptSize = 0.15,
-  ptAlpha = 0.5, add2title = "", legendTitle = "",
-  cells.use = NULL)
+ggUMAP(
+  object,
+  colFac = NULL,
+  col_vector = NULL,
+  ptSize = 0.15,
+  ptAlpha = 0.5,
+  add2title = "",
+  legendTitle = "",
+  cells.use = NULL
+)
 }
 \arguments{
 \item{object}{A seurat object}

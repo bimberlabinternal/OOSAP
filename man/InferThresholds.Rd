@@ -4,8 +4,13 @@
 \alias{InferThresholds}
 \title{A Title}
 \usage{
-InferThresholds(data, dataLabel, minQuant = 0.05, plotFigs = T,
-  FindElbowMinY = NA)
+InferThresholds(
+  data,
+  dataLabel,
+  minQuant = 0.05,
+  plotFigs = T,
+  FindElbowMinY = NA
+)
 }
 \value{
 A modified Seurat object.

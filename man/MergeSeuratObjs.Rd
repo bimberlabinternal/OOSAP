@@ -4,12 +4,20 @@
 \alias{MergeSeuratObjs}
 \title{MergeSeuratObjs}
 \usage{
-MergeSeuratObjs(seuratObjs, metadata = NULL, method = c("simple",
-  "cca"), maxCCAspaceDim = 20, maxPCs2Weight = 20,
-  useAllFeatures = F, nVariableFeatures = 2000,
-  includeCellCycleGenes = T, assay = NULL,
-  normalization.method = "LogNormalize", spike.genes = NULL,
-  spikeImmuneGenes = T)
+MergeSeuratObjs(
+  seuratObjs,
+  metadata = NULL,
+  method = c("simple", "cca"),
+  maxCCAspaceDim = 20,
+  maxPCs2Weight = 20,
+  useAllFeatures = F,
+  nVariableFeatures = 2000,
+  includeCellCycleGenes = T,
+  assay = NULL,
+  normalization.method = "LogNormalize",
+  spike.genes = NULL,
+  spikeImmuneGenes = T
+)
 }
 \arguments{
 \item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)}

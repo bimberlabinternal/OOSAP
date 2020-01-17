@@ -4,8 +4,7 @@
 \alias{MDSmyDF}
 \title{MDSmyDF}
 \usage{
-MDSmyDF(dfx, labelsDF, factorV, title = "MDS Plot", col_vector,
-  returnMDS = F)
+MDSmyDF(dfx, labelsDF, factorV, title = "MDS Plot", col_vector, returnMDS = F)
 }
 \value{
 MDS plot of data or data

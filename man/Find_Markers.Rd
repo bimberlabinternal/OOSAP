@@ -4,10 +4,17 @@
 \alias{Find_Markers}
 \title{Find_Markers}
 \usage{
-Find_Markers(seuratObj, resolutionToUse, outFile = NULL,
-  saveFileMarkers = NULL, testsToUse = c("wilcox", "bimod", "roc", "t",
-  "negbinom", "poisson", "LR", "MAST", "DESeq2"), numGenesToSave = 20,
-  onlyPos = F, includeNameTranslation = T)
+Find_Markers(
+  seuratObj,
+  resolutionToUse,
+  outFile = NULL,
+  saveFileMarkers = NULL,
+  testsToUse = c("wilcox", "bimod", "roc", "t", "negbinom", "poisson", "LR", "MAST",
+    "DESeq2"),
+  numGenesToSave = 20,
+  onlyPos = F,
+  includeNameTranslation = T
+)
 }
 \arguments{
 \item{seuratObj}{A seurat object}

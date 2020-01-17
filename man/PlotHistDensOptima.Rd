@@ -4,8 +4,13 @@
 \alias{PlotHistDensOptima}
 \title{PlotHistDensOptima}
 \usage{
-PlotHistDensOptima(dftemp, Print = F, col_vector = col_vector,
-  nn = NULL, Title = "")
+PlotHistDensOptima(
+  dftemp,
+  Print = F,
+  col_vector = col_vector,
+  nn = NULL,
+  Title = ""
+)
 }
 \arguments{
 \item{dftemp, }{a dataframe with column var1 to be plotted.}

@@ -4,15 +4,34 @@
 \alias{MultiClassifier_Cells}
 \title{MultiClassifier_Cells}
 \usage{
-MultiClassifier_Cells(object_train, object_test, data2use = "data",
-  assay = "RNA", training.genes = NULL, Y_Train_True = NULL,
-  Y_Test_True = NULL, Xp1 = F, Xlog10 = F, Xasinh = F,
-  do_Adaboost = F, do_Caret_LinSVM = F, do_ranger_RF = F,
-  do_Caret_NaiveBayes = F, do_Caret_NNet = F, do_Caret_radialSVM = F,
-  do_ElasticNet = F, do_tree = F, do_tree_gini = F,
-  do_Caret_pcaNNet = F, do_Caret_rangerRF = F, do_glmStepAIC = F,
-  do_stepLDA = F, crossValReps = 3, NcrossVal = 10,
-  preProc = c("scale", "center", "nzv", "zv"))
+MultiClassifier_Cells(
+  object_train,
+  object_test,
+  data2use = "data",
+  assay = "RNA",
+  training.genes = NULL,
+  Y_Train_True = NULL,
+  Y_Test_True = NULL,
+  Xp1 = F,
+  Xlog10 = F,
+  Xasinh = F,
+  do_Adaboost = F,
+  do_Caret_LinSVM = F,
+  do_ranger_RF = F,
+  do_Caret_NaiveBayes = F,
+  do_Caret_NNet = F,
+  do_Caret_radialSVM = F,
+  do_ElasticNet = F,
+  do_tree = F,
+  do_tree_gini = F,
+  do_Caret_pcaNNet = F,
+  do_Caret_rangerRF = F,
+  do_glmStepAIC = F,
+  do_stepLDA = F,
+  crossValReps = 3,
+  NcrossVal = 10,
+  preProc = c("scale", "center", "nzv", "zv")
+)
 }
 \value{
 A list of resuts

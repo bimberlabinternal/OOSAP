@@ -4,8 +4,16 @@
 \alias{PCAmyDF}
 \title{PCAmyDF}
 \usage{
-PCAmyDF(dfx, labels, factorV, title = "PCA Plot", scale, center,
-  col_vector, namePointBL = F)
+PCAmyDF(
+  dfx,
+  labels,
+  factorV,
+  title = "PCA Plot",
+  scale,
+  center,
+  col_vector,
+  namePointBL = F
+)
 }
 \value{
 PCA plot of data or data

@@ -4,9 +4,15 @@
 \alias{GenerateCellHashingCalls}
 \title{GenerateCellHashingCalls}
 \usage{
-GenerateCellHashingCalls(barcodeData, positive.quantile = 0.99,
-  attemptRecovery = TRUE, useSeurat = TRUE, useMultiSeq = TRUE,
-  outFile = "combinedHtoCalls.txt", allCallsOutFile = NA)
+GenerateCellHashingCalls(
+  barcodeData,
+  positive.quantile = 0.99,
+  attemptRecovery = TRUE,
+  useSeurat = TRUE,
+  useMultiSeq = TRUE,
+  outFile = "combinedHtoCalls.txt",
+  allCallsOutFile = NA
+)
 }
 \value{
 A data table of results.

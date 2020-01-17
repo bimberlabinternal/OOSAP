@@ -4,9 +4,15 @@
 \alias{ClassifySGSAndApply}
 \title{ClassifySGSAndApply}
 \usage{
-ClassifySGSAndApply(seuratObj, geneList = NULL, geneSetName = NULL,
-  saveFilePath = NULL, doPlot = T, positivityThreshold = NULL,
-  reduction = NULL)
+ClassifySGSAndApply(
+  seuratObj,
+  geneList = NULL,
+  geneSetName = NULL,
+  saveFilePath = NULL,
+  doPlot = T,
+  positivityThreshold = NULL,
+  reduction = NULL
+)
 }
 \arguments{
 \item{geneList}{A character vector of the genes to test}
