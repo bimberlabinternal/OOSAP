@@ -45,6 +45,6 @@ addons:
       - ccache
       - r-cran-data.table
       - r-cran-kernlab
+      - python3.6-dev
       - python3-wheel
-      - libpython3.6-dev
       - python3-pip
