@@ -291,7 +291,7 @@ GenerateQcPlots <- function(barcodeData){
 
   #boxplot per HTO:
   barcodeMatrix <- as.matrix(barcodeData)
-  melted <- setNames(melt(barcodeMatrix), c('HTO', 'CellBarcode', 'Count'))
+  melted <- setNames(reshape2::melt(barcodeMatrix), c('HTO', 'CellBarcode', 'Count'))
   print(ggplot(melted, aes(x = HTO, y = Count)) +
           geom_boxplot() +
           xlab('HTO') +
@@ -741,7 +741,7 @@ utils::globalVariables(
 PrintFinalSummary <- function(dt, barcodeData){
   #Append raw counts:
   bc <- t(barcodeData)
-  x <- melt(bc)
+  x <- reshape2::melt(bc)
   names(x) <- c('CellBarcode', 'HTO', 'Count')
 
   merged <- merge(dt, x, by = c('CellBarcode', 'HTO'), all.x = T, all.y = F)

@@ -375,9 +375,28 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
     if (is.null(seuratObj)) {
       seuratObj <- seuratObjs[[exptNum]]
     } else {
+      geneIds1 <- seuratObj@misc$geneIds
+      geneIds2 <- seuratObjs[[exptNum]]@misc$geneIds
+
+      if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
+        stop('Gene names are not equal!')
+      }
+
       seuratObj <- merge(x = seuratObj,
                          y = seuratObjs[[exptNum]],
                          project = projectName)
+
+      if (any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
+        seuratObj@misc$geneIds <- geneIds2
+      } else if (!any(is.na(geneIds1)) & any(is.na(geneIds2))) {
+        seuratObj@misc$geneIds <- geneIds1
+      } else if (!any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
+        if (any(geneIds1 != geneIds2)) {
+          stop('Gene IDs did not match between seurat objects!')
+        }
+      }
+
+      seuratObj@misc$geneIds <- geneIds1
     }
   }
   
