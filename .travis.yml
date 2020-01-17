@@ -16,7 +16,7 @@ os:
 # see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 # Note: previously this required numba 0.42, but seems to have been fixed: https://github.com/lmcinnes/umap/issues/209
 before_install:
-  - chmod +x ./travis-config.sh && ./travis-config.sh && pip3 install --user setuptools umap-learn
+  - chmod +x ./travis-config.sh && ./travis-config.sh && pip3 install --upgrade pip && pip3 install setuptools umap-learn
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
