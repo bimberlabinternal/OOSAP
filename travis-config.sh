@@ -43,4 +43,4 @@ fi
 #echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile.site
 
 echo 'R repos:'
-Rscript -e "getOption('repos')"/
+Rscript -e "getOption('repos')"
