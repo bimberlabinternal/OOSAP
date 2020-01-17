@@ -16,7 +16,7 @@ os:
 # see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 # Note: previously this required numba 0.42, but seems to have been fixed: https://github.com/lmcinnes/umap/issues/209
 before_install:
-  - chmod +x ./travis-config.sh && ./travis-config.sh && pip install --user wheel && pip install -q --user umap-learn
+  - chmod +x ./travis-config.sh && ./travis-config.sh && pip3 install --user wheel && pip3 install -q --user umap-learn
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
@@ -45,4 +45,4 @@ addons:
       - ccache
       - r-cran-data.table
       - r-cran-kernlab
-      - python-pip
+      - python3-pip

@@ -3,10 +3,9 @@ RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
 		libpython-dev \
-		python-pip \
-    && pip install wheel \
-    && pip install numba==0.42.0 \
-    && pip install umap-learn \
+		python3-pip \
+    && pip3 install wheel \
+    && pip3 install umap-learn \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
