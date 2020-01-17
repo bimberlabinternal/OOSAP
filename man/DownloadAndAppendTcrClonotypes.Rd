@@ -4,8 +4,12 @@
 \alias{DownloadAndAppendTcrClonotypes}
 \title{DownloadAndAppendTcrClonotypes}
 \usage{
-DownloadAndAppendTcrClonotypes(seuratObject, outPath = ".",
-  dropExisting = T, overwriteTcrTable = F)
+DownloadAndAppendTcrClonotypes(
+  seuratObject,
+  outPath = ".",
+  dropExisting = T,
+  overwriteTcrTable = F
+)
 }
 \arguments{
 \item{seuratObject}{A Seurat object}

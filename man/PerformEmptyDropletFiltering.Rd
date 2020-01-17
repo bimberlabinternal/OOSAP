@@ -4,8 +4,11 @@
 \alias{PerformEmptyDropletFiltering}
 \title{PerformEmptyDropletFiltering}
 \usage{
-PerformEmptyDropletFiltering(seuratRawData, fdrThreshold = 0.01,
-  emptyDropNIters = 10000)
+PerformEmptyDropletFiltering(
+  seuratRawData,
+  fdrThreshold = 0.01,
+  emptyDropNIters = 10000
+)
 }
 \arguments{
 \item{seuratRawData}{Raw data}

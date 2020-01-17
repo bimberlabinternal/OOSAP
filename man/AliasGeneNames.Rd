@@ -4,9 +4,13 @@
 \alias{AliasGeneNames}
 \title{AliasGeneNames}
 \usage{
-AliasGeneNames(ensemblIds, biomart = "ensembl",
+AliasGeneNames(
+  ensemblIds,
+  biomart = "ensembl",
   dataset = "mmulatta_gene_ensembl",
-  ensemblFilters = c("ensembl_gene_id"), ensemblVersion = NULL)
+  ensemblFilters = c("ensembl_gene_id"),
+  ensemblVersion = NULL
+)
 }
 \arguments{
 \item{ensemblIds}{A vector of ensembl IDs, passed to the getBM() filters argument}

@@ -4,8 +4,13 @@
 \alias{DoRowFiltering}
 \title{DoRowFiltering}
 \usage{
-DoRowFiltering(bData, minRowSum = 5, minRowMax = 20,
-  minRowMean = 0.2, minMeanNonZeroCount = 2)
+DoRowFiltering(
+  bData,
+  minRowSum = 5,
+  minRowMax = 20,
+  minRowMean = 0.2,
+  minMeanNonZeroCount = 2
+)
 }
 \value{
 A modified Seurat object.

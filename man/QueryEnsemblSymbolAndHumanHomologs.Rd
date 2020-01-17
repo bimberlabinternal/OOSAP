@@ -4,10 +4,14 @@
 \alias{QueryEnsemblSymbolAndHumanHomologs}
 \title{QueryEnsemblSymbolAndHumanHomologs}
 \usage{
-QueryEnsemblSymbolAndHumanHomologs(ensemblIds, biomart = "ensembl",
+QueryEnsemblSymbolAndHumanHomologs(
+  ensemblIds,
+  biomart = "ensembl",
   dataset = "mmulatta_gene_ensembl",
-  ensemblFilters = c("ensembl_gene_id"), version = NULL,
-  extraAttrs = NULL)
+  ensemblFilters = c("ensembl_gene_id"),
+  version = NULL,
+  extraAttrs = NULL
+)
 }
 \arguments{
 \item{ensemblIds}{A vector of ensembl IDs, passed to the getBM() filters argument}

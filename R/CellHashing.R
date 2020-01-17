@@ -898,7 +898,7 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
     cellHashingId <- FindMatchedCellHashing(barcodePrefix)
     if (is.null(cellHashingId)){
       print(paste0('Cell hashing not used for prefix: ', barcodePrefix, ', skipping'))
-      return(seuratObject)
+      next(seuratObject)
     } else if (is.na(cellHashingId)){
       stop(paste0('Unable to find cellHashing calls table file for prefix: ', barcodePrefix))
     }

@@ -4,8 +4,7 @@
 \alias{PlotMyTable}
 \title{PlotMyTable}
 \usage{
-PlotMyTable(MyTable, Title = "", legend.position = "bottom",
-  PlotCombo = F)
+PlotMyTable(MyTable, Title = "", legend.position = "bottom", PlotCombo = F)
 }
 \arguments{
 \item{MyTable, }{A 2-way table e.g. MyTable = table(x, y)}

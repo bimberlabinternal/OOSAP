@@ -4,8 +4,13 @@
 \alias{RemoveCellCycle}
 \title{RemoveCellCycle}
 \usage{
-RemoveCellCycle(seuratObj, pcaResultFile = NULL, useSCTransform = F,
-  do.scale = T, do.center = T)
+RemoveCellCycle(
+  seuratObj,
+  pcaResultFile = NULL,
+  useSCTransform = F,
+  do.scale = T,
+  do.center = T
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}

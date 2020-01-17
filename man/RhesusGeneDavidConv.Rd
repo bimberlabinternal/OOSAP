@@ -4,8 +4,12 @@
 \alias{RhesusGeneDavidConv}
 \title{A Title}
 \usage{
-RhesusGeneDavidConv(ColNames2Conv, RhesusConvDavid.path,
-  ENSMB.tag = "ENSMM", returnFull = F)
+RhesusGeneDavidConv(
+  ColNames2Conv,
+  RhesusConvDavid.path,
+  ENSMB.tag = "ENSMM",
+  returnFull = F
+)
 }
 \value{
 A modified Seurat object.

@@ -4,8 +4,11 @@
 \alias{GenerateCellHashCallsSeurat}
 \title{GenerateCellHashCallsSeurat}
 \usage{
-GenerateCellHashCallsSeurat(barcodeData, positive.quantile = 0.99,
-  attemptRecovery = TRUE)
+GenerateCellHashCallsSeurat(
+  barcodeData,
+  positive.quantile = 0.99,
+  attemptRecovery = TRUE
+)
 }
 \value{
 A data table of results

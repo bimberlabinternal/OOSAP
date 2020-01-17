@@ -4,10 +4,18 @@
 \alias{FindClustersAndDimRedux}
 \title{FindClustersAndDimRedux}
 \usage{
-FindClustersAndDimRedux(seuratObj, dimsToUse = NULL, saveFile = NULL,
-  forceReCalc = F, minDimsToUse = NULL, umap.method = "umap-learn",
-  UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234,
-  UMAP.NumEpoc = 500)
+FindClustersAndDimRedux(
+  seuratObj,
+  dimsToUse = NULL,
+  saveFile = NULL,
+  forceReCalc = F,
+  minDimsToUse = NULL,
+  umap.method = "umap-learn",
+  UMAP_NumNeib = 40L,
+  UMAP_MinDist = 0.2,
+  UMAP_Seed = 1234,
+  UMAP.NumEpoc = 500
+)
 }
 \arguments{
 \item{seuratObj, }{A Seurat object.}

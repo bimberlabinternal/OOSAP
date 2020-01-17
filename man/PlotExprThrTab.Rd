@@ -4,9 +4,16 @@
 \alias{PlotExprThrTab}
 \title{PlotExprThrTab}
 \usage{
-PlotExprThrTab(SeuratObj, GeneName = NULL, CutThresh = NULL,
-  PlotBar = T, MetaDataName = NULL, TitleExtra = "", PlotHist = F,
-  col_vector = col_vector)
+PlotExprThrTab(
+  SeuratObj,
+  GeneName = NULL,
+  CutThresh = NULL,
+  PlotBar = T,
+  MetaDataName = NULL,
+  TitleExtra = "",
+  PlotHist = F,
+  col_vector = col_vector
+)
 }
 \arguments{
 \item{SeuratObj, }{A Seurat object.}

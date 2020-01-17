@@ -4,8 +4,11 @@
 \alias{GetTraingStats}
 \title{A Title}
 \usage{
-GetTraingStats(ClassifierSet = NA, AvailableTrainConfMatrix = "",
-  AvailableTestConfMatrix = "")
+GetTraingStats(
+  ClassifierSet = NA,
+  AvailableTrainConfMatrix = "",
+  AvailableTestConfMatrix = ""
+)
 }
 \value{
 A modified Seurat object.

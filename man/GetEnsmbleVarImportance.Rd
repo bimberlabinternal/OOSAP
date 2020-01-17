@@ -4,8 +4,11 @@
 \alias{GetEnsmbleVarImportance}
 \title{GetEnsmbleVarImportance}
 \usage{
-GetEnsmbleVarImportance(ClassiferSet, AvailableClassifiers = "",
-  ScaleVarImp = T)
+GetEnsmbleVarImportance(
+  ClassiferSet,
+  AvailableClassifiers = "",
+  ScaleVarImp = T
+)
 }
 \value{
 A list

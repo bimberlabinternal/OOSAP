@@ -4,9 +4,19 @@
 \alias{bimodal_posDisHD}
 \title{bimodal_posDisHD}
 \usage{
-bimodal_posDisHD(ndim = 5, n = 1000, cpct = 0.4, mu1 = log(1),
-  mu2 = log(100), sig1 = log(3), sig2 = log(2), p = 0.5,
-  JitterPeaks = T, removeDups = T, tSNEplot = T)
+bimodal_posDisHD(
+  ndim = 5,
+  n = 1000,
+  cpct = 0.4,
+  mu1 = log(1),
+  mu2 = log(100),
+  sig1 = log(3),
+  sig2 = log(2),
+  p = 0.5,
+  JitterPeaks = T,
+  removeDups = T,
+  tSNEplot = T
+)
 }
 \description{
 ndim-HD bimodal Dist given parameters
