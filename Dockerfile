@@ -5,6 +5,7 @@ RUN apt-get update -y \
 		libpython3-dev \
 		python3-pip \
     && pip3 install umap-learn \
+    && apt-get upgrade \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
 
@@ -14,6 +15,7 @@ RUN Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), depend
     # NOTE: these seem to be required for garnett to succeed in docker. DESeq2/genefilter added for Seurat
     && Rscript -e "BiocManager::install(c('org.Hs.eg.db', 'org.Mm.eg.db', 'HSMMSingleCell', 'monocle', 'DelayedMatrixStats', 'DESeq2', 'genefilter'), dependencies=TRUE, ask = FALSE)" \
     && Rscript -e "devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependencies = T, upgrade = 'always')" \
+    && Rscript -e "update.packages(ask = FALSE)" \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
 
 # This should not be cached if the files change

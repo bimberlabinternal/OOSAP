@@ -6,11 +6,12 @@
 #' @param dataset Passed directly to biomaRt::useEnsembl
 #' @param version Passed directly to biomaRt::useEnsembl
 #' @param extraAttrs A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.
+#' @param ensemblMirror Passed directly to biomaRt::useEnsembl.  Defaults to uswest since the default (NULL) was given SSL errors in docker
 #' @importFrom biomaRt useEnsembl getBM
 #' @importFrom dplyr %>% group_by summarise
 #' @export
-QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id'), version = NULL, extraAttrs = NULL) {
-    ensembl = useEnsembl(biomart=biomart, dataset=dataset, version = version)
+QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id'), version = NULL, ensemblMirror = 'uswest', extraAttrs = NULL) {
+    ensembl = useEnsembl(biomart=biomart, dataset=dataset, version = version, mirror = ensemblMirror)
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
     if (!is.null(extraAttrs)) {
         homologAttrs <- unique(c(homologAttrs, extraAttrs))
