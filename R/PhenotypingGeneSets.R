@@ -177,12 +177,6 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
 
 
 
-#' @title A Title
-#'
-#' @description A description
-#' @return A modified Seurat object.
-#' @keywords SerIII_template
-#' @export
 RhesusGeneDavidConv <- function(ColNames2Conv, RhesusConvDavid.path, ENSMB.tag = "ENSMM", returnFull=F){
 
   #Seurat 3 cant update the gene names !!

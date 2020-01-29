@@ -10,6 +10,8 @@ doMergeSimple(seuratObjs, nameList, projectName)
 \item{seuratObjs}{A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)}
 
 \item{nameList}{A list of names from MergeSeuratObjs()}
+
+\item{projectName}{The projectName to pass to Seurat}
 }
 \description{
 An internal method to do simple merging of seurat objects from a list of them.

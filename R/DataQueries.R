@@ -12,6 +12,7 @@ utils::globalVariables(
 #' @param seuratObj, A Seurat object.
 #' @param fieldSelect The set of fields to query
 #' @param fieldNames The labels to use for the fields
+#' @param overwriteExisting If true and the output exists, it will be overwritten
 #' @return A modified Seurat object.
 #' @export
 #' @importFrom dplyr %>% group_by_at summarise_at arrange

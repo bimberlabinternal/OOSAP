@@ -9,6 +9,8 @@ WriteCellBarcodes(seuratObj, file)
 \arguments{
 \item{seuratObj}{The seurat object}
 
+\item{file}{The output file}
+
 \item{The}{file to which barcodes will be written}
 }
 \value{
