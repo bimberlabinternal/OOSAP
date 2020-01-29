@@ -5,21 +5,21 @@ tests <- list(
         input = '../testdata/cellHashing/282-1-HTO_cellHashingRawCounts.txt',
         htos = c(2:3, 8, 10, 12),
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
-        CalledCells = 24846,
-        Singlet = 14319,
-        MultiSeq = 419,
-        Seurat = 17133,
-        CallRows = 24846,
+        CalledCells = 6953,
+        Singlet = 4791,
+        MultiSeq = 3743,
+        Seurat = 3242,
+        CallRows = 6953,
         DoRowFilter = T
     ),
     '283' = list(
         input = '../testdata/cellHashing/283-cellbarcodeToHTO.calls.citeSeqCounts.txt', htos = c(2:6),
         gexBarcodeFile = '../testdata/cellHashing/283-validCellIndexes.csv',
-        CalledCells = 5969,
-        Singlet = 2971,
-        MultiSeq = 230,
-        Seurat = 3523,
-        CallRows = 5969,
+        CalledCells = 4970,
+        Singlet = 3889,
+        MultiSeq = 3519,
+        Seurat = 2524,
+        CallRows = 4970,
         DoRowFilter = T
     )
     # 'NewFormat' = list(
