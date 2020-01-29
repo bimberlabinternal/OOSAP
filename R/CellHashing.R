@@ -484,7 +484,8 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
   Idents(object = seuratObj, cells = names(x = init.clusters$clustering), drop = TRUE) <- init.clusters$clustering
 
   # Calculate tSNE embeddings with a distance matrix
-  seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay)
+  perplexity <- .InferPerplexity(seuratObj, 100)
+  seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay, perplexity = perplexity)
   P <- DimPlot(seuratObj, reduction = 'hto_tsne', label = TRUE)
   P <- P + ggtitle('Clusters: clara')
   print(P)
@@ -630,7 +631,8 @@ HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationFi
   }
 
   if (doTSNE) {
-    seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay)
+    perplexity <- .InferPerplexity(seuratObj, 100)
+    seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay, perplexity = perplexity)
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = TRUE) + ggtitle(label))
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = TRUE) + ggtitle(label))
   }
