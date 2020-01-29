@@ -6,6 +6,9 @@
 \usage{
 PrintFinalSummary(dt, barcodeData)
 }
+\arguments{
+\item{The}{barcode counts matrix}
+}
 \value{
 A modified Seurat object.
 }

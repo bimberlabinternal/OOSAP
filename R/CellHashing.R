@@ -653,6 +653,11 @@ utils::globalVariables(
 #' @export
 #' @import data.table
 #' @import ggplot2
+#' @param mc Multiseq calls dataframe
+#' @param sc Seurat calls dataframe
+#' @param barcodeData The barcode count matrix
+#' @param outFile The output TSV file
+#' @param allCallsOutFile If provided, a more detailed output will be written here
 #' @importFrom dplyr %>% group_by summarise
 ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
                                    outFile = 'combinedHtoCalls.txt',
@@ -793,6 +798,8 @@ utils::globalVariables(
 #' @importFrom knitr kable
 #' @importFrom data.table melt
 #' @importFrom naturalsort naturalfactor
+#' @param The data table with calls
+#' @param The barcode counts matrix
 #' @import ggplot2
 PrintFinalSummary <- function(dt, barcodeData){
   #Append raw counts:

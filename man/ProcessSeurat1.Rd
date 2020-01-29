@@ -37,9 +37,13 @@ ProcessSeurat1(
 
 \item{doCellFilter}{If true, basic filtering will be performed using nCount_RNA, nFeature_RNA, and pMito}
 
+\item{nCount_RNA.high}{If doCellFilter=T, cells with nCount_RNA above this value will be filtered}
+
 \item{nFeature.high}{If doCellFilter=T, cells with nFeature above this value will be filtered}
 
 \item{pMito.high}{If doCellFilter=T, cells with percent mito above this value will be filtered}
+
+\item{nCount_RNA.low}{If doCellFilter=T, cells with nCount_RNA below this value will be filtered}
 
 \item{nFeature.low}{If doCellFilter=T, cells with nFeature below this value will be filtered}
 
@@ -61,9 +65,11 @@ ProcessSeurat1(
 
 \item{useSCTransform}{If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)}
 
-\item{uUMI.high}{If doCellFilter=T, cells with nCount_RNA above this value will be filtered}
+\item{mean.cutoff}{Passed directly to FindVariableFeatures}
 
-\item{uUMI.low}{If doCellFilter=T, cells with nCount_RNA below this value will be filtered}
+\item{dispersion.cutoff}{Passed directly to FindVariableFeatures}
+
+\item{spikeGenes}{If provided these will be appended to the set of VariableFeatures}
 }
 \value{
 A modified Seurat object.

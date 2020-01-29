@@ -36,6 +36,10 @@ MergeSeuratObjs(
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
 
+\item{assay}{The assay to use}
+
+\item{normalization.method}{Normalization method}
+
 \item{spike.genes}{If CCA is used, this list of list of genes will be spiked into the merged object, beyond the default VariableGenes()}
 
 \item{spikeImmuneGenes}{If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object}

@@ -12,6 +12,17 @@ ProcessEnsemblHtoCalls(
   allCallsOutFile = NA
 )
 }
+\arguments{
+\item{mc}{Multiseq calls dataframe}
+
+\item{sc}{Seurat calls dataframe}
+
+\item{barcodeData}{The barcode count matrix}
+
+\item{outFile}{The output TSV file}
+
+\item{allCallsOutFile}{If provided, a more detailed output will be written here}
+}
 \value{
 A modified Seurat object.
 }

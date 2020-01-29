@@ -242,6 +242,8 @@ MarkStepRun <- function(seuratObj, name, saveFile = NULL) {
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @param spike.genes If NULL ignored, but a vector of unique genes
 #' @param spikeImmuneGenes If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object
+#' @param normalization.method Normalization method
+#' @param plotFigs If true, QC figures will be generated
 #' @return A modified Seurat object.
 doMergeCCA <- function(seuratObjs, nameList, 
                        maxCCAspaceDim, 
@@ -367,6 +369,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 #' @description An internal method to do simple merging of seurat objects from a list of them.
 #' @param seuratObjs A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)
 #' @param nameList A list of names from MergeSeuratObjs()
+#' @param projectName The projectName to pass to Seurat
 doMergeSimple <- function(seuratObjs, nameList, projectName){
   seuratObj <- NULL
   
@@ -417,6 +420,8 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
 #' @param nVariableFeatures The number of VariableFeatures to identify
 #' @param includeCellCycleGenes If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes
 #' @param spike.genes If CCA is used, this list of list of genes will be spiked into the merged object, beyond the default VariableGenes()
+#' @param assay The assay to use
+#' @param normalization.method Normalization method
 #' @param spikeImmuneGenes If CCA is used, this will spike a pre-determined set of immune-related genes into the merged object
 #' @return A modified Seurat object.
 #' @export
@@ -426,7 +431,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
                             maxCCAspaceDim = 20, maxPCs2Weight = 20, 
                             useAllFeatures = F, nVariableFeatures = 2000,
                             includeCellCycleGenes = T, assay = NULL,
-                            normalization.method = "LogNormalize", 
+                            normalization.method = "LogNormalize",
                             spike.genes = NULL, spikeImmuneGenes = T){
 
 
@@ -515,8 +520,8 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param saveFile If provided, the seuratObj will be saved here as it is processed, providing some ability to resume if there is a failure
 #' @param doCellCycle If true, CellCycle genes will be regressed
 #' @param doCellFilter If true, basic filtering will be performed using nCount_RNA, nFeature_RNA, and pMito
-#' @param uUMI.high If doCellFilter=T, cells with nCount_RNA above this value will be filtered
-#' @param uUMI.low If doCellFilter=T, cells with nCount_RNA below this value will be filtered
+#' @param nCount_RNA.high If doCellFilter=T, cells with nCount_RNA above this value will be filtered
+#' @param nCount_RNA.low If doCellFilter=T, cells with nCount_RNA below this value will be filtered
 #' @param nFeature.high If doCellFilter=T, cells with nFeature above this value will be filtered
 #' @param nFeature.low If doCellFilter=T, cells with nFeature below this value will be filtered
 #' @param pMito.high If doCellFilter=T, cells with percent mito above this value will be filtered
@@ -526,6 +531,9 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param variableFeatureSelectionMethod The selection method to be passed to FindVariableFeatures()
 #' @param useSCTransform If true, SCTransform will be used in place of the standard Seurat workflow (NormalizeData, ScaleData, FindVariableFeatures)
 #' @param nVariableFeatures The number of variable features to find
+#' @param dispersion.cutoff Passed directly to FindVariableFeatures
+#' @param mean.cutoff Passed directly to FindVariableFeatures
+#' @param spikeGenes If provided these will be appended to the set of VariableFeatures
 #' @param printDefaultPlots If true, the default set of QC plots will be printed
 #' @param npcs Number of PCs to use for RunPCA()
 #' @param ccPcaResultFile If provided, the PCA results from cell cycle regression will be written here
@@ -1207,6 +1215,7 @@ WriteSummaryMetrics <- function(seuratObj, file) {
 #' @description Writes a table of cell barcodes to the provided file
 #' @return A modified Seurat object.
 #' @param seuratObj The seurat object
+#' @param file The output file
 #' @param The file to which barcodes will be written
 #' @export
 WriteCellBarcodes <- function(seuratObj, file) {

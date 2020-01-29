@@ -28,11 +28,15 @@ doMergeCCA(
 
 \item{assay}{NULL for default assay or specify}
 
+\item{normalization.method}{Normalization method}
+
 \item{useAllFeatures}{If true, the resulting object will contain all features, as opposed to just VariableGenes (not recommended)}
 
 \item{includeCellCycleGenes}{If true, the cell cycles genes will always be included with IntegrateData(), as opposed to just VariableGenes}
 
 \item{nVariableFeatures}{The number of VariableFeatures to identify}
+
+\item{plotFigs}{If true, QC figures will be generated}
 
 \item{spike.genes}{If NULL ignored, but a vector of unique genes}
 

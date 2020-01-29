@@ -18,6 +18,8 @@ QueryAndApplyCdnaMetadata(
 \item{fieldSelect}{The set of fields to query}
 
 \item{fieldNames}{The labels to use for the fields}
+
+\item{overwriteExisting}{If true and the output exists, it will be overwritten}
 }
 \value{
 A modified Seurat object.
