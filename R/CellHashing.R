@@ -769,7 +769,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   merged$FinalClassification <- as.character(merged$HTO_classification.global.MultiSeq)
   merged$FinalClassification[merged$HTO_classification.global.MultiSeq == 'Negative'] <- as.character(merged$HTO_classification.global.Seurat[merged$HTO_classification.global.MultiSeq == 'Negative'])
   merged$FinalClassification[!merged$GlobalConcordant] <- 'Discordant'
-  merged$FinalClassification[]
+  merged$FinalClassification[!merged$Concordant] <- 'Discordant'
   merged$FinalClassification <- as.factor(merged$FinalClassification)
 
   df <- data.frame(
@@ -952,7 +952,7 @@ GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, ba
   df <- rbind(df, data.frame(Category = categoryName, MetricName = "TotalCounts", Value = sum(barcodeData)))
 
   #Any called cell:
-  calledCellBarcodes <- dt$CellBarcode[dt$HTO_Classification != 'Negative']
+  calledCellBarcodes <- dt$CellBarcode[dt$HTO_Classification != 'Negative' & dt$HTO_Classification != 'Discordant']
   calledIntersect <- intersect(whitelist$CellBarcode, calledCellBarcodes)
 
   df <- rbind(df, data.frame(Category = categoryName, MetricName = "TotalCalled", Value = length(calledCellBarcodes)))
