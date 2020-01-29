@@ -4,10 +4,17 @@
 \alias{DoMULTIseqDemux}
 \title{A Title}
 \usage{
-DoMULTIseqDemux(seuratObj)
+DoMULTIseqDemux(
+  seuratObj,
+  assay = "HTO",
+  autoThresh = TRUE,
+  quantile = NULL,
+  maxiter = 20,
+  qrange = seq(from = 0.2, to = 0.95, by = 0.05)
+)
 }
 \arguments{
-\item{seurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

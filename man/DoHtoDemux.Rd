@@ -4,7 +4,12 @@
 \alias{DoHtoDemux}
 \title{A Title}
 \usage{
-DoHtoDemux(seuratObj, positive.quantile = 0.99)
+DoHtoDemux(
+  seuratObj,
+  positive.quantile = 0.99,
+  label = "Seurat HTODemux",
+  plotDist = FALSE
+)
 }
 \arguments{
 \item{seurObj, }{A Seurat object.}

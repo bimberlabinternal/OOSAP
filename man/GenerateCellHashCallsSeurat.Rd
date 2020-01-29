@@ -7,7 +7,8 @@
 GenerateCellHashCallsSeurat(
   barcodeData,
   positive.quantile = 0.99,
-  attemptRecovery = TRUE
+  attemptRecovery = F,
+  minCellsForRecovery = 500
 )
 }
 \value{
