@@ -4,7 +4,15 @@
 \alias{HtoSummary}
 \title{A Title}
 \usage{
-HtoSummary(seuratObj, field1, field2, doHeatmap = T)
+HtoSummary(
+  seuratObj,
+  htoClassificationField,
+  globalClassificationField,
+  label,
+  doHeatmap = T,
+  doTSNE = T,
+  assay = "HTO"
+)
 }
 \arguments{
 \item{seurObj, }{A Seurat object.}

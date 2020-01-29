@@ -4,7 +4,7 @@
 \alias{DebugDemux}
 \title{A Title}
 \usage{
-DebugDemux(seuratObj)
+DebugDemux(seuratObj, assay = "HTO", reportKmeans = FALSE)
 }
 \arguments{
 \item{seurObj, }{A Seurat object.}

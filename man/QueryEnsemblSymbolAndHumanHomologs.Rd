@@ -10,6 +10,7 @@ QueryEnsemblSymbolAndHumanHomologs(
   dataset = "mmulatta_gene_ensembl",
   ensemblFilters = c("ensembl_gene_id"),
   version = NULL,
+  ensemblMirror = "uswest",
   extraAttrs = NULL
 )
 }
@@ -23,6 +24,8 @@ QueryEnsemblSymbolAndHumanHomologs(
 \item{ensemblFilters}{A vector of ensembl IDs, passed to the getBM() filters argument.}
 
 \item{version}{Passed directly to biomaRt::useEnsembl}
+
+\item{ensemblMirror}{Passed directly to biomaRt::useEnsembl.  Defaults to uswest since the default (NULL) was given SSL errors in docker}
 
 \item{extraAttrs}{A vector of attributes that biomaRt::getBM() should get beyond default set. see listAttributes.}
 }

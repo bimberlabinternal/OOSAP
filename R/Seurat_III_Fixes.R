@@ -17,6 +17,7 @@
 #' @export
 #' @importFrom fitdistrplus fitdist
 #' @importFrom cluster clara
+#' @importFrom Matrix t
 HTODemux2 <- function(
   object,
   assay = "HTO",
@@ -37,14 +38,13 @@ HTODemux2 <- function(
     assay = assay,
     slot = slot
   )[, colnames(x = object)]
-  assayData <- as.matrix(x = assayData)
 
   ncenters <- (nrow(x = data) + 1)
   switch(
     EXPR = kfunc,
     'kmeans' = {
       init.clusters <- kmeans(
-        x = t(x = as.matrix(data)),
+        x = t(x = data),
         centers = ncenters,
         nstart = nstarts
       )
@@ -54,7 +54,7 @@ HTODemux2 <- function(
     'clara' = {
       #use fast k-medoid clustering
       init.clusters <- clara(
-      	x = t(x = as.matrix(data)),
+      	x = t(x = data),
         k = ncenters,
         samples = nsamples
       )

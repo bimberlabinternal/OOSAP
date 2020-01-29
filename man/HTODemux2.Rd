@@ -11,7 +11,8 @@ HTODemux2(
   nstarts = 100,
   kfunc = "clara",
   nsamples = 100,
-  verbose = TRUE
+  verbose = TRUE,
+  plotDist = FALSE
 )
 }
 \arguments{

@@ -51,6 +51,12 @@ test_that("Cell hashing works", {
 
             GenerateQcPlots(barcodeData)
 
+            #Subset to keep reasonable
+            if (ncol(barcodeData) > 8000) {
+                print('Subsetting barcodeData')
+                barcodeData <- barcodeData[1:8000]
+            }
+
             sc <- OOSAP:::GenerateCellHashCallsSeurat(barcodeData)
 
             mc <- OOSAP:::GenerateCellHashCallsMultiSeq(barcodeData)

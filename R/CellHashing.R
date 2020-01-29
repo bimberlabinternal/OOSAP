@@ -469,10 +469,11 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 #' @description A description
 #' @param seurObj, A Seurat object.
 #' @importFrom cluster clara
+#' @importFrom Matrix t
 #' @return A modified Seurat object.
 DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
   print('Debugging information for Seurat HTODemux:')
-  data <- as.matrix(GetAssayData(object = seuratObj, assay = assay))
+  data <- GetAssayData(object = seuratObj, assay = assay)
   ncenters <- (nrow(x = data) + 1)
 
   init.clusters <- clara(
@@ -629,7 +630,7 @@ HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationFi
   }
 
   if (doTSNE) {
-    seuratObj[['hto_tsne']] <- RunTSNE(dist(t(as.matrix(GetAssayData(seuratObj, slot = "data", assay = assay)))), assay = assay)
+    seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay)
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = TRUE) + ggtitle(label))
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = TRUE) + ggtitle(label))
   }
@@ -759,7 +760,8 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
     ConcordantSinglet = c(sum(merged$ConcordantNoNeg & merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$ConcordantNoNeg & merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(ret$FinalClassification == 'Singlet'))
   )
   rownames(df) <- c('Seurat', 'MultiSeq', 'Final')
-  print(kable(t(df)))
+  df <- t(df)
+  print(knitr::kable(df))
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
