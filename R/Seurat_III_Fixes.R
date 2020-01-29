@@ -24,24 +24,27 @@ HTODemux2 <- function(
   nstarts = 100,
   kfunc = "clara",
   nsamples = 100,
-  verbose = TRUE
+  verbose = TRUE,
+  plotDist = FALSE
 ) {
-  # This is a hack around Seurat's method.  If this is improved, shift to use that:
+  # This is a hack around Seurat's method to make it more robust and fault tolerant.  If this is improved, shift to use that:
+  slot <- "counts"
 
   #initial clustering
   data <- GetAssayData(object = object, assay = assay)
-  counts <- GetAssayData(
+  assayData <- GetAssayData(
     object = object,
     assay = assay,
-    slot = 'counts'
+    slot = slot
   )[, colnames(x = object)]
-  counts <- as.matrix(x = counts)
+  assayData <- as.matrix(x = assayData)
+
   ncenters <- (nrow(x = data) + 1)
   switch(
     EXPR = kfunc,
     'kmeans' = {
       init.clusters <- kmeans(
-        x = t(x = GetAssayData(object = object, assay = assay)),
+        x = t(x = as.matrix(data)),
         centers = ncenters,
         nstart = nstarts
       )
@@ -51,7 +54,7 @@ HTODemux2 <- function(
     'clara' = {
       #use fast k-medoid clustering
       init.clusters <- clara(
-        x = t(x = GetAssayData(object = object, assay = assay)),
+      	x = t(x = as.matrix(data)),
         k = ncenters,
         samples = nsamples
       )
@@ -65,44 +68,53 @@ HTODemux2 <- function(
   average.expression <- AverageExpression(
     object = object,
     assays = c(assay),
+    slot = slot,
     verbose = FALSE
   )[[assay]]
-
-  #TODO: checking for any HTO negative in all clusters:
 
   if (sum(average.expression == 0) > 0) {
     warning("Cells with zero counts exist as a cluster.")
   }
 
   #create a matrix to store classification result
-  discrete <- GetAssayData(object = object, assay = assay)
+  discrete <- GetAssayData(object = object, assay = assay, slot = slot)
   discrete[discrete > 0] <- 0
   # for each HTO, we will use the minimum cluster for fitting
-  for (iter in rownames(x = data)) {
-    values <- counts[iter, colnames(object)]
-    #commented out if we take all but the top cluster as background
-    #values_negative=values[setdiff(object@cell.names,WhichCells(object,which.max(average.expression[iter,])))]
+  for (hto in naturalsort::naturalsort(rownames(x = data))) {
+    values <- assayData[hto, colnames(object)]
 
-    minNonZero <- which.min(x = average.expression[iter,average.expression[iter, ] > 0])
-    maxNonZero <- which.max(x = average.expression[iter,average.expression[iter, ] > 0])
+    minNonZero <- which.min(x = average.expression[hto,average.expression[hto, ] > 0])
+    maxNonZero <- which.max(x = average.expression[hto,average.expression[hto, ] > 0])
 
     # This indicates the only non-zero cluster is the primary one.
     # It's not especially likely, but could occur when there are only 2 possible HTOs
     if (minNonZero == maxNonZero){
-      warning('Min. non-zero value is the same as max value, using cutoff of 1 read')
+      print('Min. non-zero value is the same as max value, using cutoff of 1 read')
       cutoff <- 1
     } else {
       values.use <- values[WhichCells(
         object = object,
         idents = levels(x = Idents(object = object))[[minNonZero]]
       )]
-      fit <- suppressWarnings(expr = fitdist(data = values.use, distr = "nbinom"))
-      cutoff <- as.numeric(x = quantile(x = fit, probs = positive.quantile)$quantiles[1])
+
+      tryCatch({
+        fit <- suppressWarnings(fitdist(data = values.use, distr = "nbinom"))
+        if (plotDist) {
+          print(plot(fit))
+        }
+
+        cutoff <- as.numeric(x = quantile(x = fit, probs = positive.quantile)$quantiles[1])
+      }, error = function(e) {
+        print(paste0('Error fitting nbinom, skipping: ', hto))
+        print(e)
+        saveRDS(values.use, file = paste0('./', hto, '.nbinom.data.rds'))
+        next
+      })
     }
 
-    discrete[iter, names(x = which(x = values > cutoff))] <- 1
+    discrete[hto, names(x = which(x = values > cutoff))] <- 1
     if (verbose) {
-      message(paste0("Cutoff for ", iter, " : ", cutoff, " reads"))
+      print(paste0("Cutoff for ", hto, " : ", cutoff, " reads"))
     }
   }
   # now assign cells to HTO based on discretized values
@@ -134,7 +146,7 @@ HTODemux2 <- function(
       return(paste(sort(x = c(hash.maxID[x], hash.secondID[x])), collapse = "_"))
     }
   )
-  # doublet_names <- names(x = table(doublet_id))[-1] # Not used
+
   classification <- classification.global
   classification[classification.global == "Negative"] <- "Negative"
   classification[classification.global == "Singlet"] <- hash.maxID[which(x = classification.global == "Singlet")]
@@ -153,10 +165,10 @@ HTODemux2 <- function(
   )
   object <- AddMetaData(object = object, metadata = classification.metadata)
   Idents(object) <- paste0(assay, '_classification')
-  # Idents(object, cells = rownames(object@meta.data[object@meta.data$classification.global == "Doublet", ])) <- "Doublet"
+
   doublets <- rownames(x = object[[]])[which(object[[paste0(assay, "_classification.global")]] == "Doublet")]
   Idents(object = object, cells = doublets) <- 'Doublet'
-  # object@meta.data$hash.ID <- Idents(object)
+
   object$hash.ID <- Idents(object = object)
   return(object)
 }

@@ -345,7 +345,7 @@ utils::globalVariables(
 #' @description Generates final cell hashing calls using Seurat3 HTODemux
 #' @return A data table of results
 #' @import data.table
-GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE) {
+GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = F, minCellsForRecovery = 500) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
@@ -353,14 +353,14 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, a
     dt <- data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
 
     #attempt recovery:
-    if (attemptRecovery && length(seuratObj$HTO_classification.global == 'Negative') > 50) {
+    if (attemptRecovery && length(seuratObj$HTO_classification.global == 'Negative') > minCellsForRecovery) {
       print('Attempting recovery of negatives')
       seuratObj2 <- subset(seuratObj, subset = HTO_classification.global == 'Negative')
       seuratObj2 <- CreateSeuratObject(seuratObj2@assays$HTO@counts, assay = 'HTO')
       print(paste0('Initial negative cells : ', ncol(seuratObj2)))
 
       tryCatch({
-        seuratObj2 <- DoHtoDemux(seuratObj2, positive.quantile = positive.quantile)
+        seuratObj2 <- DoHtoDemux(seuratObj2, positive.quantile = positive.quantile, label = 'Seurat HTODemux (2nd Round)')
         seuratObj2 <- subset(seuratObj2, subset = HTO_classification.global == 'Singlet')
         print(paste0('Total cells rescued by second HTODemux call: ', ncol(seuratObj2)))
         if (ncol(seuratObj2) > 0) {
@@ -470,26 +470,54 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 #' @param seurObj, A Seurat object.
 #' @importFrom cluster clara
 #' @return A modified Seurat object.
-DebugDemux <- function(seuratObj) {
+DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
   print('Debugging information for Seurat HTODemux:')
-  data <- GetAssayData(object = seuratObj, assay = 'HTO')
+  data <- as.matrix(GetAssayData(object = seuratObj, assay = assay))
   ncenters <- (nrow(x = data) + 1)
 
   init.clusters <- clara(
-    x = t(x = GetAssayData(object = seuratObj, assay = 'HTO')),
+    x = t(x = data),
     k = ncenters,
     samples = 100
   )
-  #identify positive and negative signals for all HTO
   Idents(object = seuratObj, cells = names(x = init.clusters$clustering), drop = TRUE) <- init.clusters$clustering
+
+  # Calculate tSNE embeddings with a distance matrix
+  seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay)
+  P <- DimPlot(seuratObj, reduction = 'hto_tsne', label = TRUE)
+  P <- P + ggtitle('Clusters: clara')
+  print(P)
 
   average.expression <- AverageExpression(
     object = seuratObj,
-    assays = c("HTO"),
+    assays = c(assay),
     verbose = FALSE
-  )[["HTO"]]
+  )[[assay]]
 
-  print(average.expression)
+  print(knitr::kable(average.expression, label = 'clara'))
+
+  if (reportKmeans) {
+    print('kmeans:')
+    init.clusters <- kmeans(
+      x = t(x = data),
+      centers = ncenters,
+      nstart = 100
+    )
+    Idents(object = seuratObj, cells = names(x = init.clusters$cluster), drop = TRUE) <- init.clusters$cluster
+
+    # Calculate tSNE embeddings with a distance matrix
+    P <- DimPlot(seuratObj, label = TRUE)
+    P <- P + ggtitle('Clusters: kmeans')
+    print(P)
+
+    average.expression <- AverageExpression(
+      object = seuratObj,
+      assays = c(assay),
+      verbose = FALSE
+    )[[assay]]
+
+    print(knitr::kable(average.expression, label = 'kmeans'))
+  }
 }
 
 #' @title A Title
@@ -497,15 +525,15 @@ DebugDemux <- function(seuratObj) {
 #' @description A description
 #' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
-DoHtoDemux <- function(seuratObj, positive.quantile = 0.99) {
+DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTODemux', plotDist = FALSE) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
   DebugDemux(seuratObj)
 
-  seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile)
+  seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile, plotDist = plotDist)
 
-  HtoSummary(seuratObj, field1 = 'HTO_classification.global', field2 = 'hash.ID')
+  HtoSummary(seuratObj, label = label, htoClassificationField = 'hash.ID', globalClassificationField = 'HTO_classification.global')
 
   return(seuratObj)
 }
@@ -554,19 +582,29 @@ GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, atte
 #' @title A Title
 #'
 #' @description A description
-#' @param seurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
-DoMULTIseqDemux <- function(seuratObj) {
-  # Normalize HTO data, here we use centered log-ratio (CLR) transformation
-  seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
+DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantile = NULL, maxiter = 20, qrange = seq(from = 0.2, to = 0.95, by = 0.05)) {
 
-  seuratObj <- MULTIseqDemux(seuratObj, assay = "HTO", quantile = 0.7, verbose = TRUE)
+  ## Normalize Data: Log2 Transform, mean-center
+  counts <- GetAssayData(seuratObj, assay = assay, slot = 'counts')
+  log2Scaled <- as.data.frame(log2(counts))
+  for (i in 1:ncol(counts)) {
+    ind <- which(is.finite(log2Scaled[,i]) == FALSE)
+    log2Scaled[ind,i] <- 0
+    log2Scaled[,i] <- log2Scaled[,i]-mean(log2Scaled[,i])
+  }
+  seuratObjMS <- CreateSeuratObject(counts, assay = 'MultiSeq')
+  seuratObjMS[['MultiSeq']]@data <- as.matrix(log2Scaled)
 
-  seuratObj$MULTI_classification.global <- as.character(seuratObj$MULTI_ID)
-  seuratObj$MULTI_classification.global[!(seuratObj$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
+  seuratObjMS <- MULTIseqDemux(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
+
+  seuratObj$MULTI_ID <- as.character(seuratObjMS$MULTI_ID)
+  seuratObj$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
+  seuratObj$MULTI_classification.global[!(seuratObjMS$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
   seuratObj$MULTI_classification.global <- as.factor(seuratObj$MULTI_classification.global)
 
-  HtoSummary(seuratObj, field1 = 'MULTI_classification.global', field2 = 'MULTI_ID', doHeatmap = F)
+  HtoSummary(seuratObj, label = 'MULTI-SEQ', htoClassificationField = 'MULTI_ID', globalClassificationField = 'MULTI_classification.global')
 
   return(seuratObj)
 }
@@ -576,21 +614,28 @@ DoMULTIseqDemux <- function(seuratObj) {
 #' @description A description
 #' @param seurObj, A Seurat object.
 #' @return A modified Seurat object.
-HtoSummary <- function(seuratObj, field1, field2, doHeatmap = T) {
+HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationField, label, doHeatmap = T, doTSNE = T, assay = 'HTO') {
   #report outcome
-  print(table(seuratObj[[field1]]))
-  print(table(seuratObj[[field2]]))
+  print(table(seuratObj[[htoClassificationField]]))
+  print(table(seuratObj[[globalClassificationField]]))
 
   # Group cells based on the max HTO signal
   seuratObj_hashtag <- seuratObj
-  Idents(seuratObj_hashtag) <- field2
-  htos <- rownames(GetAssayData(seuratObj_hashtag,assay = "HTO"))
-  for (hto in htos){
-    print(RidgePlot(seuratObj_hashtag, features = c(hto), assay = 'HTO', ncol = 1))
+  Idents(seuratObj_hashtag) <- globalClassificationField
+  htos <- rownames(GetAssayData(seuratObj_hashtag, assay = assay))
+  for (hto in naturalsort::naturalsort(htos)){
+    print(VlnPlot(seuratObj_hashtag, features = c(hto), assay = assay, ncol = 1, log = T) + ggtitle(paste0(label, ": ", hto, " (log)")))
+    print(VlnPlot(seuratObj_hashtag, features = c(hto), assay = assay, ncol = 1, log = F) + ggtitle(paste0(label, ": ", hto)))
+  }
+
+  if (doTSNE) {
+    seuratObj[['hto_tsne']] <- RunTSNE(dist(t(as.matrix(GetAssayData(seuratObj, slot = "data", assay = assay)))), assay = assay)
+    print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = TRUE) + ggtitle(label))
+    print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = TRUE) + ggtitle(label))
   }
 
   if (doHeatmap) {
-    print(HTOHeatmap(seuratObj, assay = "HTO", classification = field2, global.classification = field1, ncells = min(3000, ncol(seuratObj)), singlet.names = NULL))
+    print(HTOHeatmap(seuratObj, assay = assay, classification = htoClassificationField, global.classification = globalClassificationField, ncells = min(3000, ncol(seuratObj)), singlet.names = NULL) + ggtitle(label))
   }
 }
 
@@ -658,6 +703,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   merged$Concordant <- as.character(merged$HTO_classification.MultiSeq) == as.character(merged$HTO_classification.Seurat)
   merged$ConcordantNoNeg <- !(!merged$Concordant & merged$HTO_classification.MultiSeq != 'Negative' & merged$HTO_classification.Seurat != 'Negative')
   merged$GlobalConcordant <- as.character(merged$HTO_classification.global.MultiSeq) == as.character(merged$HTO_classification.global.Seurat)
+  merged$GlobalConcordantNoNeg <- !(!merged$GlobalConcordant & merged$HTO_classification.global.MultiSeq != 'Negative' & merged$HTO_classification.global.Seurat != 'Negative')
   merged$HasSeuratCall <- !is.na(merged$HTO_classification.Seurat) & merged$HTO_classification.Seurat != 'Negative'
   merged$HasMultiSeqCall <- !is.na(merged$HTO_classification.MultiSeq) & merged$HTO_classification.MultiSeq != 'Negative'
 
@@ -668,6 +714,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   print(paste0('Total discordant: ', nrow(merged[!merged$Concordant])))
   print(paste0('Total discordant, ignoring negatives: ', nrow(merged[!merged$ConcordantNoNeg])))
   print(paste0('Total discordant global calls: ', nrow(merged[!merged$GlobalConcordant])))
+  print(paste0('Total discordant, global calls ignoring negatives: ', nrow(merged[!merged$GlobalConcordantNoNeg])))
 
   discord <- merged[!merged$GlobalConcordant]
   discord <- discord %>% group_by(HTO_classification.global.MultiSeq, HTO_classification.global.Seurat) %>% summarise(Count = dplyr::n())
@@ -701,11 +748,18 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   # For the time being, accept those as correct.
   ret$FinalCall <- as.character(ret$HTO_classification.MultiSeq)
   ret$FinalCall[ret$HTO_classification.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.Seurat[ret$HTO_classification.MultiSeq == 'Negative'])
-  ret$FinalCall <- as.factor(ret$FinalCall)
+  ret$FinalCall <- naturalsort::naturalfactor(ret$FinalCall)
 
   ret$FinalClassification <- as.character(ret$HTO_classification.global.MultiSeq)
   ret$FinalClassification[ret$HTO_classification.global.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.global.Seurat[ret$HTO_classification.global.MultiSeq == 'Negative'])
   ret$FinalClassification <- as.factor(ret$FinalClassification)
+
+  df <- data.frame(
+    TotalSinglet = c(sum(merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(ret$FinalClassification == 'Singlet')),
+    ConcordantSinglet = c(sum(merged$ConcordantNoNeg & merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$ConcordantNoNeg & merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(ret$FinalClassification == 'Singlet'))
+  )
+  rownames(df) <- c('Seurat', 'MultiSeq', 'Final')
+  print(kable(t(df)))
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
@@ -935,19 +989,19 @@ FindMatchedCellHashing <- function(loupeDataId){
     containerFilter=NULL,
     colNameOpt="rname"
   )
-  
+
   if (nrow(rows) == 0) {
     print(paste0("Loupe File ID: ", loupeDataId, " not found"))
     return(NA)
   }
-  
+
   readset <- unique(rows[['readset']])
-  
+
   if (is.na(readset) || is.null(readset)) {
     print("readset is NA/NULL")
     return(NA)
   }
-  
+
   libraryId <- unique(rows[['library_id']])
 
   #determine whether we expect cell hashing to be used:
@@ -978,8 +1032,8 @@ FindMatchedCellHashing <- function(loupeDataId){
     queryName="outputfiles",
     colSort="-rowid",
     colSelect="rowid",
-    colFilter=makeFilter(c("readset", "EQUAL", readset), 
-                         c("category", "EQUAL", "Seurat Cell Hashing Calls"), 
+    colFilter=makeFilter(c("readset", "EQUAL", readset),
+                         c("category", "EQUAL", "Seurat Cell Hashing Calls"),
                          c("library_id", "EQUAL", libraryId)),
     containerFilter=NULL,
     colNameOpt="rname"
@@ -1001,13 +1055,13 @@ FindMatchedCellHashing <- function(loupeDataId){
       queryName="outputfiles",
       colSort="-rowid",
       colSelect="rowid,",
-      colFilter=makeFilter(c("readset", "EQUAL", readset), 
-                           c("category", "EQUAL", "10x GEX Cell Hashing Calls"), 
+      colFilter=makeFilter(c("readset", "EQUAL", readset),
+                           c("category", "EQUAL", "10x GEX Cell Hashing Calls"),
                            c("library_ld", "EQUAL", libraryId)),
       containerFilter=NULL,
       colNameOpt="rname"
     ))
-    
+
     if (nrow(rowsB) == 0){
       print("Not found")
     } else {
@@ -1040,7 +1094,7 @@ DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
     print(paste0("File exists, will not overwrite: ", outFile))
     return(outFile)
 	}
-  
+
   #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
   rows <- labkey.selectRows(
     baseUrl=lkBaseUrl,
