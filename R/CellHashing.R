@@ -565,7 +565,7 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData) {
 #' @return A data table of results.
 #' @export
 #' @import data.table
-GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = TRUE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
+GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = FALSE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
   sc <- NA
   if (useSeurat) {
     sc <- GenerateCellHashCallsSeurat(barcodeData, positive.quantile = positive.quantile, attemptRecovery = attemptRecovery )
@@ -694,35 +694,52 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   merged$HTO_classification.MultiSeq <- as.character(merged$HTO_classification.MultiSeq)
   merged$HTO_classification.MultiSeq[is.na(merged$HTO_classification.MultiSeq)] <- 'Negative'
-  merged$HTO_classification.MultiSeq <- as.factor(merged$HTO_classification.MultiSeq)
+  merged$HTO_classification.MultiSeq <- naturalsort::naturalfactor(merged$HTO_classification.MultiSeq)
 
   merged$HTO_classification.Seurat <- as.character(merged$HTO_classification.Seurat)
   merged$HTO_classification.Seurat[is.na(merged$HTO_classification.Seurat)] <- 'Negative'
-  merged$HTO_classification.Seurat <- as.factor(merged$HTO_classification.Seurat)
+  merged$HTO_classification.Seurat <- naturalsort::naturalfactor(merged$HTO_classification.Seurat)
 
   merged$HTO_classification.global.MultiSeq <- as.character(merged$HTO_classification.global.MultiSeq)
   merged$HTO_classification.global.MultiSeq[is.na(merged$HTO_classification.global.MultiSeq)] <- 'Negative'
-  merged$HTO_classification.global.MultiSeq <- as.factor(merged$HTO_classification.global.MultiSeq)
+  merged$HTO_classification.global.MultiSeq <- naturalsort::naturalfactor(merged$HTO_classification.global.MultiSeq)
 
   merged$HTO_classification.global.Seurat <- as.character(merged$HTO_classification.global.Seurat)
   merged$HTO_classification.global.Seurat[is.na(merged$HTO_classification.global.Seurat)] <- 'Negative'
-  merged$HTO_classification.global.Seurat <- as.factor(merged$HTO_classification.global.Seurat)
+  merged$HTO_classification.global.Seurat <- naturalsort::naturalfactor(merged$HTO_classification.global.Seurat)
 
+  merged$HasSeuratCall <- merged$HTO_classification.Seurat != 'Negative'
+  merged$HasMultiSeqCall <- merged$HTO_classification.MultiSeq != 'Negative'
+
+  #dont count situations where one side is negative as discordant
   merged$Concordant <- as.character(merged$HTO_classification.MultiSeq) == as.character(merged$HTO_classification.Seurat)
-  merged$ConcordantNoNeg <- !(!merged$Concordant & merged$HTO_classification.MultiSeq != 'Negative' & merged$HTO_classification.Seurat != 'Negative')
-  merged$GlobalConcordant <- as.character(merged$HTO_classification.global.MultiSeq) == as.character(merged$HTO_classification.global.Seurat)
-  merged$GlobalConcordantNoNeg <- !(!merged$GlobalConcordant & merged$HTO_classification.global.MultiSeq != 'Negative' & merged$HTO_classification.global.Seurat != 'Negative')
-  merged$HasSeuratCall <- !is.na(merged$HTO_classification.Seurat) & merged$HTO_classification.Seurat != 'Negative'
-  merged$HasMultiSeqCall <- !is.na(merged$HTO_classification.MultiSeq) & merged$HTO_classification.MultiSeq != 'Negative'
+  merged$Concordant[!merged$Concordant & (merged$HTO_classification.MultiSeq == 'Negative' | merged$HTO_classification.Seurat == 'Negative')] <- TRUE
 
-  merged$Seurat <- merged$HTO_classification.Seurat != 'Negative'
-  merged$MultiSeq <- merged$HTO_classification.MultiSeq != 'Negative'
+  merged$GlobalConcordant <- as.character(merged$HTO_classification.global.MultiSeq) == as.character(merged$HTO_classification.global.Seurat)
+  merged$GlobalConcordant[!merged$GlobalConcordant & (merged$HTO_classification.global.MultiSeq == 'Negative' | merged$HTO_classification.global.Seurat == 'Negative')] <- TRUE
 
   print(paste0('Total concordant: ', nrow(merged[merged$Concordant])))
-  print(paste0('Total discordant: ', nrow(merged[!merged$Concordant])))
-  print(paste0('Total discordant, ignoring negatives: ', nrow(merged[!merged$ConcordantNoNeg])))
-  print(paste0('Total discordant global calls: ', nrow(merged[!merged$GlobalConcordant])))
-  print(paste0('Total discordant, global calls ignoring negatives: ', nrow(merged[!merged$GlobalConcordantNoNeg])))
+  print(paste0('Total discordant (HTO call): ', nrow(merged[!merged$Concordant])))
+  print(paste0('Total discordant (HTO classification): ', nrow(merged[!merged$GlobalConcordant])))
+
+  tbl <- data.frame(table(Concordant = merged$Concordant))
+
+  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
+  colorValues <- getPalette(length(names(tbl)))
+
+  print(ggplot(tbl, aes(x="", y=Freq, fill=Concordant)) +
+    geom_bar(width = 1, stat = "identity", color = "black") +
+		coord_polar("y", start=0) +
+    scale_fill_manual(values = colorValues) +
+		theme_minimal() +
+		theme(
+			axis.text.x=element_blank(),
+			axis.title = element_blank(),
+			axis.ticks = element_blank(),
+			panel.grid  = element_blank()
+		) +
+    ggtitle('Seurat/MultiSeq Concordance')
+	)
 
   discord <- merged[!merged$GlobalConcordant]
   discord <- discord %>% group_by(HTO_classification.global.MultiSeq, HTO_classification.global.Seurat) %>% summarise(Count = dplyr::n())
@@ -742,29 +759,22 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           ggtitle('Discordance By HTO Call') + ylab('Seurat') + xlab('MULTI-seq')
   )
 
-  discord <- merged[!merged$ConcordantNoNeg]
-  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
-
-  print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
-          theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-          scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
-          ggtitle('Discordance By HTO Call, Ignoring Negatives') + ylab('Seurat') + xlab('MULTI-seq')
-  )
-  ret <- merged[merged$ConcordantNoNeg,]
-
   # These calls should be identical, except for possibly negatives from one method that are non-negative in the other
   # For the time being, accept those as correct.
-  ret$FinalCall <- as.character(ret$HTO_classification.MultiSeq)
-  ret$FinalCall[ret$HTO_classification.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.Seurat[ret$HTO_classification.MultiSeq == 'Negative'])
-  ret$FinalCall <- naturalsort::naturalfactor(ret$FinalCall)
+  merged$FinalCall <- as.character(merged$HTO_classification.MultiSeq)
+  merged$FinalCall[merged$HTO_classification.MultiSeq == 'Negative'] <- as.character(merged$HTO_classification.Seurat[merged$HTO_classification.MultiSeq == 'Negative'])
+  merged$FinalCall[!merged$Concordant] <- 'Discordant'
+  merged$FinalCall <- naturalsort::naturalfactor(merged$FinalCall)
 
-  ret$FinalClassification <- as.character(ret$HTO_classification.global.MultiSeq)
-  ret$FinalClassification[ret$HTO_classification.global.MultiSeq == 'Negative'] <- as.character(ret$HTO_classification.global.Seurat[ret$HTO_classification.global.MultiSeq == 'Negative'])
-  ret$FinalClassification <- as.factor(ret$FinalClassification)
+  merged$FinalClassification <- as.character(merged$HTO_classification.global.MultiSeq)
+  merged$FinalClassification[merged$HTO_classification.global.MultiSeq == 'Negative'] <- as.character(merged$HTO_classification.global.Seurat[merged$HTO_classification.global.MultiSeq == 'Negative'])
+  merged$FinalClassification[!merged$GlobalConcordant] <- 'Discordant'
+  merged$FinalClassification[]
+  merged$FinalClassification <- as.factor(merged$FinalClassification)
 
   df <- data.frame(
-    TotalSinglet = c(sum(merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(ret$FinalClassification == 'Singlet')),
-    ConcordantSinglet = c(sum(merged$ConcordantNoNeg & merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$ConcordantNoNeg & merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(ret$FinalClassification == 'Singlet'))
+    TotalSinglet = c(sum(merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(merged$FinalClassification == 'Singlet')),
+    ConcordantSinglet = c(sum(merged$Concordant & merged$HTO_classification.global.Seurat == 'Singlet'), sum(merged$Concordant & merged$HTO_classification.global.MultiSeq == 'Singlet'), sum(merged$FinalClassification == 'Singlet'))
   )
   rownames(df) <- c('Seurat', 'MultiSeq', 'Final')
   df <- t(df)
@@ -774,8 +784,8 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
   }
 
-  if (nrow(ret) > 0){
-    dt <- data.table(CellBarcode = ret$Barcode, HTO = ret$FinalCall, HTO_Classification = ret$FinalClassification, key = 'CellBarcode', Seurat = ret$HasSeuratCall, MultiSeq = ret$HasMultiSeqCall)
+  if (nrow(merged) > 0){
+    dt <- data.frame(CellBarcode = merged$Barcode, HTO = merged$FinalCall, HTO_Classification = merged$FinalClassification, key = 'CellBarcode', Seurat = merged$HasSeuratCall, MultiSeq = merged$HasMultiSeqCall)
     dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
@@ -799,7 +809,6 @@ utils::globalVariables(
 #' @importFrom naturalsort naturalfactor
 #' @importFrom knitr kable
 #' @importFrom data.table melt
-#' @importFrom naturalsort naturalfactor
 #' @param The data table with calls
 #' @param The barcode counts matrix
 #' @import ggplot2
@@ -850,16 +859,56 @@ PrintFinalSummary <- function(dt, barcodeData){
           theme(axis.text.x = element_text(angle = 90, hjust = 1))
   )
 
-  print(kable(table(Classification = merged$HTO)))
+  tbl <- table(HTO = merged$HTO)
+  df <- data.frame(tbl)
+  df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
+  print(kable(df))
 
-  print(ggplot(merged, aes(x = HTO_Classification)) +
+  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
+  colorValues <- getPalette(length(names(tbl)))
+
+  print(ggplot(df, aes(x = '', y=Freq, fill=HTO)) +
+    geom_bar(width = 1, stat = "identity", color = "black") +
+    coord_polar("y", start=0) +
+    scale_fill_manual(values = colorValues) +
+    theme_minimal() +
+    theme(
+      axis.text.x=element_blank(),
+      axis.title = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid  = element_blank()
+    ) +
+    ggtitle('HTO')
+  )
+
+  print(ggplot(merged, aes(x = HTO)) +
           geom_bar(stat = 'count') +
-          xlab('Classification') +
+          xlab('HTO') +
           ylab('Count') +
           theme(axis.text.x = element_text(angle = 90, hjust = 1))
   )
 
-  print(kable(table(Classification = merged$HTO_Classification)))
+  tbl <- table(HTO_Classification = merged$HTO_Classification)
+  df <- data.frame(tbl)
+  df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
+  print(kable(df))
+
+  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
+  colorValues <- getPalette(length(names(tbl)))
+
+  print(ggplot(df, aes(x = '', y=Freq, fill=HTO_Classification)) +
+    geom_bar(width = 1, stat = "identity", color = "black") +
+    coord_polar("y", start=0) +
+    scale_fill_manual(values = colorValues) +
+    theme_minimal() +
+    theme(
+      axis.text.x=element_blank(),
+      axis.title = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid  = element_blank()
+    ) +
+    ggtitle('HTO Classification')
+  )
 
   print(ggplot(merged, aes(x = HTO_Classification, y = TotalCounts)) +
           geom_boxplot()  +
@@ -936,9 +985,16 @@ GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, ba
   df <- rbind(df, data.frame(Category = categoryName, MetricName = "TotalDoubletNotInInput", Value = totalDoubletNotInInput))
   df <- rbind(df, data.frame(Category = categoryName, MetricName = "FractionDoubletNotInInput", Value = (totalDoubletNotInInput / length(doubletCellBarcodes))))
 
+  #Discordant:
+  discordantCellBarcodes <- dt$CellBarcode[dt$HTO_Classification == 'Discordant']
+  discordantIntersect <- intersect(whitelist$CellBarcode, discordantCellBarcodes)
+  df <- rbind(df, data.frame(Category = categoryName, MetricName = "TotalDiscordant", Value = length(doubletCellBarcodes)))
+  df <- rbind(df, data.frame(Category = categoryName, MetricName = "FractionOfInputDiscordant", Value = (length(discordantIntersect) / length(whitelist$CellBarcode))))
+
+
   #By caller:
-  df <- rbind(df, data.frame(Category = categoryName, MetricName = "SeuratNonNegative", Value = sum(dt$Seurat)))
-  df <- rbind(df, data.frame(Category = categoryName, MetricName = "MultiSeqNonNegative", Value = sum(dt$MultiSeq)))
+  df <- rbind(df, data.frame(Category = categoryName, MetricName = "SeuratNonNegative", Value = sum(dt$HasSeuratCall & dt$HTO_Classification != 'Discordant')))
+  df <- rbind(df, data.frame(Category = categoryName, MetricName = "MultiSeqNonNegative", Value = sum(dt$HasMultiSeqCall & dt$HTO_Classification != 'Discordant')))
 
   df$Value[is.na(df$Value)] <- 0
 
