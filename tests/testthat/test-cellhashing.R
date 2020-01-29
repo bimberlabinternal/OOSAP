@@ -5,8 +5,8 @@ tests <- list(
         input = '../testdata/cellHashing/282-1-HTO_cellHashingRawCounts.txt',
         htos = c(2:3, 8, 10, 12),
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
-        CalledCells = 7234,
-        Singlet = 5072,
+        CalledCells = 6953,
+        Singlet = 4791,
         MultiSeq = 4790,
         Seurat = 4289,
         TotalRows = 8000,
@@ -15,8 +15,8 @@ tests <- list(
     '283' = list(
         input = '../testdata/cellHashing/283-cellbarcodeToHTO.calls.citeSeqCounts.txt', htos = c(2:6),
         gexBarcodeFile = '../testdata/cellHashing/283-validCellIndexes.csv',
-        CalledCells = 5188,
-        Singlet = 4107,
+        CalledCells = 4970,
+        Singlet = 3889,
         MultiSeq = 4576,
         Seurat = 3581,
         TotalRows = 6027,
@@ -100,7 +100,7 @@ test_that("Cell hashing works", {
 
         if (!is.null(summaryFile)) {
             d <- read.table(summaryFile, header = T, sep = '\t')
-            expect_equal(19, nrow(d))
+            expect_equal(21, nrow(d))
             unlink(summaryFile)
         }
     }
