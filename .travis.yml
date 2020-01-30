@@ -17,7 +17,7 @@ os:
 # Note: previously this required numba 0.42, but seems to have been fixed: https://github.com/lmcinnes/umap/issues/209
 # Note: 0.48 is failing, probably due to a problem in their build: "File "/tmp/pip-build-ju5e2h89/numba/setup.py", line 305 build_requires = [f'numpy >={min_numpy_build_version}']"
 before_install:
-  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 --version && pthyon --version && python3 -m pip --version && python3 -m pip install --upgrade pip && python3 -m pip --version && python3 -m pip install --user wheel setuptools && python3 -m pip install --user umap-learn
+  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 --version && python --version && python3 -m pip --version && python3 -m pip install --upgrade pip && python3 -m pip --version && python3 -m pip install --user wheel setuptools && python3 -m pip install --user umap-learn
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
