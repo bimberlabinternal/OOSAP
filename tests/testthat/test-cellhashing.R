@@ -7,9 +7,9 @@ tests <- list(
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
         CalledCells = 6953,
         Singlet = 4791,
-        MultiSeq = 3743,
-        Seurat = 3242,
-        CallRows = 6953,
+        MultiSeq = 4790,
+        Seurat = 4289,
+        TotalRows = 8000,
         DoRowFilter = T
     ),
     '283' = list(
@@ -17,9 +17,9 @@ tests <- list(
         gexBarcodeFile = '../testdata/cellHashing/283-validCellIndexes.csv',
         CalledCells = 4970,
         Singlet = 3889,
-        MultiSeq = 3519,
-        Seurat = 2524,
-        CallRows = 4970,
+        MultiSeq = 4576,
+        Seurat = 3581,
+        TotalRows = 6027,
         DoRowFilter = T
     )
     # 'NewFormat' = list(
@@ -30,7 +30,7 @@ tests <- list(
     #     Singlet = 2697,
     #     MultiSeq = 853,
     #     Seurat = 2900,
-    #     CallRows = 100,
+    #     TotalRows = 100,
     #     DoRowFilter = F
     # )
 )
@@ -89,18 +89,18 @@ test_that("Cell hashing works", {
 
         dt <- l$dt
 
-        expect_equal(test[['CalledCells']], nrow(dt))
-        expect_equal(test[['Singlet']], nrow(dt[dt$HTO_Classification == 'Singlet',]))
+        expect_equal(test[['CalledCells']], sum(dt$HTO_Classification != 'Discordant'))
+        expect_equal(test[['Singlet']], sum(dt$HTO_Classification == 'Singlet'))
         expect_equal(test[['Seurat']], sum(dt$Seurat))
         expect_equal(test[['MultiSeq']], sum(dt$MultiSeq))
 
         d <- read.table(callsFile, header = T, sep = '\t')
-        expect_equal(test[['CallRows']], nrow(d))
+        expect_equal(test[['TotalRows']], nrow(d))
         unlink(callsFile)
 
         if (!is.null(summaryFile)) {
             d <- read.table(summaryFile, header = T, sep = '\t')
-            expect_equal(19, nrow(d))
+            expect_equal(21, nrow(d))
             unlink(summaryFile)
         }
     }
