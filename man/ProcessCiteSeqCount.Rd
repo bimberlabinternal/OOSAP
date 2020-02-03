@@ -4,17 +4,19 @@
 \alias{ProcessCiteSeqCount}
 \title{ProcessCiteSeqCount}
 \usage{
-ProcessCiteSeqCount(bFile = NA, doRowFilter = T)
+ProcessCiteSeqCount(bFile = NA, doRowFilter = T, doColumnFilter = T)
 }
 \arguments{
-\item{bFile, }{A}
+\item{bFile, }{The input barcode file}
 
-\item{doRowFilter, }{A}
+\item{doRowFilter, }{If true, row-level (HTO) filtering will be performed}
+
+\item{doColumnFilter, }{If true column-level (cell) filtering will be performed}
 }
 \value{
-A
+
 }
 \description{
-A description
+The primary entrypoint for demultiplexing HTO data
 }
 \keyword{CITE-Seq,}

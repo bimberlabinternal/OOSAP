@@ -7,15 +7,15 @@
 
 #' @title ProcessCiteSeqCount
 #'
-#' @description A description
-#' @param bFile, A
-#' @param doRowFilter, A
-#' @return A
+#' @description The primary entrypoint for demultiplexing HTO data
+#' @param bFile, The input barcode file
+#' @param doRowFilter, If true, row-level (HTO) filtering will be performed
+#' @param doColumnFilter, If true column-level (cell) filtering will be performed
+#' @return
 #' @keywords CITE-Seq,
 #' @export
 #' @importFrom knitr kable
-#' @importFrom knitr kable
-ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
+ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, doColumnFilter = T) {
   if (is.na(bFile)){
     stop("No file set: change bFile")
   }
@@ -36,13 +36,21 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T) {
   }
 
   print(paste0('Initial barcodes in HTO data: ', ncol(bData)))
-  bData <- DoCellFiltering(bData)
+  if (doColumnFilter) {
+  	bData <- DoCellFiltering(bData)
+  } else {
+    print('Column filtering will not be performed')
+  }
 
   if (doRowFilter) {
     bData <- DoRowFiltering(bData)
 
     # repeat colsum filter.  because we potentially dropped rows, some cells might now drop out
-    bData <- DoCellFiltering(bData)
+    if (doColumnFilter) {
+    	bData <- DoCellFiltering(bData)
+    } else {
+      print('Column filtering will not be performed')
+    }
   } else {
     print('Row filtering will not be performed')
 
@@ -410,7 +418,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   }
 
   #Hack until we figure this out upstream
-  #TODO: Find discordant duplicates add as second col or convert to dublets or some 99 err
+  #TODO: Find discordant duplicates add as second col or convert to doublets or some error
   barcodeCallTable <- unique(barcodeCallTable)
 
 

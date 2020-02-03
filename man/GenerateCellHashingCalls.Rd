@@ -7,7 +7,7 @@
 GenerateCellHashingCalls(
   barcodeData,
   positive.quantile = 0.99,
-  attemptRecovery = TRUE,
+  attemptRecovery = FALSE,
   useSeurat = TRUE,
   useMultiSeq = TRUE,
   outFile = "combinedHtoCalls.txt",
