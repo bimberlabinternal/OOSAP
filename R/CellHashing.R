@@ -10,18 +10,22 @@
 #' @description The primary entrypoint for demultiplexing HTO data
 #' @param bFile, The input barcode file
 #' @param doRowFilter, If true, row-level (HTO) filtering will be performed
-#' @param doColumnFilter, If true column-level (cell) filtering will be performed
+#' @param maxValueForColSumFilter, When column/cell filtering is performed, cell with low reads are dropped.  If this is provided, any column with at least this many reads will be retained.  Otherwise the threshold is determined automaticaly.  If NA, defaults to 5
 #' @return
 #' @keywords CITE-Seq,
 #' @export
 #' @importFrom knitr kable
-ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, doColumnFilter = T) {
+ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, maxValueForColSumFilter = 5) {
   if (is.na(bFile)){
     stop("No file set: change bFile")
   }
 
   if (!file.exists(bFile)){
     stop(paste0("File does not exist: ", bFile))
+  }
+
+  if (is.na(maxValueForColSumFilter)) {
+    maxValueForColSumFilter <- 5
   }
 
   if (dir.exists(bFile)) {
@@ -36,21 +40,13 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, doColumnFilter = T) {
   }
 
   print(paste0('Initial barcodes in HTO data: ', ncol(bData)))
-  if (doColumnFilter) {
-  	bData <- DoCellFiltering(bData)
-  } else {
-    print('Column filtering will not be performed')
-  }
+  bData <- DoCellFiltering(bData, maxValueForColSumFilter = maxValueForColSumFilter)
 
   if (doRowFilter) {
     bData <- DoRowFiltering(bData)
 
     # repeat colsum filter.  because we potentially dropped rows, some cells might now drop out
-    if (doColumnFilter) {
-    	bData <- DoCellFiltering(bData)
-    } else {
-      print('Column filtering will not be performed')
-    }
+    bData <- DoCellFiltering(bData, maxValueForColSumFilter = maxValueForColSumFilter)
   } else {
     print('Row filtering will not be performed')
 

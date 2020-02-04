@@ -4,14 +4,14 @@
 \alias{ProcessCiteSeqCount}
 \title{ProcessCiteSeqCount}
 \usage{
-ProcessCiteSeqCount(bFile = NA, doRowFilter = T, doColumnFilter = T)
+ProcessCiteSeqCount(bFile = NA, doRowFilter = T, maxValueForColSumFilter = 5)
 }
 \arguments{
 \item{bFile, }{The input barcode file}
 
 \item{doRowFilter, }{If true, row-level (HTO) filtering will be performed}
 
-\item{doColumnFilter, }{If true column-level (cell) filtering will be performed}
+\item{maxValueForColSumFilter, }{When column/cell filtering is performed, cell with low reads are dropped.  If this is provided, any column with at least this many reads will be retained.  Otherwise the threshold is determined automaticaly.  If NA, defaults to 5}
 }
 \value{
 
