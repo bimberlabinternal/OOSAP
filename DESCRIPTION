@@ -67,6 +67,7 @@ Collate:
     'Classification_Sim.R'
     'DataQueries.R'
     'GSEA_Seurat.R'
+    'GeneAliasing.R'
     'GeneNames.R'
     'Monocle_III.R'
     'PhenotypingGeneSets.R'
