@@ -272,7 +272,7 @@ aliasSTRINGdb <- function(ensemblIds = NULL, geneSymbols = NULL,
 #' @param geneSymbols A vector of gene symbols, passed to the getBM() filters argument
 #' @param email email account registered with DAVIDWebService 
 #' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
-#' @import RDAVIDWebService 
+#' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
@@ -344,7 +344,7 @@ aliasDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email,
 #' @param aliasPriorityOrder vector containig priority order of alias database. Must be UPPERCASE. Current databases: ENSEMBL, STRING, DAVID
 #' @importFrom biomaRt useEnsembl getBM
 #' @import STRINGdb
-#' @import RDAVIDWebService 
+#' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match

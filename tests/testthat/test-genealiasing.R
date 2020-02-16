@@ -1,4 +1,6 @@
-test1a = 
+context("scRNAseq")
+
+test1a =
   c("ENSMMUG00000000016",
      "ENSMMUG00000015664",
      "ENSMMUG00000010387",
@@ -96,26 +98,33 @@ expect_test3a_david =
 
 
 
-#######################################################################################################################
-testEnsembl <- aliasENSEMBL(ensemblIds = test1a, 
-                            geneSymbols = NULL,
-                            attributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'),
-                            replaceUnmatched = F)
-expect_equal(as.character(testEnsembl$Coalesced.ENSEMBL), expect_test1a_ensembl)
 
-testString <- aliasSTRINGdb(ensemblIds = NULL, 
-                            geneSymbols = test2a, 
-                            speciesId = 9606)
-expect_equal(as.character(testString$Coalesced.STRING), expect_test2a_string)
 
-email = "onwuzu@ohsu.edu"
-testDavid <- aliasDAVID(ensemblIds = test3a, 
-                        geneSymbols = NULL, 
-                        email = email)
-expect_equal(as.character(testDavid$Coalesced.DAVID), expect_test3a_david)
-expect_length(as.character(testDavid$Coalesced.DAVID), length(expect_test3a_david))
+test_that("Gene aliasing code works as expected", {
+  testEnsembl <- aliasENSEMBL(ensemblIds = test1a,
+                              geneSymbols = NULL,
+                              attributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'),
+                              replaceUnmatched = F)
 
-davidEmail = "onwuzu@ohsu.edu"
-testAliasTable <- aliasTable(geneSymbols = test2b, ensemblIds = test2a, davidEmail = davidEmail)
-expect_length(as.character(testAliasTable$Consensus), length(expect_test2b))
+  expect_equal(as.character(testEnsembl$Coalesced.ENSEMBL), expect_test1a_ensembl)
 
+  testString <- aliasSTRINGdb(ensemblIds = NULL,
+                              geneSymbols = test2a,
+                              speciesId = 9606)
+  expect_equal(as.character(testString$Coalesced.STRING), expect_test2a_string)
+
+  davidEmail <- Sys.getenv('DAVID_EMAIL')
+  if (is.na(davidEmail) || davidEmail == '') {
+    stop('DAVID_EMAIL environment variable must be set!')
+  }
+
+  testDavid <- aliasDAVID(ensemblIds = test3a,
+                          geneSymbols = NULL,
+                          email = davidEmail)
+  expect_equal(as.character(testDavid$Coalesced.DAVID), expect_test3a_david)
+  expect_length(as.character(testDavid$Coalesced.DAVID), length(expect_test3a_david))
+
+  testAliasTable <- aliasTable(geneSymbols = test2b, ensemblIds = test2a, davidEmail = davidEmail)
+  expect_length(as.character(testAliasTable$Consensus), length(expect_test2b))
+
+})
