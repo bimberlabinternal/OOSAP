@@ -44,7 +44,11 @@ Imports:
     DESeq2,
     MAST,
     kernlab,
-    Biostrings
+    Biostrings,
+    BiocGenerics,
+    RDAVIDWebService,
+    STRINGdb,
+    stringr
 Suggests:
     ggvis,
     devtools,
