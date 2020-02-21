@@ -36,6 +36,7 @@ jobs:
         # See: https://github.com/r-lib/testthat/issues/515
         - # consider adding --as-cran
         - R CMD check --no-tests *tar.gz
+        - echo "DAVID_EMAIL value: "$DAVID_EMAIL
         - Rscript -e 'res=devtools::test(reporter="summary");df=as.data.frame(res);if(sum(df$failed) > 0 || any(df$error)) {q(status=1)}'
       after_script:
         - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out; else echo '00install.log not found'; fi

@@ -157,7 +157,7 @@ DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
 #' @importFrom cowplot plot_grid
 Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
   plots <- list(
-    ggplot(melt(table(seuratObject$SingleR_Labels)), aes(x=Var1, y = value, fill=Var1))  +
+    ggplot(reshape2::melt(table(seuratObject$SingleR_Labels)), aes(x=Var1, y = value, fill=Var1))  +
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
@@ -168,7 +168,7 @@ Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
       ggtitle("SingleR Predicted Classification:") +
       ylab("Number of cells"),
 
-    ggplot(melt(table(seuratObject$SingleR_Labels_Fine)), aes(x=Var1, y = value, fill=Var1))  +
+    ggplot(reshape2::melt(table(seuratObject$SingleR_Labels_Fine)), aes(x=Var1, y = value, fill=Var1))  +
       geom_bar(stat="identity", position="dodge", width = 0.7) + 
       # scale_fill_manual(values=col_vector) +
       theme_bw() + 
