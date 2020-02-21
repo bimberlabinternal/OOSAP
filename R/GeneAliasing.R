@@ -1,204 +1,198 @@
-####################################################################################################################
-mapENSEMBL <- function(inputIds, biomart, dataset, version, mirror, attributes, filters){
-  ensembl <- useEnsembl(biomart = biomart, 
-                        dataset = dataset, 
-                        version = version, 
-                        mirror = mirror)
-  ensemblResults <- getBM(attributes = attributes,
-                          filters = filters, 
-                          values = inputIds, 
-                          mart = ensembl)
-  return(ensemblResults)
-}
 
-####################################################################################################################
-mapSTRINGdb <- function(inputIds, speciesId, score_threshold = 0, version = "10"){
-  string_db <- STRINGdb$new(version = version, 
+# Perform the actual query against STRINGdb
+.QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "10"){
+	print('Querying STRINGdb')
+  string_db <- STRINGdb::STRINGdb$new(version = stringDBVersion,
                             species = speciesId, 
                             score_threshold = score_threshold, 
                             input_directory = "")
   
   ## map inputIds to stringID mapIds
-  inputIds.df <- data.frame(InputIds = as.character(inputIds))
-  inputIds.map <- string_db$map(my_data_frame = inputIds.df, 
-                                my_data_frame_id_col_names = "InputIds", 
+  inputIds.map <- string_db$map(my_data_frame = data.frame(InputTerm = as.character(inputIds)),
+                                my_data_frame_id_col_names = "InputTerm",
                                 takeFirst = T, 
                                 removeUnmappedRows = FALSE)
-  
-  ## get all species aliases
+	## get all species aliases
   stringdb.alias <- string_db$get_aliases()
-  stringdb.alias <- stringdb.alias %>% 
+  stringdb.alias <- stringdb.alias %>%
     group_by(STRING_id) %>% 
-    summarize(STRING.aliases = paste0(alias, collapse = ','))
-  
-  ## megre alias table with mapped inputIds to get inputIds' aliases
-  stringdbResults <- merge(stringdb.alias, inputIds.map, by = c("STRING_id"), all.x = F)
-  ## get 1st alias(gene name) from list of aliases 
-  stringdbResults$STRING.symbol <- sapply(strsplit(stringdbResults$STRING.aliases, ','), head, 1)
-  
-  return(stringdbResults)
+    summarize(STRING.aliases = toString(sort(unique(alias))))
+
+  stringdb.alias <- merge(inputIds.map, stringdb.alias, by = c("STRING_id"), all.x = F)
+
+	print(paste0('Found ', sum(!is.na(stringdb.alias$STRING_id)), ' of ', length(inputIds)))
+
+  return(stringdb.alias)
 }
 
-####################################################################################################################
-mapDAVID <- function(inputIds, email, idType, listType = "Gene", listName = "MyListName"){
-  david <- DAVIDWebService$new(email = email, 
-                               url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
+
+# Perform the actual query against DAVID
+.QueryDAVID <- function(inputIds, email, idType){
+	print(paste0('Querying DAVID by: ', idType))
+  david <- RDAVIDWebService::DAVIDWebService$new(email = email, url="https://david.ncifcrf.gov/webservice/services/DAVIDWebService.DAVIDWebServiceHttpSoap12Endpoint/")
   
-  david.addList <- addList(object = david, 
+  david.addList <- RDAVIDWebService::addList(object = david,
                            inputIds = inputIds, 
-                           listName = listName, 
+                           listName = 'MyListName',
                            idType = idType, 
-                           listType = listType)
-  
+                           listType = 'Gene')
+	print(paste0('Found ', (100*david.addList$inDavid), '% of ', length(inputIds)))
+
   davidReport <- david$getGeneListReport()
-  
-  davidResult.df <- data.frame(InputIds = as.character(davidReport$ID), DAVID.gene_name = as.character(davidReport$Name))
-  
-  davidResult.df$DAVID.symbol <- str_match(davidResult.df$DAVID.gene_name, '\\(.*?\\)$')
-  davidResult.df$DAVID.symbol <- lapply(strsplit(davidResult.df$DAVID.symbol, '[()]'), tail, n = 1L)
+  davidResult.df <- data.frame(InputIds = as.character(davidReport$ID), DAVID.GeneName = as.character(davidReport$Name), DAVID.Id = as.character(davidReport$ID), stringsAsFactors = FALSE)
+
+	# Extract gene symbol from name string (i.e. "microRNA 214(MIR214)")
+  davidResult.df$DAVID.Symbol <- stringr::str_match(davidResult.df$DAVID.GeneName, '\\(.*?\\)$')
+  davidResult.df$DAVID.Symbol <- sapply(davidResult.df$DAVID.Symbol, function(x){
+		return(unlist(strsplit(x, '[()]'))[2])
+	})
+
   return(davidResult.df)
 }
 
-####################################################################################################################
-inputOrder <- function(input, mergeWith, inputLen){
-  ##add newly translated genes to main gene table 
-  if (is.null(input)){
-    input.df <- data.frame(InputIds = NA, SortOrder = as.numeric(1:inputLen))
-  } else{
-    input.df <- data.frame(InputIds = as.character(input), SortOrder = as.numeric(1:inputLen))
-  }
-  
-  merged <- merge(input.df, mergeWith, by = c("InputIds"), all.x = T)
-  merged <- merged[order(merged$SortOrder),]
-  
-}
 
-####################################################################################################################
-coalesceAlias <- function(ensInput, symbInput, toCoalesce_x, toCoalesce_y, replaceUnmatched = FALSE){
-  ##to coalesce symbols outputted from ensemblId input and geneSymbols input
-  merged <- merge(ensInput, symbInput, by = c("SortOrder"))
-  
-  merged <- mutate_all(merged, as.character)
-  if (nrow(merged) > 0){
-    merged[merged == "" | merged == "NA"] <- NA
+# Basic argument checking
+.CheckGeneInputs <- function(ensemblIds, geneSymbols){
+  if (.IsEmpty(ensemblIds) && .IsEmpty(geneSymbols)) {
+    stop('Must provide either ensemblIds or geneSymbols')
   }
-  
-  if (replaceUnmatched == TRUE){
-    coalesced <- coalesce(merged[[toCoalesce_x]], merged[[toCoalesce_y]], merged[["InputIds.y"]], merged[["InputIds.x"]])
-  } else{
-    coalesced <- coalesce(merged[[toCoalesce_x]], merged[[toCoalesce_y]])
-  }
-  
-  coalesced <- data.frame(SortOrder = as.character(merged[["SortOrder"]]), 
-                          InputIds.EnsemblId = as.character(merged[["InputIds.x"]]), 
-                          InputIds.GeneSymbol = as.character(merged[["InputIds.y"]]), 
-                          Coalesced = as.vector(coalesced))
-  
-  return(coalesced)
-}
-
-####################################################################################################################
-checkInputLen <- function(ensemblIds, geneSymbols){
-  lenEns <- length(ensemblIds)
-  lenSym <- length(geneSymbols)
-  
-  inputLen <- max(lenEns, lenSym)
-  
-  if (!lenEns == lenSym){
-    if (!is.null(ensemblIds) & !is.null(geneSymbols)){
-      stop("Unequal length of inputs. If ensemblIds and geneSymbol is non-null, both must be off equal length. ")
+  else if (!.IsEmpty(ensemblIds) & !.IsEmpty(geneSymbols)) {
+    if (length(ensemblIds) != length(geneSymbols)) {
+      stop('EnsemblIds and geneSymbol must be of equal length.')
     }
   }
-  return(inputLen)
 }
 
-####################################################################################################################
-#' @title aliasENSEMBL
-#' @param ensemblIds A vector of ensembl IDs, passed to the getBM() filters argument
-#' @param geneSymbols A vector of gene symbols, passed to the getBM() filters argument
-#' @param attributes A vector of ensembl attributes
+
+# Utility function to test if the input is NA or NULL
+.IsEmpty <- function(x) {
+	return(all(is.na(x)) || all(is.null(x)))  
+}
+
+
+#' @title TranslateToEnsembl
+#' @param ensemblIds A vector of ensembl IDs, passed to the biomaRt::getBM() to query against ensembl_gene_id
+#' @param geneSymbols A vector of gene symbols, passed to the biomaRt::getBM() to query against hgnc_symbol
 #' @param dataset Passed directly to biomaRt::useEnsembl
-#' @param version Passed directly to biomaRt::useEnsembl
-#' @param mirror Passed directly to biomaRt::useEnsembl
+#' @param ensemblVersion Passed directly to biomaRt::useEnsembl
+#' @param ensemblMirror Passed directly to biomaRt::useEnsembl
 #' @param biomart Passed directly to biomaRt::useEnsembl
-#' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
 #' @importFrom biomaRt useEnsembl getBM
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
 #' @export
+TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = "ensembl"){
+  .CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+  if (is.null(ensemblIds)) {
+    ensemblIds <- NA
+  }
 
-aliasENSEMBL <- function(ensemblIds = NULL, geneSymbols = NULL, 
-                         attributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'),  
-                         dataset = "mmulatta_gene_ensembl", version = NULL, mirror = "uswest", biomart = "ensembl", 
-                         replaceUnmatched = TRUE){
+  if (is.null(geneSymbols)) {
+    geneSymbols <- NA
+  }
   
-  #check ensemblIds, geneSymbols for NA/NULL.
-  # if both non-null, make sure they are the same length
-  inputLen <- checkInputLen(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+	combinedEnsembl <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
+	combinedEnsembl$Order <- 1:nrow(combinedEnsembl)
 
-  if (!is.null(ensemblIds)){
-    ensemblRes <- mapENSEMBL(inputIds = ensemblIds, 
-                             attributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'), 
-                             filters = c("ensembl_gene_id"), 
+	ensemblById <- NA
+	if (!.IsEmpty(ensemblIds)) {
+		ensemblById <- .QueryEnsembl(inputIds = ensemblIds,
+                             queryField = "ensembl_gene_id",
                              dataset = dataset, 
-                             version = version, 
-                             mirror = mirror, 
+                             ensemblVersion = ensemblVersion,
+														 ensemblMirror = ensemblMirror,
                              biomart = biomart)
-    colnames(ensemblRes)[colnames(ensemblRes) == "ensembl_gene_id"] <- "InputIds"
-    ensemblResEnsId <- inputOrder(input = ensemblIds, mergeWith = ensemblRes, inputLen = inputLen)
-  } else{
-    ##create empty dataframe of length(input)
-    ensemblResEnsId <- data.frame(InputIds = NA, 
-                                  SortOrder = as.numeric(1:length(geneSymbols)), 
-                                  hgnc_symbol = NA, 
-                                  external_gene_name = NA)
+
+		ensemblById$EnsemblId <- ensemblById$ensembl_gene_id
+		ensemblById <- merge(combinedEnsembl, ensemblById, by = 'EnsemblId', all.x = T)
+		ensemblById <- dplyr::arrange(ensemblById, Order)
   }
-  
-  if (!is.null(geneSymbols)){
-    ## better to use filters = c("hgnc_symbol") than 'external_gene_names'  
-    ##because of numerous ensemblIds matches with generic names like
-    ##5S_rRNA, Metazoa_SRP, Y_RNA, U1-6. 
-    ensemblRes <- mapENSEMBL(inputIds = geneSymbols, 
-                             attributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'), 
-                             filters = c("hgnc_symbol"), 
+
+	ensemblBySymbol1 <- NA
+	ensemblBySymbol2 <- NA
+  if (!.IsEmpty(geneSymbols)) {
+		ensemblBySymbol1 <- .QueryEnsembl(inputIds = geneSymbols,
+                             queryField = "external_gene_name",
                              dataset = dataset, 
-                             version = version, 
-                             mirror = mirror, 
+                             ensemblVersion = ensemblVersion,
+														 ensemblMirror = ensemblMirror,
                              biomart = biomart)
-    
-    colnames(ensemblRes)[colnames(ensemblRes) == "hgnc_symbol"] <- "InputIds"
-    ensemblResSymbId <- inputOrder(input = geneSymbols, mergeWith = ensemblRes, inputLen = inputLen)
-  } else{
-    ##create empty dataframe of length(input)
-    ensemblResSymbId <- data.frame(InputIds = NA, 
-                                   SortOrder = as.numeric(1:length(ensemblIds)), 
-                                   ensembl_gene_id = NA, 
-                                   external_gene_name = NA)
-  }
-  
-  #reconcile/consensus between ensembl Id and symbol
-  if (replaceUnmatched == T){
-    coalesceEnsembl <- coalesceAlias(ensInput = ensemblResEnsId, symbInput = ensemblResSymbId, 
-                                    toCoalesce_x = "external_gene_name.x", toCoalesce_y = "external_gene_name.y",
-                                    replaceUnmatched = TRUE)
-  } else{
-    coalesceEnsembl <- coalesceAlias(ensInput = ensemblResEnsId, symbInput = ensemblResSymbId, 
-                                    toCoalesce_x = "external_gene_name.x", toCoalesce_y = "external_gene_name.y")
-  }
-  
-  
-  colnames(coalesceEnsembl)[colnames(coalesceEnsembl) == "Coalesced"] <- "Coalesced.ENSEMBL"
-  #write.table(coalesceEnsembl, file = "ensemblCoalesce.csv", sep = ",", row.names = F)
-  
-  return(coalesceEnsembl)
+		ensemblBySymbol1$GeneSymbol <- ensemblBySymbol1$external_gene_name
+		ensemblBySymbol1 <- merge(combinedEnsembl, ensemblBySymbol1, by = 'GeneSymbol', all.x = T)
+		ensemblBySymbol1 <- dplyr::arrange(ensemblBySymbol1, Order)
+
+		ensemblBySymbol2 <- .QueryEnsembl(inputIds = geneSymbols,
+														queryField = "hgnc_symbol",
+														dataset = dataset,
+														ensemblVersion = ensemblVersion,
+														ensemblMirror = ensemblMirror,
+														biomart = biomart)
+		ensemblBySymbol2$GeneSymbol <- ensemblBySymbol2$hgnc_symbol
+		ensemblBySymbol2 <- merge(combinedEnsembl, ensemblBySymbol2, by = 'GeneSymbol', all.x = T)
+		ensemblBySymbol2 <- dplyr::arrange(ensemblBySymbol2, Order)
+	}
+
+	#Concat in preferential order, based on EnsemblId.  We can assume any resolved hit from Ensembl will have an Ensembl ID
+	ret <- data.frame(EnsemblId = combinedEnsembl$EnsemblId, GeneSymbol = combinedEnsembl$GeneSymbol, ensembl_gene_id = NA, hgnc_symbol = NA, external_gene_name = NA, Order = 1:nrow(combinedEnsembl), stringsAsFactors=FALSE)
+	ret <- .ConcatPreferentially(fieldToTest = 'ensembl_gene_id', datasets = list(ensemblById, ensemblBySymbol1, ensemblBySymbol2), baseDf = ret)
+	ret <- ret[names(ret) != 'Order']
+
+	return(ret)
 }
 
-####################################################################################################################
-#' @title aliasSTRINGdb
-#' @param ensemblIds A vector of ensembl IDs, passed to the getBM() filters argument
-#' @param geneSymbols A vector of gene symbols, passed to the getBM() filters argument
+.ConcatPreferentially <- function(fieldToTest, datasets, baseDf){
+	datasets <- datasets[!is.na(datasets)]
+	if (!('Order' %in% names(baseDf))) {
+		baseDf$Order <- 1:nrow(baseDf)
+	}
+
+	ret <- baseDf[FALSE, TRUE]  #zero rows
+
+	for (dataset in datasets) {
+		toAppend <- dataset[!is.na(dataset[[fieldToTest]]) & !(dataset[[fieldToTest]] %in% ret[[fieldToTest]]),]
+		ret <- rbind(ret, toAppend[names(ret)])
+	}
+
+	#now ensure all input terms represented, in order:
+	ret <- rbind(ret, baseDf[!(baseDf$Order %in% ret$Order),])
+	ret <- dplyr::arrange(ret, Order)
+
+  return(ret)
+}
+
+
+# Translate a list of gene IDs to Ensembl IDs, based on a target field
+.QueryEnsembl <- function(inputIds, queryField, biomart, dataset, ensemblVersion, ensemblMirror){
+	print(paste0('Querying Ensembl using: ', queryField))
+	ensembl <- biomaRt::useEnsembl(biomart = biomart,
+		dataset = dataset,
+		version = ensemblVersion,
+		mirror = ensemblMirror
+	)
+
+	ensemblResults <- biomaRt::getBM(
+		attributes = c('ensembl_gene_id', 'hgnc_symbol', 'external_gene_name'),
+		filters = c(queryField),
+		values = inputIds,
+		mart = ensembl
+	)
+
+	#Drop duplicates.  Note: could consider group_concat on variables?
+	ensemblResults <- ensemblResults %>% group_by_at(queryField) %>% mutate(total = dplyr::n())
+	ensemblResults <- ensemblResults[ensemblResults$total == 1,]
+	ensemblResults <- ensemblResults[names(ensemblResults) != 'total']
+
+	print(paste0('Found ', sum(!is.na(ensemblResults$ensembl_gene_id)), ' of ', length(inputIds)))
+	
+	return(ensemblResults)
+}
+
+  
+#' @title TranslateToStringDb
+#' @param ensemblIds A vector of ensembl IDs
+#' @param geneSymbols A vector of gene symbols
 #' @param speciesId Species ID. see Stringdb reference for list of avialable species
 #' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
 #' @import STRINGdb 
@@ -208,70 +202,51 @@ aliasENSEMBL <- function(ensemblIds = NULL, geneSymbols = NULL,
 #' @importFrom stats setNames
 #' @export
 
-aliasSTRINGdb <- function(ensemblIds = NULL, geneSymbols = NULL, 
-                          speciesId = 9606,  
-                          replaceUnmatched = TRUE){
-  #check ensemblIds, geneSymbols for NA/NULL.
-  # if both non-null, make sure they are the same length
-  inputLen <- checkInputLen(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-  
-  queryIds<- character()
-  if (!is.null(ensemblIds)){
-    queryIds <- c(queryIds, ensemblIds)
-    
-    # stringRes <- mapSTRINGdb(inputIds = geneSymbols, speciesId = speciesId, score_threshold = score_threshold)
-    # stringResSymbId <- inputOrder(input = geneSymbols, mergeWith = stringRes)
-  } else{
-    ##create empty dataframe of length(input)
-    stringResEnsId <- data.frame(InputIds = NA, 
-                                 SortOrder = as.numeric(1:length(geneSymbols)), 
-                                 STRING_id = NA, 
-                                 STRING.aliases = NA, 
-                                 STRING.symbol = NA)
+TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId = 9606){
+	.CheckGeneInputs(ensemblIds, geneSymbols)
+  if (is.null(ensemblIds)) {
+    ensemblIds <- NA
   }
   
-  if (!is.null(geneSymbols)){
+  if (is.null(geneSymbols)) {
+    geneSymbols <- NA
+  }
+  
+  queryIds <- character()
+	if (!.IsEmpty(ensemblIds)) {
+    queryIds <- c(queryIds, ensemblIds)
+  }
+
+	if (!.IsEmpty(geneSymbols)) {
     queryIds <- c(queryIds, geneSymbols)
-    # stringRes <- mapSTRINGdb(inputIds = geneSymbols, speciesId = speciesId, score_threshold = score_threshold)
-    # stringResSymbId <- inputOrder(input = geneSymbols, mergeWith = stringRes)
-  } else{
-    ##create empty dataframe of length(input)
-    stringResSymbId <- data.frame(InputIds = NA, 
-                                  SortOrder = as.numeric(1:length(ensemblIds)), 
-                                  STRING_id = NA, 
-                                  STRING.aliases = NA, 
-                                  STRING.symbol = NA)
   }
   
   queryIds <- unique(queryIds)
-  stringRes <- mapSTRINGdb(inputIds = queryIds, 
-                           speciesId = speciesId)
-  stringResEnsId <- inputOrder(input = ensemblIds, mergeWith = stringRes, inputLen = inputLen)
-  stringResSymbId <- inputOrder(input = geneSymbols, mergeWith = stringRes, inputLen = inputLen)
-  
+  stringRes <- .QuerySTRINGdb(inputIds = queryIds, speciesId = speciesId)
 
-  #reconcile/consensus between ensembl Id and symbol
-  if (replaceUnmatched == TRUE){
-    coalesceString <- coalesceAlias(ensInput = stringResEnsId, symbInput = stringResSymbId, 
-                                   toCoalesce_x = "STRING.symbol.x", toCoalesce_y = "STRING.symbol.y",
-                                   replaceUnmatched = TRUE)
-  } else{
-    coalesceString <- coalesceAlias(ensInput = stringResEnsId, symbInput = stringResSymbId, 
-                                   toCoalesce_x = "STRING.symbol.x", toCoalesce_y = "STRING.symbol.y")
-  }
-  
-  colnames(coalesceString)[colnames(coalesceString) == "Coalesced"] <- "Coalesced.STRINGDB"
-  #write.table(coalesceString, file = "stringCoalesce.csv", sep = ",", row.names = F)
-  
-  return(coalesceString)
+	#Preferentially accept results by EnsemblId
+	resultsBase <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
+	resultsBase$Order <- 1:nrow(resultsBase)
+
+	resultsById <- merge(resultsBase, stringRes, by.x = 'EnsemblId', all.x = T, by.y = 'InputTerm')
+	resultsById <- resultsById[!is.na(resultsById$STRING_id),]
+
+	resultsBySymbol <- merge(resultsBase, stringRes, by.x = 'GeneSymbol', all.x = T, by.y = 'InputTerm')
+	resultsBySymbol <- resultsBySymbol[!(resultsBySymbol$Order %in% resultsById$Order),]
+
+	results <- rbind(resultsById, resultsBySymbol)
+	results <- rbind(results, resultsBase[!(resultsBase$Order %in% results$Order),])
+	results <- dplyr::arrange(results, Order)
+	results <- results[names(results) != 'Order']
+
+	return(results)
 }
 
-####################################################################################################################
-#' @title aliasDAVID
-#' @param ensemblIds A vector of ensembl IDs, passed to the getBM() filters argument
-#' @param geneSymbols A vector of gene symbols, passed to the getBM() filters argument
+
+#' @title TranslateToDAVID
+#' @param ensemblIds A vector of ensembl IDs
+#' @param geneSymbols A vector of gene symbols
 #' @param email email account registered with DAVIDWebService 
-#' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
 #' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
 #' @importFrom dplyr %>% group_by summarize mutate_all coalesce
 #' @importFrom BiocGenerics order
@@ -279,68 +254,51 @@ aliasSTRINGdb <- function(ensemblIds = NULL, geneSymbols = NULL,
 #' @importFrom stats setNames
 #' @export
 
-aliasDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email, 
-                       replaceUnmatched = TRUE){
-  ##geneSymbols = NULL for now as idType = 'OFFICIAL_GENE_SYMBOL' is not available in RDAVIDWebService for now
-  
-  #check ensemblIds, geneSymbols for NA/NULL.
-  # if both non-null, make sure they are the same length
-  inputLen <- checkInputLen(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
-  
-  if (!is.null(ensemblIds)){
-    davidRes <- mapDAVID(inputIds = ensemblIds,
-                         email = email,
-                         idType = 'ENSEMBL_GENE_ID')
-    davidResEnsId <- inputOrder(input = ensemblIds, mergeWith = davidRes, inputLen = inputLen)
-  } else{
-    ##create empty dataframe of length(input)
-    davidResEnsId <- data.frame(InputIds = NA, 
-                                SortOrder = as.numeric(1:length(geneSymbols)), 
-                                DAVID.gene_name = NA, 
-                                DAVID.symbol = NA)
+TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
+	.CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
+  if (is.null(ensemblIds)) {
+    ensemblIds <- NA
   }
   
-  ##idType = 'OFFICIAL_GENE_SYMBOL' is not available in RDAVIDWebService for now
-  if (!is.null(geneSymbols)){
-    davidRes <- mapDAVID(inputIds = geneSymbols, 
-                         email = email,
-                         idType = 'ENSEMBL_GENE_ID')
-    davidResSymbId <- inputOrder(input = geneSymbols, mergeWith = davidRes, inputLen = inputLen)
-  } else{
-    ##create empty dataframe of length(input)
-    davidResSymbId <- data.frame(InputIds = NA, 
-                                 SortOrder = as.numeric(1:length(ensemblIds)), 
-                                 DAVID.gene_name = NA, 
-                                 DAVID.symbol = NA)
+  if (is.null(geneSymbols)) {
+    geneSymbols <- NA
   }
-  
-  #reconcile/consensus between ensembl Id and symbol
-  if (replaceUnmatched == TRUE){
-    coalesceDavid <- coalesceAlias(ensInput = davidResEnsId, symbInput = davidResSymbId, 
-                                   toCoalesce_x = "DAVID.symbol.x", toCoalesce_y = "DAVID.symbol.y",
-                                   replaceUnmatched = TRUE)
-  } else{
-    coalesceDavid <- coalesceAlias(ensInput = davidResEnsId, symbInput = davidResSymbId, 
-                                   toCoalesce_x = "DAVID.symbol.x", toCoalesce_y = "DAVID.symbol.y")
+
+	results <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
+	results$Order <- 1:nrow(results)
+
+	davidResById <- NA
+	if (!.IsEmpty(ensemblIds)) {
+    davidResById <- .QueryDAVID(inputIds = ensemblIds, email = email, idType = 'ENSEMBL_GENE_ID')
+		davidResById <- merge(results, davidResById, by.x = 'EnsemblId', all.x = F, by.y = 'InputIds')
   }
-  
-  colnames(coalesceDavid)[colnames(coalesceDavid) == "Coalesced"] <- "Coalesced.DAVID"
-  #write.table(coalesceDavid, file = "davidCoalesce.csv", sep = ",", row.names = F)
-  
-  return(coalesceDavid)
+
+	davidResBySymbol <- NA
+	if (!.IsEmpty(geneSymbols)) {
+		# OFFICIAL_GENE_SYMBOL is not available in RDAVIDWebService for now
+    #davidResBySymbol <- .QueryDAVID(inputIds = geneSymbols, email = email, idType = 'OFFICIAL_GENE_SYMBOL')
+		#davidResBySymbol <- merge(results, davidResById, by.x = 'GeneSymbol', all.x = F, by.y = 'InputIds')
+  }
+
+	ret <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, DAVID.Id = NA, DAVID.GeneName = NA, DAVID.Symbol = NA, stringsAsFactors=FALSE)
+	ret$Order <- 1:nrow(ret)
+	ret <- .ConcatPreferentially(fieldToTest = 'DAVID.Id', datasets = list(davidResById, davidResBySymbol), baseDf = ret)
+	ret <- ret[names(ret) != 'Order']
+
+  return(ret)
 }
 
-####################################################################################################################
+
 #' @title aliasTable
-#' @param ensemblIds A vector of ensembl IDs, passed to the getBM() filters argument
-#' @param geneSymbols A vector of gene symbols, passed to the getBM() filters argument
+#' @param ensemblIds A vector of ensembl IDs
+#' @param geneSymbols A vector of gene symbols
 #' @param ensemblAttributes A vector of ensembl attributes
 #' @param ensemblDataset Passed directly to biomaRt::useEnsembl
 #' @param ensemblVersion Passed directly to biomaRt::useEnsembl
 #' @param ensemblMirror Passed directly to biomaRt::useEnsembl
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @param davidEmail email account registered with DAVIDWebService 
-#' @param stringSpeciesId species ID. see Stringdb for list of avialable species
+#' @param stringSpeciesId species ID. see Stringdb for list of available species
 #' @param aliasPriorityOrder vector containig priority order of alias database. Must be UPPERCASE. Current databases: ENSEMBL, STRING, DAVID
 #' @importFrom biomaRt useEnsembl getBM
 #' @import STRINGdb
@@ -351,60 +309,69 @@ aliasDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email,
 #' @importFrom stats setNames
 #' @export
 
-aliasTable <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail,
-                       ensemblAttributes = c('hgnc_symbol', 'ensembl_gene_id', 'external_gene_name'), 
+TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail,
                        ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = 'ensembl', 
                        stringSpeciesId = 9606,
-                       aliasPriorityOrder = c("ENSEMBL", "STRING", "DAVID")){
-  
-  ret.ensembl <- aliasENSEMBL(ensemblIds = ensemblIds, 
+											 useEnsembl = TRUE, useSTRINGdb = TRUE, useDAVID = TRUE){
+
+	.CheckGeneInputs(ensemblIds, geneSymbols)
+	if (is.null(ensemblIds)) {
+		ensemblIds <- NA
+	}
+
+	if (is.null(geneSymbols)) {
+		geneSymbols <- NA
+	}
+
+	inputDf <- data.frame(EnsemblId = ensemblIds, GeneSymbol = geneSymbols, stringsAsFactors = FALSE)
+	inputDf$Order <- 1:nrow(inputDf)
+
+	if (useEnsembl) {
+	  ret.ensembl <- TranslateToEnsembl(ensemblIds = ensemblIds,
                               geneSymbols = geneSymbols, 
-                              dataset = ensemblDataset, 
-                              attributes = ensemblAttributes, 
-                              version = ensemblVersion, 
-                              mirror = ensemblMirror, 
-                              biomart = biomart, 
-                              replaceUnmatched = FALSE)
-  
-  ##Aadd aliasSTRINGdb to aliasTable after bioconductor update of STRING_db (when mmlulatta is available)
-  #https://bioc.ism.ac.jp/packages/3.1/bioc/vignettes/STRINGdb/inst/doc/STRINGdb.pdf
-  ret.string <- aliasSTRINGdb(ensemblIds = ensemblIds, 
+                              dataset = ensemblDataset,
+                              ensemblVersion = ensemblVersion,
+															ensemblMirror = ensemblMirror,
+                              biomart = biomart)
+
+		if (nrow(inputDf) != nrow(ret.ensembl)) {
+			stop('Rows not equal for ensembl result')
+		}
+
+		ret.ensembl$Order <- 1:nrow(ret.ensembl)
+		ret.ensembl <- ret.ensembl[!(names(ret.ensembl) %in% c('EnsemblId', 'GeneSymbol'))]
+		inputDf <- merge(inputDf, ret.ensembl, by = 'Order', all.x = TRUE)
+	}
+
+	if (useSTRINGdb) {
+  	ret.string <- TranslateToStringDb(ensemblIds = ensemblIds,
                               geneSymbols = geneSymbols,
-                              speciesId = stringSpeciesId, 
-                              replaceUnmatched = FALSE)
-  
-  ret.david <- aliasDAVID(ensemblIds = ensemblIds, 
-                          geneSymbols = geneSymbols,
-                          email = davidEmail, 
-                          replaceUnmatched = FALSE)
-  
-  
-  ##merge outputs of ensembl, string, david
-  merged <- merge(ret.ensembl, ret.string, by = c("SortOrder", "InputIds.EnsemblId", "InputIds.GeneSymbol"), all.x = T)
-  final <- merge(merged, ret.david, by = c("SortOrder", "InputIds.EnsemblId", "InputIds.GeneSymbol"), all.x = T)
-  final$SortOrder <- as.numeric(as.character(final$SortOrder))
-  final <- final[order(as.numeric(final[["SortOrder"]])),]
-  final <- final[ , !(names(final) %in% "SortOrder")]
-  
-  ##add consensus column
-  final <- mutate_all(final, as.character)
-  final[final == "" | final == "NA"] <- NA
-  
-  ##order according to preference for coalesce
-  ##TODO: add check for aliasPriorityOrder
-  consensus <- coalesce(final[[grep(aliasPriorityOrder[1], colnames(final))]],
-                        final[[grep(aliasPriorityOrder[2], colnames(final))]],
-                        final[[grep(aliasPriorityOrder[3], colnames(final))]],
-                        final[["InputIds.GeneSymbol"]], 
-                        final[["InputIds.EnsemblId"]])
-                        
-  final <- data.frame(final, Consensus = as.vector(consensus))
-  
-  ##TODO: fix unique alias list
-  # final$All_Aliases <- apply(final, 1, function(x)unique(x))
-  # final$All_Aliases <- paste(sapply(final$All_Aliases, paste, collapse=', '))
-  
-  return(final)
+                              speciesId = stringSpeciesId)
+
+		if (nrow(inputDf) != nrow(ret.string)) {
+			stop('Rows not equal for STRINGdb result')
+		}
+
+		ret.string$Order <- 1:nrow(ret.string)
+		ret.string <- ret.string[!(names(ret.string) %in% c('EnsemblId', 'GeneSymbol'))]
+		inputDf <- merge(inputDf, ret.string, by = 'Order', all.x = TRUE)
+	}
+
+	if (useDAVID) {
+  	ret.david <- TranslateToDAVID(ensemblIds = ensemblIds, geneSymbols = geneSymbols, email = davidEmail)
+		if (nrow(inputDf) != nrow(ret.david)) {
+			stop('Rows not equal for DAVID result')
+		}
+
+		ret.david$Order <- 1:nrow(ret.david)
+		ret.david <- ret.david[!(names(ret.david) %in% c('EnsemblId', 'GeneSymbol'))]
+		inputDf <- merge(inputDf, ret.david, by = 'Order', all.x = TRUE)
+	}
+
+	inputDf <- dplyr::arrange(inputDf, Order)
+	inputDf <- inputDf[names(inputDf) != 'Order']
+
+  return(inputDf)
 }
 
 
