@@ -36,7 +36,6 @@ Imports:
     org.Hs.eg.db,
     org.Mm.eg.db,
     fastAdaboost,
-    reticulate,
     caret,
     scater,
     SingleR,
@@ -48,7 +47,11 @@ Imports:
     BiocGenerics,
     RDAVIDWebService,
     STRINGdb,
-    stringr
+    stringr,
+    reshape2,
+    Rtsne,
+    scales,
+    SummarizedExperiment
 Suggests:
     ggvis,
     devtools,
@@ -58,7 +61,8 @@ Remotes:
     bioc::release/DropletUtils,
     bioc::release/DESeq2,
     bioc::release/MAST,
-    bioc::release/SingleR
+    bioc::release/SingleR,
+    bioc::release/SummarizedExperiment
 RoxygenNote: 7.0.2
 Collate: 
     'LabKeySettings.R'
