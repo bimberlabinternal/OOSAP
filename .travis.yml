@@ -47,3 +47,13 @@ addons:
       - r-cran-data.table
       - r-cran-kernlab
       - python3-pip
+
+deploy:
+  - provider: releases
+    api_key: ${GH_TOKEN}
+    file_glob: true
+    file:
+      - OOSAP_**.tar.gz
+    skip_cleanup: true
+    on:
+      tags: true
