@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/bimberlabinternal/OOSAP.svg?branch=Dev)](https://travis-ci.com/bimberlabinternal/OOSAP)
+[![DOI](https://zenodo.org/badge/187915110.svg)](https://zenodo.org/badge/latestdoi/187915110)
 
 # OOSAP
 
