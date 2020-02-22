@@ -4,7 +4,7 @@
 \alias{GenerateCellHashCallsMultiSeq}
 \title{A Title}
 \usage{
-GenerateCellHashCallsMultiSeq(barcodeData)
+GenerateCellHashCallsMultiSeq(barcodeData, method = "seurat")
 }
 \value{
 A modified Seurat object.

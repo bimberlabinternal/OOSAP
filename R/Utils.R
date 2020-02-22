@@ -340,3 +340,19 @@ find_peaks <- function (x, m = 4){
   pks
 }
 
+
+.InferPerplexityFromSeuratObj <- function(seuratObj, perplexity = 30) {
+  return(.InferPerplexity(ncol(seuratObj), perplexity))
+}
+
+
+.InferPerplexity <- function(sampleNumber, perplexity = 30) {
+  if (sampleNumber - 1 < 3 * perplexity) {
+    print(paste0('Perplexity is too large for the number of samples: ', sampleNumber))
+    perplexityNew <- floor((sampleNumber - 1) / 3)
+    print(paste0('lowering from ', perplexity, ' to: ', perplexityNew))
+    perplexity <- perplexityNew
+  }
+
+  return(perplexity)
+}

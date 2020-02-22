@@ -1,4 +1,5 @@
 #' @include LabKeySettings.R
+#' @include Utils.R
 #' @import Seurat
 #' @import Rlabkey
 
@@ -296,12 +297,30 @@ GenerateQcPlots <- function(barcodeData){
   #boxplot per HTO:
   barcodeMatrix <- as.matrix(barcodeData)
   melted <- setNames(reshape2::melt(barcodeMatrix), c('HTO', 'CellBarcode', 'Count'))
+  melted$HTO <- naturalsort::naturalfactor(melted$HTO)
   print(ggplot(melted, aes(x = HTO, y = Count)) +
           geom_boxplot() +
           xlab('HTO') +
           ylab('Count') +
           ggtitle('Counts By HTO') +
           theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  )
+
+  print(ggplot(melted, aes(x = Count, color = HTO)) +
+    geom_density() +
+    xlab('Count/Cell') +
+    ylab('Density') +
+    ggtitle('HTO Counts Per Cell') +
+    facet_grid(HTO ~ ., scales = 'free')
+  )
+
+  melted$LogCount <- log10(melted$Count + 0.5)
+  print(ggplot(melted, aes(x = LogCount, color = HTO)) +
+    geom_density() +
+    xlab('log10(Count)/Cell') +
+    ylab('Density') +
+    ggtitle('Log10 HTO Counts Per Cell') +
+    facet_grid(HTO ~ ., scales = 'free')
   )
 
   melted$Count <- melted$Count + 0.5
@@ -488,7 +507,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
   Idents(object = seuratObj, cells = names(x = init.clusters$clustering), drop = TRUE) <- init.clusters$clustering
 
   # Calculate tSNE embeddings with a distance matrix
-  perplexity <- .InferPerplexity(seuratObj, 100)
+  perplexity <- .InferPerplexityFromSeuratObj(seuratObj, 100)
   seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay, perplexity = perplexity)
   P <- DimPlot(seuratObj, reduction = 'hto_tsne', label = TRUE)
   P <- P + ggtitle('Clusters: clara')
@@ -549,11 +568,15 @@ DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTOD
 #' @description A description
 #' @return A modified Seurat object.
 #' @import data.table
-GenerateCellHashCallsMultiSeq <- function(barcodeData) {
+GenerateCellHashCallsMultiSeq <- function(barcodeData, method = 'seurat') {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
-    seuratObj <- DoMULTIseqDemux(seuratObj)
+    if (method == 'seurat') {
+      seuratObj <- DoMULTIseqDemux(seuratObj)
+    } else {
+      stop(pate0('Unknown method: ', method))
+    }
 
     return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$MULTI_ID, HTO_classification.global = seuratObj$MULTI_classification.global, key = c('Barcode')))
   }, error = function(e){
@@ -585,32 +608,33 @@ GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, atte
   return(dt)
 }
 
-#' @title A Title
+#' @title Perform HTO classification using Seurat's implementation of MULTI-seq classification
 #'
-#' @description A description
+#' @description Perform HTO classification using Seurat's implementation of MULTI-seq classification
 #' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantile = NULL, maxiter = 20, qrange = seq(from = 0.2, to = 0.95, by = 0.05)) {
-
   ## Normalize Data: Log2 Transform, mean-center
   counts <- GetAssayData(seuratObj, assay = assay, slot = 'counts')
-  log2Scaled <- as.data.frame(log2(counts))
-  for (i in 1:ncol(counts)) {
+  log2Scaled <- as.data.frame(log2(Matrix::t(counts)))
+  for (i in 1:ncol(log2Scaled)) {
     ind <- which(is.finite(log2Scaled[,i]) == FALSE)
     log2Scaled[ind,i] <- 0
     log2Scaled[,i] <- log2Scaled[,i]-mean(log2Scaled[,i])
   }
   seuratObjMS <- CreateSeuratObject(counts, assay = 'MultiSeq')
-  seuratObjMS[['MultiSeq']]@data <- as.matrix(log2Scaled)
+  seuratObjMS[['MultiSeq']]@data <- Matrix::t(as.matrix(log2Scaled))
 
   seuratObjMS <- MULTIseqDemux(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
 
-  seuratObj$MULTI_ID <- as.character(seuratObjMS$MULTI_ID)
-  seuratObj$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
-  seuratObj$MULTI_classification.global[!(seuratObjMS$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
-  seuratObj$MULTI_classification.global <- as.factor(seuratObj$MULTI_classification.global)
+  seuratObjMS$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
+  seuratObjMS$MULTI_classification.global[!(seuratObjMS$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
+  seuratObjMS$MULTI_classification.global <- as.factor(seuratObjMS$MULTI_classification.global)
 
-  HtoSummary(seuratObj, label = 'MULTI-SEQ', htoClassificationField = 'MULTI_ID', globalClassificationField = 'MULTI_classification.global')
+  HtoSummary(seuratObjMS, label = 'MULTI-SEQ', htoClassificationField = 'MULTI_ID', globalClassificationField = 'MULTI_classification.global', assay = 'MultiSeq')
+
+  seuratObj$MULTI_ID <- as.character(seuratObjMS$MULTI_ID)
+  seuratObj$MULTI_classification.global <- seuratObjMS$MULTI_classification.global
 
   return(seuratObj)
 }
@@ -635,7 +659,7 @@ HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationFi
   }
 
   if (doTSNE) {
-    perplexity <- .InferPerplexity(seuratObj, 100)
+    perplexity <- .InferPerplexityFromSeuratObj(seuratObj, 100)
     seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay, perplexity = perplexity)
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = TRUE) + ggtitle(label))
     print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = TRUE) + ggtitle(label))
@@ -761,6 +785,15 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
           scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
           ggtitle('Discordance By HTO Call') + ylab('Seurat') + xlab('MULTI-seq')
+  )
+
+  discord <- merged[!merged$HasSeuratCall | !merged$HasMultiSeqCall,]
+  discord <- discord[discord$HasSeuratCall | discord$HasMultiSeqCall,]
+  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
+  print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+    ggtitle('Calls Made By Single Caller') + ylab('Seurat') + xlab('MULTI-seq')
   )
 
   # These calls should be identical, except for possibly negatives from one method that are non-negative in the other
@@ -1023,7 +1056,7 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
     cellHashingId <- FindMatchedCellHashing(barcodePrefix)
     if (is.null(cellHashingId)){
       print(paste0('Cell hashing not used for prefix: ', barcodePrefix, ', skipping'))
-      next(seuratObject)
+      next
     } else if (is.na(cellHashingId)){
       stop(paste0('Unable to find cellHashing calls table file for prefix: ', barcodePrefix))
     }

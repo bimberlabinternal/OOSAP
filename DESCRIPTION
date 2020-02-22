@@ -57,9 +57,9 @@ Remotes:
     bioc::release/SingleR
 RoxygenNote: 7.0.2
 Collate: 
+    'Utils.R'
     'LabKeySettings.R'
     'CellHashing.R'
-    'Utils.R'
     'Classification_Caret.R'
     'Classification_Garnett.R'
     'Classification_MCE.R'
