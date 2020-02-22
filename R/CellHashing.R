@@ -605,12 +605,14 @@ DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantil
 
   seuratObjMS <- MULTIseqDemux(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
 
-  seuratObj$MULTI_ID <- as.character(seuratObjMS$MULTI_ID)
-  seuratObj$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
-  seuratObj$MULTI_classification.global[!(seuratObjMS$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
-  seuratObj$MULTI_classification.global <- as.factor(seuratObj$MULTI_classification.global)
+  seuratObjMS$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
+  seuratObjMS$MULTI_classification.global[!(seuratObjMS$MULTI_ID %in% c('Negative', 'Doublet'))] <- 'Singlet'
+  seuratObjMS$MULTI_classification.global <- as.factor(seuratObjMS$MULTI_classification.global)
 
-  HtoSummary(seuratObj, label = 'MULTI-SEQ', htoClassificationField = 'MULTI_ID', globalClassificationField = 'MULTI_classification.global')
+  HtoSummary(seuratObjMS, label = 'MULTI-SEQ', htoClassificationField = 'MULTI_ID', globalClassificationField = 'MULTI_classification.global', assay = 'MultiSeq')
+
+  seuratObj$MULTI_ID <- as.character(seuratObjMS$MULTI_ID)
+  seuratObj$MULTI_classification.global <- seuratObjMS$MULTI_classification.global
 
   return(seuratObj)
 }
@@ -763,7 +765,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           ggtitle('Discordance By HTO Call') + ylab('Seurat') + xlab('MULTI-seq')
   )
 
-  discord <- merged[!merged$HasSeuratCall | !merge$HasMultiSeqCall,]
+  discord <- merged[!merged$HasSeuratCall | !merged$HasMultiSeqCall,]
   discord <- discord[discord$HasSeuratCall | discord$HasMultiSeqCall,]
   discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
   print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
