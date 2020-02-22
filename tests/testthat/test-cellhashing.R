@@ -5,9 +5,10 @@ tests <- list(
         input = '../testdata/cellHashing/282-1-HTO_cellHashingRawCounts.txt',
         htos = c(2:3, 8, 10, 12),
         gexBarcodeFile = '../testdata/cellHashing/282-1-whitelist.txt',
-        CalledCells = 6953,
-        Singlet = 4791,
-        MultiSeq = 4790,
+        CalledCells = 6032,
+        Singlet = 4084,
+        MultiSeq = 5860,
+				Discordant = 0,
         Seurat = 4289,
         TotalRows = 8000,
         DoRowFilter = T
@@ -15,9 +16,10 @@ tests <- list(
     '283' = list(
         input = '../testdata/cellHashing/283-cellbarcodeToHTO.calls.citeSeqCounts.txt', htos = c(2:6),
         gexBarcodeFile = '../testdata/cellHashing/283-validCellIndexes.csv',
-        CalledCells = 4970,
-        Singlet = 3889,
-        MultiSeq = 4576,
+        CalledCells = 4733,
+        Singlet = 3363,
+        MultiSeq = 4786,
+    		Discordant = 0,
         Seurat = 3581,
         TotalRows = 6027,
         DoRowFilter = T
@@ -93,6 +95,7 @@ test_that("Cell hashing works", {
         expect_equal(test[['Singlet']], sum(dt$HTO_Classification == 'Singlet'))
         expect_equal(test[['Seurat']], sum(dt$Seurat))
         expect_equal(test[['MultiSeq']], sum(dt$MultiSeq))
+        expect_equal(test[['Discordant']], sum(dt$HTO_Classification == 'Discordant'))
 
         d <- read.table(callsFile, header = T, sep = '\t')
         expect_equal(test[['TotalRows']], nrow(d))

@@ -828,7 +828,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
-    perplexity <- .InferPerplexity(seuratObj)
+    perplexity <- .InferPerplexityFromSeuratObj(seuratObj)
     seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity)
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
@@ -1556,16 +1556,5 @@ PlotMarkerSet <- function(seuratObj, reduction, title, features) {
   }
 
   print(AddTitleToMultiPlot(FeaturePlot(seuratObj, features = featuresToPlot, reduction = reduction), title))
-}
-
-.InferPerplexity <- function(seuratObj, perplexity = 30) {
-  if (ncol(seuratObj) - 1 < 3 * perplexity) {
-    print(paste0('Perplexity is too large for the number of samples: ', ncol(seuratObj)))
-    perplexityNew <- floor((ncol(seuratObj) - 1) / 3)
-    print(paste0('lowering from ', perplexity, ' to: ', perplexityNew))
-    perplexity <- perplexityNew
-  }
-
-  return(perplexity)
 }
 

@@ -97,6 +97,7 @@ HTODemux2 <- function(
         idents = levels(x = Idents(object = object))[[minNonZero]]
       )]
 
+      doSkip <- FALSE
       tryCatch({
         fit <- suppressWarnings(fitdist(data = values.use, distr = "nbinom"))
         if (plotDist) {
@@ -108,8 +109,12 @@ HTODemux2 <- function(
         print(paste0('Error fitting nbinom, skipping: ', hto))
         print(e)
         saveRDS(values.use, file = paste0('./', hto, '.nbinom.data.rds'))
-        next
+        doSkip <- TRUE
       })
+
+      if (doSkip) {
+        next
+      }
     }
 
     discrete[hto, names(x = which(x = values > cutoff))] <- 1
