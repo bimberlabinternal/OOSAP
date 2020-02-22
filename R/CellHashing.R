@@ -591,17 +591,16 @@ GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, atte
 #' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantile = NULL, maxiter = 20, qrange = seq(from = 0.2, to = 0.95, by = 0.05)) {
-
   ## Normalize Data: Log2 Transform, mean-center
   counts <- GetAssayData(seuratObj, assay = assay, slot = 'counts')
-  log2Scaled <- as.data.frame(log2(counts))
+  log2Scaled <- as.data.frame(log2(t(counts)))
   for (i in 1:ncol(counts)) {
     ind <- which(is.finite(log2Scaled[,i]) == FALSE)
     log2Scaled[ind,i] <- 0
     log2Scaled[,i] <- log2Scaled[,i]-mean(log2Scaled[,i])
   }
   seuratObjMS <- CreateSeuratObject(counts, assay = 'MultiSeq')
-  seuratObjMS[['MultiSeq']]@data <- as.matrix(log2Scaled)
+  seuratObjMS[['MultiSeq']]@data <- t(as.matrix(log2Scaled))
 
   seuratObjMS <- MULTIseqDemux(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
 
