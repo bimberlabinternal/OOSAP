@@ -763,6 +763,15 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           ggtitle('Discordance By HTO Call') + ylab('Seurat') + xlab('MULTI-seq')
   )
 
+  discord <- merged[!merged$HasSeuratCall | !merge$HasMultiSeqCall,]
+  discord <- discord[discord$HasSeuratCall | discord$HasMultiSeqCall,]
+  discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
+  print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+    ggtitle('Calls Made By Single Caller') + ylab('Seurat') + xlab('MULTI-seq')
+  )
+
   # These calls should be identical, except for possibly negatives from one method that are non-negative in the other
   # For the time being, accept those as correct.
   merged$FinalCall <- as.character(merged$HTO_classification.MultiSeq)
