@@ -35,7 +35,7 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
     ret <- ret[order(ret$SortOrder),]
 
     ret$Label <- as.character(ret$ensembl_gene_id)
-    ret$Label[!is.na(ret$hsapiens_homolog_associated_gene_name)] <- paste0(ret$hsapiens_homolog_associated_gene_name[!is.na(ret$hsapiens_homolog_associated_gene_name)], '(HS)')
+    ret$Label[!is.na(ret$hsapiens_homolog_associated_gene_name)] <- paste0(ret$hsapiens_homolog_associated_gene_name[!is.na(ret$hsapiens_homolog_associated_gene_name)], '(hs)')
     ret$Label[!is.na(ret$external_gene_name)] <- ret$external_gene_name[!is.na(ret$external_gene_name)]
 
     return(ret)
