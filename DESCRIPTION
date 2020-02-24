@@ -44,7 +44,8 @@ Imports:
     DESeq2,
     MAST,
     kernlab,
-    Biostrings
+    Biostrings,
+    KernSmooth
 Suggests:
     ggvis,
     devtools,
