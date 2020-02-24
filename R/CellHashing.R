@@ -299,6 +299,9 @@ GenerateQcPlots <- function(barcodeData){
   melted <- setNames(reshape2::melt(barcodeMatrix), c('HTO', 'CellBarcode', 'Count'))
   melted$HTO <- naturalsort::naturalfactor(melted$HTO)
 
+  htoNames <- simplifyHtoNames(as.character(melted$HTO))
+  melted$HTO <- naturalfactor(as.character(htoNames))
+
   getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(unique(melted$HTO)))), "Set1"))
   colorValues <- getPalette(length(unique(melted$HTO)))
 
