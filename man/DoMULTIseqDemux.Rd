@@ -2,7 +2,7 @@
 % Please edit documentation in R/CellHashing.R
 \name{DoMULTIseqDemux}
 \alias{DoMULTIseqDemux}
-\title{A Title}
+\title{Perform HTO classification using Seurat's implementation of MULTI-seq classification}
 \usage{
 DoMULTIseqDemux(
   seuratObj,
@@ -20,5 +20,5 @@ DoMULTIseqDemux(
 A modified Seurat object.
 }
 \description{
-A description
+Perform HTO classification using Seurat's implementation of MULTI-seq classification
 }

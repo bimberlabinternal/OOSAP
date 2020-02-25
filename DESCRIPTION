@@ -1,7 +1,7 @@
 Package: OOSAP
 Type: Package
 Title: OHSU-ONPRC Single-cell Analysis Package
-Version: 0.1.0
+Version: 0.1.1
 Author: Bimber Lab
 Maintainer: The package maintainer <mahyarie@ohsu.edu>
 Description: The goal of this package is bringing together tools and pipelines for the analysis of single-cell RNASeq data.
@@ -44,6 +44,7 @@ Imports:
     MAST,
     kernlab,
     Biostrings,
+    KernSmooth,
     BiocGenerics,
     RDAVIDWebService,
     STRINGdb,
@@ -65,9 +66,9 @@ Remotes:
     bioc::release/SummarizedExperiment
 RoxygenNote: 7.0.2
 Collate: 
+    'Utils.R'
     'LabKeySettings.R'
     'CellHashing.R'
-    'Utils.R'
     'Classification_Caret.R'
     'Classification_Garnett.R'
     'Classification_MCE.R'
