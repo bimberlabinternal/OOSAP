@@ -36,7 +36,6 @@ Imports:
     org.Hs.eg.db,
     org.Mm.eg.db,
     fastAdaboost,
-    reticulate,
     caret,
     scater,
     SingleR,
@@ -45,7 +44,15 @@ Imports:
     MAST,
     kernlab,
     Biostrings,
-    KernSmooth
+    KernSmooth,
+    BiocGenerics,
+    RDAVIDWebService,
+    STRINGdb,
+    stringr,
+    reshape2,
+    Rtsne,
+    scales,
+    SummarizedExperiment
 Suggests:
     ggvis,
     devtools,
@@ -55,7 +62,8 @@ Remotes:
     bioc::release/DropletUtils,
     bioc::release/DESeq2,
     bioc::release/MAST,
-    bioc::release/SingleR
+    bioc::release/SingleR,
+    bioc::release/SummarizedExperiment
 RoxygenNote: 7.0.2
 Collate: 
     'Utils.R'
@@ -68,6 +76,7 @@ Collate:
     'Classification_Sim.R'
     'DataQueries.R'
     'GSEA_Seurat.R'
+    'GeneAliasing.R'
     'GeneNames.R'
     'Monocle_III.R'
     'PhenotypingGeneSets.R'

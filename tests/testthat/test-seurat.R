@@ -80,7 +80,7 @@ test_that("Serat SCTransform works as expected", {
   seuratObj <- readRDS('../testdata/seuratOutput.rds')
   seuratObjSCT <- OOSAP::CreateSeuratObj(seuratData = seuratObj@assays$RNA@counts, project = 'Set1')
 
-  seuratObjSCT <- ProcessSeurat1(seuratObjSCT, doCellCycle = F, useSCTransform = T)
+  seuratObjSCT <- suppressWarnings(ProcessSeurat1(seuratObjSCT, doCellCycle = F, useSCTransform = T))
 
   expect_equal(length(rownames(seuratObjSCT@assays$SCT@scale.data)), length(rownames(seuratObjSCT@assays$SCT@counts)))
   expect_equal(ncol(seuratObjSCT), ncol(seuratObj))
