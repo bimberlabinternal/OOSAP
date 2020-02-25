@@ -546,6 +546,7 @@ DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTOD
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
   DebugDemux(seuratObj)
+  PlotHtoCountData(seuratObj, label = 'Seurat HTO Demux')
 
   seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile, plotDist = plotDist)
   seuratObj$hash.ID <- naturalsort::naturalfactor(as.character(seuratObj$hash.ID))
@@ -618,6 +619,8 @@ DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantil
   seuratObjMS <- CreateSeuratObject(counts, assay = 'MultiSeq')
   seuratObjMS[['MultiSeq']]@data <- Matrix::t(as.matrix(log2Scaled))
 
+  PlotHtoCountData(seuratObjMS, label = 'MultiSeq', assay = 'MultiSeq')
+
   seuratObjMS <- MULTIseqDemux2(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
 
   seuratObjMS$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
@@ -632,6 +635,35 @@ DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantil
   seuratObj$MULTI_classification.global <- seuratObjMS$MULTI_classification.global
 
   return(seuratObj)
+}
+
+PlotHtoCountData <- function(seuratObj, label, assay = 'HTO') {
+  #Plot raw data by HTO:
+  data <- GetAssayData(seuratObj, assay = assay, slot = 'counts')
+  df2 <- as.data.frame(data)
+  df2$HTO <- row.names(data)
+  df2 <- tidyr::gather(df2, key = 'CellBarcode', value = 'Count', -HTO)
+  df2$HTO <- OOSAP:::simplifyHtoNames(as.character(df2$HTO))
+  df2$HTO <- naturalsort::naturalfactor(df2$HTO)
+
+  df2$Count <- log10(df2$Count + 0.5)
+  print(ggplot(df2, aes(y = Count, x = HTO, fill = HTO)) +
+    geom_boxplot() +
+    ggtitle(paste0(label, ': Raw counts by HTO (log10)'))
+  )
+
+  #Plot normalized data by HTO:
+  data <- GetAssayData(seuratObj, assay = assay, slot = 'data')
+  df2 <- as.data.frame(data)
+  df2$HTO <- row.names(data)
+  df2 <- tidyr::gather(df2, key = 'CellBarcode', value = 'Count', -HTO)
+  df2$HTO <- OOSAP:::simplifyHtoNames(as.character(df2$HTO))
+  df2$HTO <- naturalsort::naturalfactor(df2$HTO)
+
+  print(ggplot(df2, aes(y = Count, x = HTO, fill = HTO)) +
+    geom_boxplot() +
+    ggtitle(paste0(label, ': Normalized data by HTO'))
+  )
 }
 
 #' @title A Title
@@ -914,8 +946,8 @@ PrintFinalSummary <- function(dt, barcodeData){
   )
 
   cellData <- merged[c('TotalCounts', 'Count', 'HTO_Classification', 'HTO')]
-  cellData$TotalCounts <- log10(cellData$TotalCounts + 0.5)
-  cellData$Count <- log10(cellData$Count + 0.5)
+  cellData$TotalCounts <- log(cellData$TotalCounts + 0.5)
+  cellData$Count <- log(cellData$Count + 0.5)
 
   print(ggplot(cellData, aes(x = TotalCounts, fill = HTO_Classification)) +
     geom_density() +
