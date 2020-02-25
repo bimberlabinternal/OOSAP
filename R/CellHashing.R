@@ -302,12 +302,9 @@ GenerateQcPlots <- function(barcodeData){
   htoNames <- simplifyHtoNames(as.character(melted$HTO))
   melted$HTO <- naturalfactor(as.character(htoNames))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(unique(melted$HTO)))), "Set1"))
-  colorValues <- getPalette(length(unique(melted$HTO)))
-
-  print(ggplot(melted, aes(x = Count, color = HTO)) +
+  print(ggplot(melted, aes(x = Count, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('Count/Cell') +
     ylab('Density') +
     ggtitle('HTO Counts Per Cell') +
@@ -315,9 +312,9 @@ GenerateQcPlots <- function(barcodeData){
   )
 
   melted$LogCount <- log10(melted$Count + 0.5)
-  print(ggplot(melted, aes(x = LogCount, color = HTO)) +
+  print(ggplot(melted, aes(x = LogCount, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('log10(Count)/Cell') +
     ylab('Density') +
     ggtitle('Log10 HTO Counts Per Cell') +
@@ -749,13 +746,10 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   tbl <- data.frame(table(Concordant = merged$Concordant))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
-  colorValues <- getPalette(length(names(tbl)))
-
   print(ggplot(tbl, aes(x="", y=Freq, fill=Concordant)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
 		coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
 		theme_minimal() +
 		theme(
 			axis.text.x=element_blank(),
@@ -898,13 +892,10 @@ PrintFinalSummary <- function(dt, barcodeData){
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
   print(kable(df))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
-  colorValues <- getPalette(length(names(tbl)))
-
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
     coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     theme_minimal() +
     theme(
       axis.text.x=element_blank(),
@@ -926,24 +917,38 @@ PrintFinalSummary <- function(dt, barcodeData){
   cellData$TotalCounts <- log10(cellData$TotalCounts + 0.5)
   cellData$Count <- log10(cellData$Count + 0.5)
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(unique(cellData$HTO)))), "Set1"))
-  colorValues <- getPalette(length(unique(cellData$HTO)))
-
-  print(ggplot(cellData, aes(x = TotalCounts, color = HTO_Classification)) +
+  print(ggplot(cellData, aes(x = TotalCounts, fill = HTO_Classification)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('Total Counts/Cell (log)') +
     ylab('Density') +
     ggtitle('Total Counts By HTO') +
     facet_grid(HTO_Classification ~ ., scales = 'free')
   )
 
-  print(ggplot(cellData[!(cellData$HTO %in% c('Negative', 'Doublet', 'Discordant')),], aes(x = Count, color = HTO)) +
+  print(ggplot(cellData[!(cellData$HTO %in% c('Negative', 'Doublet', 'Discordant')),], aes(x = Count, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('HTO Counts/Cell (log)') +
     ylab('Density') +
     ggtitle('Counts By HTO') +
+    facet_grid(HTO ~ ., scales = 'free')
+  )
+
+  #Melt data:
+  melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
+	melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
+
+  htoNames <- simplifyHtoNames(as.character(melted$HTO))
+  melted$HTO <- naturalfactor(as.character(htoNames))
+	melted$Count <- log10(melted$Count + 0.5)
+
+  print(ggplot(melted, aes(x = Count, fill = HTO)) +
+    geom_density() +
+    scale_fill_brewer(palette = "Set1") +
+    xlab('HTO Counts/Cell (log)') +
+    ylab('Density') +
+    ggtitle('Raw HTO Counts For Negative Cells (log10)') +
     facet_grid(HTO ~ ., scales = 'free')
   )
 
@@ -958,7 +963,7 @@ PrintFinalSummary <- function(dt, barcodeData){
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO_Classification)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
     coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     theme_minimal() +
     theme(
       axis.text.x=element_blank(),

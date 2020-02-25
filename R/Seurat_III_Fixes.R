@@ -232,21 +232,23 @@ MULTIseqDemux2 <- function(
       res.use <- res_round[res_round$Subset == "pSinglet", ]
       q.use <- res.use[which.max(res.use$Proportion),"q"]
 
-      P1 <- ggplot(data=threshold.results1$res, aes(x=q, y=Proportion, color=Subset)) +
-        geom_line() +
-        theme(legend.position = "none") +
-        geom_vline(xintercept=threshold.results1$extrema, lty=2) +
-        geom_vline(xintercept=q.use, lty=2) +
-        scale_color_manual(values=c("red","black","blue")) +
-        ggtitle(paste0('Multi-SEQ Iteration: ', iter, ', quantile: ', q.use))
-
-      print(P1)
-
       round.calls <- ClassifyCells(data = multi_data_norm, q = q.use)
       #remove negative cells
       neg.cells <- names(x = round.calls)[which(x = round.calls == "Negative")]
+      called.cells <- sum(round.calls != "Negative")
       neg.vector <- c(neg.vector, rep(x = "Negative", length(x = neg.cells)))
       negatives <- c(negatives, neg.cells)
+
+      print(ggplot(data=threshold.results1$res, aes(x=q, y=Proportion, color=Subset)) +
+        geom_line() +
+        theme(
+          legend.position = "right"
+        ) +
+        geom_vline(xintercept=q.use, lty=2) +
+        scale_color_manual(values=c("red","black","blue")) +
+        ggtitle(paste0('Multi-Seq Iteration: ', iter, ', quantile: ', q.use, ', input: ', length(round.calls), ', called: ', called.cells))
+      )
+
       if (length(x = neg.cells) == 0) {
         print(paste0('no negatives, breaking after iteration: ', iter))
         break

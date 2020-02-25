@@ -15,6 +15,7 @@ Imports:
     Rlabkey,
     data.table,
     dplyr,
+    tidyr,
     naturalsort,
     DropletUtils,
     Matrix,
