@@ -340,17 +340,11 @@ ClassifyCells <- function(data, q) {
     if (n == 1) {
       bc_calls[[cell_i]] <- c(bc_calls[[cell_i]], bc)
       n_bc_calls[cell_i] <- n_bc_calls[cell_i] + 1
-      if (is.na(n_bc_calls[cell_i])) {
-        stop('NA cell, pos 1')
-      }
     } else {
       # have to iterate, lame
       for (cell in cell_i) {
         bc_calls[[cell]] <- c(bc_calls[[cell]], bc)
         n_bc_calls[cell] <- n_bc_calls[cell] + 1
-        if (is.na(n_bc_calls[cell])) {
-          stop('NA cell, pos 2')
-        }
       }
     }
   }
