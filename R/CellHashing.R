@@ -969,20 +969,24 @@ PrintFinalSummary <- function(dt, barcodeData){
 
   #Melt data:
   melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
-	melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
+  if (nrow(melted) == 0) {
+    print('There were no negative cells')
+  } else {
+    melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
 
-  htoNames <- simplifyHtoNames(as.character(melted$HTO))
-  melted$HTO <- naturalfactor(as.character(htoNames))
-	melted$Count <- log10(melted$Count + 0.5)
+    htoNames <- simplifyHtoNames(as.character(melted$HTO))
+    melted$HTO <- naturalfactor(as.character(htoNames))
+    melted$Count <- log10(melted$Count + 0.5)
 
-  print(ggplot(melted, aes(x = Count, fill = HTO)) +
-    geom_density() +
-    scale_fill_brewer(palette = "Set1") +
-    xlab('HTO Counts/Cell (log)') +
-    ylab('Density') +
-    ggtitle('Raw HTO Counts For Negative Cells (log10)') +
-    facet_grid(HTO ~ ., scales = 'free')
-  )
+    print(ggplot(melted, aes(x = Count, fill = HTO)) +
+      geom_density() +
+      scale_fill_brewer(palette = "Set1") +
+      xlab('HTO Counts/Cell (log)') +
+      ylab('Density') +
+      ggtitle('Raw HTO Counts For Negative Cells (log10)') +
+      facet_grid(HTO ~ ., scales = 'free')
+    )
+  }
 
   tbl <- table(HTO_Classification = merged$HTO_Classification)
   df <- data.frame(tbl)
