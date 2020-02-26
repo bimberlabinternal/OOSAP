@@ -22,6 +22,7 @@ ADD . /OOSAP
 RUN cd /OOSAP \
     && R CMD build . \
     && Rscript -e "print(getOption('repos'))" \
+    && Rscript -e "BiocManager::install()" \
     && Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, threads = getOption('Ncpus',1))" \
     && R CMD INSTALL --build *.tar.gz \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
