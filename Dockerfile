@@ -1,10 +1,11 @@
 from bioconductor/release_core2
+
 RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
 		libpython3-dev \
 		python3-pip \
-		openjdk-8-jre \
+		openjdk-8-jdk \
     && pip3 install umap-learn \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
