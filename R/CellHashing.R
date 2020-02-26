@@ -302,12 +302,9 @@ GenerateQcPlots <- function(barcodeData){
   htoNames <- simplifyHtoNames(as.character(melted$HTO))
   melted$HTO <- naturalfactor(as.character(htoNames))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(unique(melted$HTO)))), "Set1"))
-  colorValues <- getPalette(length(unique(melted$HTO)))
-
-  print(ggplot(melted, aes(x = Count, color = HTO)) +
+  print(ggplot(melted, aes(x = Count, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('Count/Cell') +
     ylab('Density') +
     ggtitle('HTO Counts Per Cell') +
@@ -315,9 +312,9 @@ GenerateQcPlots <- function(barcodeData){
   )
 
   melted$LogCount <- log10(melted$Count + 0.5)
-  print(ggplot(melted, aes(x = LogCount, color = HTO)) +
+  print(ggplot(melted, aes(x = LogCount, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('log10(Count)/Cell') +
     ylab('Density') +
     ggtitle('Log10 HTO Counts Per Cell') +
@@ -549,6 +546,7 @@ DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTOD
   seuratObj <- NormalizeData(seuratObj, assay = "HTO", normalization.method = "CLR", verbose = FALSE)
 
   DebugDemux(seuratObj)
+  PlotHtoCountData(seuratObj, label = 'Seurat HTO Demux')
 
   seuratObj <- HTODemux2(seuratObj, positive.quantile =  positive.quantile, plotDist = plotDist)
   seuratObj$hash.ID <- naturalsort::naturalfactor(as.character(seuratObj$hash.ID))
@@ -621,6 +619,8 @@ DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantil
   seuratObjMS <- CreateSeuratObject(counts, assay = 'MultiSeq')
   seuratObjMS[['MultiSeq']]@data <- Matrix::t(as.matrix(log2Scaled))
 
+  PlotHtoCountData(seuratObjMS, label = 'MultiSeq', assay = 'MultiSeq')
+
   seuratObjMS <- MULTIseqDemux2(seuratObjMS, assay = "MultiSeq", quantile = quantile, verbose = TRUE, autoThresh = autoThresh, maxiter = maxiter, qrange = qrange)
 
   seuratObjMS$MULTI_classification.global <- as.character(seuratObjMS$MULTI_ID)
@@ -635,6 +635,35 @@ DoMULTIseqDemux <- function(seuratObj, assay = 'HTO', autoThresh = TRUE, quantil
   seuratObj$MULTI_classification.global <- seuratObjMS$MULTI_classification.global
 
   return(seuratObj)
+}
+
+PlotHtoCountData <- function(seuratObj, label, assay = 'HTO') {
+  #Plot raw data by HTO:
+  data <- GetAssayData(seuratObj, assay = assay, slot = 'counts')
+  df2 <- as.data.frame(data)
+  df2$HTO <- row.names(data)
+  df2 <- tidyr::gather(df2, key = 'CellBarcode', value = 'Count', -HTO)
+  df2$HTO <- OOSAP:::simplifyHtoNames(as.character(df2$HTO))
+  df2$HTO <- naturalsort::naturalfactor(df2$HTO)
+
+  df2$Count <- log10(df2$Count + 0.5)
+  print(ggplot(df2, aes(y = Count, x = HTO, fill = HTO)) +
+    geom_boxplot() +
+    ggtitle(paste0(label, ': Raw counts by HTO (log10)'))
+  )
+
+  #Plot normalized data by HTO:
+  data <- GetAssayData(seuratObj, assay = assay, slot = 'data')
+  df2 <- as.data.frame(data)
+  df2$HTO <- row.names(data)
+  df2 <- tidyr::gather(df2, key = 'CellBarcode', value = 'Count', -HTO)
+  df2$HTO <- OOSAP:::simplifyHtoNames(as.character(df2$HTO))
+  df2$HTO <- naturalsort::naturalfactor(df2$HTO)
+
+  print(ggplot(df2, aes(y = Count, x = HTO, fill = HTO)) +
+    geom_boxplot() +
+    ggtitle(paste0(label, ': Normalized data by HTO'))
+  )
 }
 
 #' @title A Title
@@ -749,13 +778,10 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   tbl <- data.frame(table(Concordant = merged$Concordant))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
-  colorValues <- getPalette(length(names(tbl)))
-
   print(ggplot(tbl, aes(x="", y=Freq, fill=Concordant)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
 		coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
 		theme_minimal() +
 		theme(
 			axis.text.x=element_blank(),
@@ -898,13 +924,10 @@ PrintFinalSummary <- function(dt, barcodeData){
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
   print(kable(df))
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
-  colorValues <- getPalette(length(names(tbl)))
-
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
     coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     theme_minimal() +
     theme(
       axis.text.x=element_blank(),
@@ -923,27 +946,41 @@ PrintFinalSummary <- function(dt, barcodeData){
   )
 
   cellData <- merged[c('TotalCounts', 'Count', 'HTO_Classification', 'HTO')]
-  cellData$TotalCounts <- log10(cellData$TotalCounts + 0.5)
-  cellData$Count <- log10(cellData$Count + 0.5)
+  cellData$TotalCounts <- log(cellData$TotalCounts + 0.5)
+  cellData$Count <- log(cellData$Count + 0.5)
 
-  getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(unique(cellData$HTO)))), "Set1"))
-  colorValues <- getPalette(length(unique(cellData$HTO)))
-
-  print(ggplot(cellData, aes(x = TotalCounts, color = HTO_Classification)) +
+  print(ggplot(cellData, aes(x = TotalCounts, fill = HTO_Classification)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('Total Counts/Cell (log)') +
     ylab('Density') +
     ggtitle('Total Counts By HTO') +
     facet_grid(HTO_Classification ~ ., scales = 'free')
   )
 
-  print(ggplot(cellData[!(cellData$HTO %in% c('Negative', 'Doublet', 'Discordant')),], aes(x = Count, color = HTO)) +
+  print(ggplot(cellData[!(cellData$HTO %in% c('Negative', 'Doublet', 'Discordant')),], aes(x = Count, fill = HTO)) +
     geom_density() +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     xlab('HTO Counts/Cell (log)') +
     ylab('Density') +
     ggtitle('Counts By HTO') +
+    facet_grid(HTO ~ ., scales = 'free')
+  )
+
+  #Melt data:
+  melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
+	melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
+
+  htoNames <- simplifyHtoNames(as.character(melted$HTO))
+  melted$HTO <- naturalfactor(as.character(htoNames))
+	melted$Count <- log10(melted$Count + 0.5)
+
+  print(ggplot(melted, aes(x = Count, fill = HTO)) +
+    geom_density() +
+    scale_fill_brewer(palette = "Set1") +
+    xlab('HTO Counts/Cell (log)') +
+    ylab('Density') +
+    ggtitle('Raw HTO Counts For Negative Cells (log10)') +
     facet_grid(HTO ~ ., scales = 'free')
   )
 
@@ -958,7 +995,7 @@ PrintFinalSummary <- function(dt, barcodeData){
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO_Classification)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
     coord_polar("y", start=0) +
-    scale_fill_manual(values = colorValues) +
+    scale_fill_brewer(palette = "Set1") +
     theme_minimal() +
     theme(
       axis.text.x=element_blank(),
