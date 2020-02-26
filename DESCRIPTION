@@ -64,7 +64,9 @@ Remotes:
     bioc::release/DESeq2,
     bioc::release/MAST,
     bioc::release/SingleR,
-    bioc::release/SummarizedExperiment
+    bioc::release/SummarizedExperiment,
+    bioc::release/RDAVIDWebService,
+    bioc::release/STRINGdb
 RoxygenNote: 7.0.2
 Collate: 
     'Utils.R'
