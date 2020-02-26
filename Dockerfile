@@ -1,11 +1,11 @@
-from bioconductor/release_core2
+from bioconductor/bioconductor_docker:RELEASE_3_10
 
 RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
 		libpython3-dev \
 		python3-pip \
-		openjdk-8-jdk \
+		openjdk-11-jdk \
     && pip3 install umap-learn \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
@@ -24,7 +24,7 @@ ADD . /OOSAP
 RUN cd /OOSAP \
     && R CMD build . \
     && Rscript -e "print(getOption('repos'))" \
-    && Rscript -e "BiocManager::install()" \
+    && Rscript -e "BiocManager::install(ask = F)" \
     && Rscript -e "devtools::install_deps(pkg = '.', dependencies = TRUE, threads = getOption('Ncpus',1))" \
     && R CMD INSTALL --build *.tar.gz \
     && rm -rf /tmp/downloaded_packages/ /tmp/*.rds
