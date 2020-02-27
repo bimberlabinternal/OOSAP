@@ -41,9 +41,9 @@ test_that("Highly Activated Cells Called", {
     doPlot = T
   )
   
-  t <- seuratObj2$HighlyActivated.Score
-  names(t) <- NULL
-  expect_equal(df[['HighlyActivated.Score']], t)
+  ts <- seuratObj2$HighlyActivated.Score
+  names(ts) <- NULL
+  expect_equal(df[['HighlyActivated.Score']], ts)
 })
 
 

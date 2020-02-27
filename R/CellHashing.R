@@ -354,14 +354,13 @@ utils::globalVariables(
 #' @title GenerateCellHashCallsSeurat
 #'
 #' @description Generates final cell hashing calls using Seurat3 HTODemux
-#' @return A data table of results
-#' @import data.table
+#' @return A data frame of results
 GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = F, minCellsForRecovery = 500) {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
   tryCatch({
     seuratObj <- DoHtoDemux(seuratObj, positive.quantile = positive.quantile)
-    dt <- data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
+    dt <- data.frame(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$hash.ID, HTO_classification.all = seuratObj$HTO_classification, HTO_classification.global = seuratObj$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
 
     #attempt recovery:
     if (attemptRecovery && length(seuratObj$HTO_classification.global == 'Negative') > minCellsForRecovery) {
@@ -375,7 +374,7 @@ GenerateCellHashCallsSeurat <- function(barcodeData, positive.quantile = 0.99, a
         seuratObj2 <- subset(seuratObj2, subset = HTO_classification.global == 'Singlet')
         print(paste0('Total cells rescued by second HTODemux call: ', ncol(seuratObj2)))
         if (ncol(seuratObj2) > 0) {
-          dt2 <- data.table(Barcode = as.factor(colnames(seuratObj2)), HTO_classification = seuratObj2$hash.ID, HTO_classification.all = seuratObj2$HTO_classification, HTO_classification.global = seuratObj2$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
+          dt2 <- data.frame(Barcode = as.factor(colnames(seuratObj2)), HTO_classification = seuratObj2$hash.ID, HTO_classification.all = seuratObj2$HTO_classification, HTO_classification.global = seuratObj2$HTO_classification.global, key = c('Barcode'), stringsAsFactors = F)
           dt[dt$Barcode %in% dt2$Barcode]$HTO_classification <- dt2$HTO_classification
           dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.all <- dt2$HTO_classification.all
           dt[dt$Barcode %in% dt2$Barcode]$HTO_classification.global <- dt2$HTO_classification.global
@@ -560,7 +559,6 @@ DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTOD
 #'
 #' @description A description
 #' @return A modified Seurat object.
-#' @import data.table
 GenerateCellHashCallsMultiSeq <- function(barcodeData, method = 'seurat') {
   seuratObj <- CreateSeuratObject(barcodeData, assay = 'HTO')
 
@@ -571,7 +569,7 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData, method = 'seurat') {
       stop(pate0('Unknown method: ', method))
     }
 
-    return(data.table(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$MULTI_ID, HTO_classification.global = seuratObj$MULTI_classification.global, key = c('Barcode')))
+    return(data.frame(Barcode = as.factor(colnames(seuratObj)), HTO_classification = seuratObj$MULTI_ID, HTO_classification.global = seuratObj$MULTI_classification.global, key = c('Barcode')))
   }, error = function(e){
     print(e)
     print('Error generating multiseq calls, aborting')
@@ -585,7 +583,6 @@ GenerateCellHashCallsMultiSeq <- function(barcodeData, method = 'seurat') {
 #' @description A description
 #' @return A data table of results.
 #' @export
-#' @import data.table
 GenerateCellHashingCalls <- function(barcodeData, positive.quantile = 0.99, attemptRecovery = FALSE, useSeurat = TRUE, useMultiSeq = TRUE, outFile = 'combinedHtoCalls.txt', allCallsOutFile = NA) {
   sc <- NA
   if (useSeurat) {
@@ -707,7 +704,6 @@ utils::globalVariables(
 #' @description A description
 #' @return A modified Seurat object.
 #' @export
-#' @import data.table
 #' @import ggplot2
 #' @param mc Multiseq calls dataframe
 #' @param sc Seurat calls dataframe
@@ -726,7 +722,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   if (all(is.na(sc))){
     print('No calls for seurat found')
-    dt <- data.table(CellBarcode = mc$Barcode, HTO = mc$HTO_classification, HTO_Classification = mc$HTO_classification.global, key = 'CellBarcode', Seurat = c(F), MultiSeq = c(T))
+    dt <- data.frame(CellBarcode = mc$Barcode, HTO = mc$HTO_classification, HTO_Classification = mc$HTO_classification.global, key = 'CellBarcode', Seurat = c(F), MultiSeq = c(T))
     dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
@@ -735,7 +731,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
 
   if (all(is.na(mc))){
     print('No calls for MULTI-seq found')
-    dt <- data.table(CellBarcode = sc$Barcode, HTO = sc$HTO_classification, HTO_Classification = sc$HTO_classification.global, key = 'CellBarcode', Seurat = c(T), MultiSeq = c(F))
+    dt <- data.frame(CellBarcode = sc$Barcode, HTO = sc$HTO_classification, HTO_Classification = sc$HTO_classification.global, key = 'CellBarcode', Seurat = c(T), MultiSeq = c(F))
     dt <- PrintFinalSummary(dt, barcodeData)
     write.table(dt, file = outFile, row.names = F, sep = '\t', quote = F)
 
@@ -868,17 +864,16 @@ utils::globalVariables(
 #' @return A modified Seurat object.
 #' @importFrom naturalsort naturalfactor
 #' @importFrom knitr kable
-#' @importFrom data.table melt
 #' @param The data table with calls
 #' @param The barcode counts matrix
 #' @import ggplot2
-PrintFinalSummary <- function(dt, barcodeData){
+PrintFinalSummary <- function(df, barcodeData){
   #Append raw counts:
   bc <- t(barcodeData)
   x <- reshape2::melt(bc)
   names(x) <- c('CellBarcode', 'HTO', 'Count')
 
-  merged <- merge(dt, x, by = c('CellBarcode', 'HTO'), all.x = T, all.y = F)
+  merged <- merge(df, x, by = c('CellBarcode', 'HTO'), all.x = T, all.y = F)
 
   bc <- as.data.frame(bc)
   bc$CellBarcode <- rownames(bc)
@@ -902,15 +897,15 @@ PrintFinalSummary <- function(dt, barcodeData){
 
   merged$HTO <- naturalfactor(as.character(htoNames))
 
-  t <- table(SeuratCall = merged$Seurat, MultiSeqCall = merged$MultiSeq)
+  tbl <- table(SeuratCall = merged$Seurat, MultiSeqCall = merged$MultiSeq)
 
-  colnames(t)[colnames(t) == T] <- c('MultiSeq Call')
-  colnames(t)[colnames(t) == F] <- c('MultiSeq No Call')
+  colnames(tbl)[colnames(tbl) == T] <- c('MultiSeq Call')
+  colnames(tbl)[colnames(tbl) == F] <- c('MultiSeq No Call')
 
-  rownames(t)[rownames(t) == T] <- c('Seurat Call')
-  rownames(t)[rownames(t) == F] <- c('Seurat No Call')
+  rownames(tbl)[rownames(tbl) == T] <- c('Seurat Call')
+  rownames(tbl)[rownames(tbl) == F] <- c('Seurat No Call')
 
-  print(kable(t))
+  print(kable(tbl))
 
   print(ggplot(merged, aes(x = HTO)) +
           geom_bar(stat = 'count') +
@@ -971,7 +966,9 @@ PrintFinalSummary <- function(dt, barcodeData){
     print('There were no negative cells')
   } else {
     #Melt data:
-    melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
+    melted <- as.data.frame(merged)
+    melted <- melted[melted$HTO == 'Negative', !(colnames(melted) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
+    print(str(melted))
     melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
 
     htoNames <- simplifyHtoNames(as.character(melted$HTO))
@@ -1009,7 +1006,6 @@ PrintFinalSummary <- function(dt, barcodeData){
     ) +
     ggtitle('HTO Classification')
   )
-
 
   return(merged)
 }

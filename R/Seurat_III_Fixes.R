@@ -303,7 +303,7 @@ ClassifyCells <- function(data, q) {
       model <- approxfun(x = bkde(x = data[, i], kernel = "normal"))
     }, error = function(e) {
       print(paste0("Unable to fit model for ", rownames(x = data)[i], ", for ", q, "..."))
-      saveRDS(data[, i], file = paste0('./', hto, '.fail.approxfun.rds'))
+      saveRDS(data[, i], file = paste0('./', rownames(x = data)[i], '.fail.approxfun.rds'))
     })
 
     # This is changed relative to seurat

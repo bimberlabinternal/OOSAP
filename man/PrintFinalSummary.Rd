@@ -4,7 +4,7 @@
 \alias{PrintFinalSummary}
 \title{PrintFinalSummary}
 \usage{
-PrintFinalSummary(dt, barcodeData)
+PrintFinalSummary(df, barcodeData)
 }
 \arguments{
 \item{The}{barcode counts matrix}

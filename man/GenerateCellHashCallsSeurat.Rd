@@ -12,7 +12,7 @@ GenerateCellHashCallsSeurat(
 )
 }
 \value{
-A data table of results
+A data frame of results
 }
 \description{
 Generates final cell hashing calls using Seurat3 HTODemux

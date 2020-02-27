@@ -7,7 +7,7 @@
 HTODemux2(
   object,
   assay = "HTO",
-  positive.quantile = 0.99,
+  positive.quantile = 0.98,
   nstarts = 100,
   kfunc = "clara",
   nsamples = 100,
