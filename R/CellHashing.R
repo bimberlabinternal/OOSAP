@@ -768,9 +768,9 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   merged$GlobalConcordant <- as.character(merged$HTO_classification.global.MultiSeq) == as.character(merged$HTO_classification.global.Seurat)
   merged$GlobalConcordant[!merged$GlobalConcordant & (merged$HTO_classification.global.MultiSeq == 'Negative' | merged$HTO_classification.global.Seurat == 'Negative')] <- TRUE
 
-  print(paste0('Total concordant: ', nrow(merged[merged$Concordant])))
-  print(paste0('Total discordant (HTO call): ', nrow(merged[!merged$Concordant])))
-  print(paste0('Total discordant (HTO classification): ', nrow(merged[!merged$GlobalConcordant])))
+  print(paste0('Total concordant: ', sum(merged$Concordant)))
+  print(paste0('Total discordant (HTO call): ', sum(!merged$Concordant)))
+  print(paste0('Total discordant (HTO classification): ', sum(!merged$GlobalConcordant)))
 
   tbl <- data.frame(table(Concordant = merged$Concordant))
 
@@ -788,7 +788,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
     ggtitle('Seurat/MultiSeq Concordance')
 	)
 
-  discord <- merged[!merged$GlobalConcordant]
+  discord <- merged[!merged$GlobalConcordant,]
   discord <- discord %>% group_by(HTO_classification.global.MultiSeq, HTO_classification.global.Seurat) %>% summarise(Count = dplyr::n())
 
   print(qplot(x=HTO_classification.global.MultiSeq, y=HTO_classification.global.Seurat, data=discord, fill=Count, geom="tile") +
@@ -797,7 +797,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
           ggtitle('Discordance By Global Call') + ylab('Seurat') + xlab('MULTI-seq')
   )
 
-  discord <- merged[!merged$Concordant]
+  discord <- merged[!merged$Concordant,]
   discord <- discord %>% group_by(HTO_classification.MultiSeq, HTO_classification.Seurat) %>% summarise(Count = dplyr::n())
 
   print(qplot(x=HTO_classification.MultiSeq, y=HTO_classification.Seurat, data=discord, fill=Count, geom="tile") +
