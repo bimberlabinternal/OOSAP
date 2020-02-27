@@ -967,11 +967,11 @@ PrintFinalSummary <- function(dt, barcodeData){
     facet_grid(HTO ~ ., scales = 'free')
   )
 
-  #Melt data:
-  melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
-  if (nrow(melted) == 0) {
+  if (sum(merged$HTO == 'Negative') == 0) {
     print('There were no negative cells')
   } else {
+    #Melt data:
+    melted <- merged[merged$HTO == 'Negative', !(colnames(merged) %in% c('HTO_Classification', 'HTO', 'key', 'Seurat', 'MultiSeq', 'Count', 'TotalCounts')), drop = FALSE]
     melted <- tidyr::gather(melted, key = 'HTO', value = 'Count', -CellBarcode)
 
     htoNames <- simplifyHtoNames(as.character(melted$HTO))
