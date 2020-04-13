@@ -2,7 +2,7 @@
 % Please edit documentation in R/SingleR_Seurat.R
 \name{Tabulate_SingleRClassLabs}
 \alias{Tabulate_SingleRClassLabs}
-\title{Tabulate SingleR Class Lables}
+\title{Tabulate SingleR Class Labels}
 \usage{
 Tabulate_SingleRClassLabs(seuratObject, plotIndividually = F)
 }
@@ -12,7 +12,7 @@ Tabulate_SingleRClassLabs(seuratObject, plotIndividually = F)
 \item{plotIndividually}{If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other}
 }
 \description{
-Tabulate Seurobject with SingleR class lables
+Tabulate SingleR class labels from a Seurat object
 }
 \keyword{Classification}
 \keyword{SingleR}

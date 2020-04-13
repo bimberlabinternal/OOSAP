@@ -7,7 +7,7 @@
 DownloadAndAppendCellHashing(seuratObject, outPath = ".")
 }
 \arguments{
-\item{seurObject, }{A Seurat object.}
+\item{seuratObject, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

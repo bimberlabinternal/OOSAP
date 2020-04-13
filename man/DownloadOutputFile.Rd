@@ -6,6 +6,13 @@
 \usage{
 DownloadOutputFile(outputFileId, outFile, overwrite = T)
 }
+\arguments{
+\item{outputFileId}{The rowid of the sequence outputfiles on the webserver}
+
+\item{outFile}{The local path to write this file}
+
+\item{overwrite}{If true, any pre-existing local copy will be replaced.}
+}
 \description{
-DownloadOutputFile
+Downloads an output file tracked in LabKey to the local filesystem.
 }
