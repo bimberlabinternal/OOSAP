@@ -356,3 +356,60 @@ find_peaks <- function (x, m = 4){
 
   return(perplexity)
 }
+
+#' @title DownloadOutputFile
+#' @description Downloads an output file tracked in LabKey to the local filesystem.
+#' @param outputFileId The rowid of the sequence outputfiles on the webserver
+#' @param outFile The local path to write this file
+#' @param overwrite If true, any pre-existing local copy will be replaced.
+#' @export
+#'
+#' @import Rlabkey
+DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
+  if (is.na(outputFileId)) {
+    stop('Output file ID cannot be NA')
+  }
+
+  if (file.exists(outFile) & !overwrite) {
+    print(paste0("File exists, will not overwrite: ", outFile))
+    return(outFile)
+  }
+
+  rows <- labkey.selectRows(
+  baseUrl=lkBaseUrl,
+  folderPath=lkDefaultFolder,
+  schemaName="sequenceanalysis",
+  queryName="outputfiles",
+  viewName="",
+  colSort="-rowid",
+  colSelect="rowid,workbook/workbookid,dataid/webdavurlrelative",
+  colFilter=makeFilter(c("rowid", "EQUAL", outputFileId)),
+  containerFilter=NULL,
+  colNameOpt="rname"
+  )
+
+  if (nrow(rows) != 1) {
+    stop(paste0('More than one matching file found, this should not occur.  RowId: ', outputFileId))
+  }
+
+  wb <- rows[['workbook_workbookid']]
+  if (is.na(wb) || is.null(wb)){
+    wb <- ''
+  }
+
+  remotePath <- rows[['dataid_webdavurlrelative']]
+
+  success <- labkey.webdav.get(
+  baseUrl=lkBaseUrl,
+  folderPath=paste0(lkDefaultFolder,wb),
+  remoteFilePath = remotePath,
+  overwrite = overwrite,
+  localFilePath = outFile
+  )
+
+  if (!success || !file.exists(outFile)) {
+    stop(paste0('labkey.webdav.get failed for file: ', remotePath))
+  }
+
+  return(outFile)
+}

@@ -12,7 +12,7 @@ DoHtoDemux(
 )
 }
 \arguments{
-\item{seurObj, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
 }
 \value{
 A modified Seurat object.

@@ -480,7 +480,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
 #' @title A Title
 #'
 #' @description A description
-#' @param seurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @importFrom cluster clara
 #' @importFrom Matrix t
 #' @return A modified Seurat object.
@@ -538,7 +538,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
 #' @title A Title
 #'
 #' @description A description
-#' @param seurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 DoHtoDemux <- function(seuratObj, positive.quantile = 0.99, label = 'Seurat HTODemux', plotDist = FALSE) {
   # Normalize HTO data, here we use centered log-ratio (CLR) transformation
@@ -666,7 +666,7 @@ PlotHtoCountData <- function(seuratObj, label, assay = 'HTO') {
 #' @title A Title
 #'
 #' @description A description
-#' @param seurObj, A Seurat object.
+#' @param seuratObj, A Seurat object.
 #' @return A modified Seurat object.
 HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationField, label, doHeatmap = T, doTSNE = T, assay = 'HTO') {
   #report outcome
@@ -1092,8 +1092,8 @@ GenerateSummaryForExpectedBarcodes <- function(dt, whitelistFile, outputFile, ba
 
 #' @title DownloadAndAppendCellHashing
 #'
-#' @description A description
-#' @param seurObject, A Seurat object.
+#' @description Downloads matching Cell Hashing data using barcodePrefix on the seurat object and appends it to metadata
+#' @param seuratObject, A Seurat object.
 #' @return A modified Seurat object.
 #' @export
 DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
@@ -1104,7 +1104,7 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
   for (barcodePrefix in unique(unique(unlist(seuratObject[['BarcodePrefix']])))) {
     print(paste0('Possibly adding cell hashing data for prefix: ', barcodePrefix))
 
-    cellHashingId <- FindMatchedCellHashing(barcodePrefix)
+    cellHashingId <- .FindMatchedCellHashing(barcodePrefix)
     if (is.null(cellHashingId)){
       print(paste0('Cell hashing not used for prefix: ', barcodePrefix, ', skipping'))
       next
@@ -1125,12 +1125,8 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
 }
 
 
-#' @title FindMatchedCellHashing
-#'
-#' @description A description
-#' @return A modified Seurat object.
 #' @import Rlabkey
-FindMatchedCellHashing <- function(loupeDataId){
+.FindMatchedCellHashing <- function(loupeDataId){
   #Note: the seurat object gets associated with the GEX readset, so look based on this:
   rows <- labkey.selectRows(
     baseUrl=lkBaseUrl,
@@ -1180,7 +1176,7 @@ FindMatchedCellHashing <- function(loupeDataId){
     return(NULL)
   }
 
-  rowsB <- suppressWarnings(labkey.selectRows(
+  rows <- suppressWarnings(labkey.selectRows(
     baseUrl=lkBaseUrl,
     folderPath=lkDefaultFolder,
     schemaName="sequenceanalysis",
@@ -1195,15 +1191,15 @@ FindMatchedCellHashing <- function(loupeDataId){
   ))
 
   ret <- NULL
-  if (nrow(rowsB) == 0){
+  if (nrow(rows) == 0){
     print(paste0("Output of type 'Seurat Cell Hashing Calls' not found.  Readset: ", readset, ", libraryId: ", libraryId))
   } else {
-    ret <- rowsB[1]
+    ret <- rows[1]
   }
 
   if (all(is.null(ret))){
     print("Trying to find output of type: '10x GEX Cell Hashing Calls'")
-    rowsB <- suppressWarnings(labkey.selectRows(
+    rows <- suppressWarnings(labkey.selectRows(
       baseUrl=lkBaseUrl,
       folderPath=lkDefaultFolder,
       schemaName="sequenceanalysis",
@@ -1217,10 +1213,10 @@ FindMatchedCellHashing <- function(loupeDataId){
       colNameOpt="rname"
     ))
 
-    if (nrow(rowsB) == 0){
+    if (nrow(rows) == 0){
       print("Not found")
     } else {
-      ret <- rowsB[1]
+      ret <- rows[1]
       print("Found output")
     }
   }
@@ -1237,55 +1233,3 @@ FindMatchedCellHashing <- function(loupeDataId){
 }
 
 
-#' @title DownloadOutputFile
-#'
-#' @import Rlabkey
-DownloadOutputFile <- function(outputFileId, outFile, overwrite = T) {
-  if (is.na(outputFileId)) {
-    stop('Output file ID cannot be NA')
-  }
-
-  if (file.exists(outFile) & !overwrite) {
-    print(paste0("File exists, will not overwrite: ", outFile))
-    return(outFile)
-	}
-
-  #There should be a file named all_contig_annotations.csv in the same directory as the VLoupe file
-  rows <- labkey.selectRows(
-    baseUrl=lkBaseUrl,
-    folderPath=lkDefaultFolder,
-    schemaName="sequenceanalysis",
-    queryName="outputfiles",
-    viewName="",
-    colSort="-rowid",
-    colSelect="rowid,workbook/workbookid,dataid/webdavurlrelative",
-    colFilter=makeFilter(c("rowid", "EQUAL", outputFileId)),
-    containerFilter=NULL,
-    colNameOpt="rname"
-  )
-
-  if (nrow(rows) != 1) {
-    stop(paste0('More than one matching file found, this should not occur.  RowId: ', outputFileId))
-  }
-
-  wb <- rows[['workbook_workbookid']]
-  if (is.na(wb) || is.null(wb)){
-    wb <- ''
-  }
-
-  remotePath <- rows[['dataid_webdavurlrelative']]
-
-  success <- labkey.webdav.get(
-    baseUrl=lkBaseUrl,
-    folderPath=paste0(lkDefaultFolder,wb),
-    remoteFilePath = remotePath,
-    overwrite = overwrite,
-    localFilePath = outFile
-  )
-
-  if (!success || !file.exists(outFile)) {
-    stop(paste0('labkey.webdav.get failed for file: ', remotePath))
-  }
-
-  return(outFile)
-}
