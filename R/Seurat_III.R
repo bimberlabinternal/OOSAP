@@ -793,12 +793,13 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 #' @param dimsToUse The number of dims to use.  If null, this will be inferred using FindSeuratElbow()
 #' @param minDimsToUse The minimum numbers of dims to use.  If dimsToUse is provided, this will override.
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
+#' @param maxTsneIter The value of max_iter to provide to RunTSNE.  Increasing can help large datasets.
 #' @param forceReCalc If true, all steps will be performed even if already marked complete
 #' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
 #' @return A modified Seurat object.
 #' @export
 FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
-                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
+                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500, maxTsneIter = 2000) {
   if (is.null(dimsToUse)) {
     dimMax <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', dimMax))
@@ -829,7 +830,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
     perplexity <- .InferPerplexityFromSeuratObj(seuratObj)
-    seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity)
+    seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity, max_iter = maxTsneIter)
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
 
