@@ -53,7 +53,8 @@ Imports:
     reshape2,
     Rtsne,
     scales,
-    SummarizedExperiment
+    SummarizedExperiment,
+    shiny
 Suggests:
     ggvis,
     devtools,
