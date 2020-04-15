@@ -11,8 +11,6 @@ mkdir $HOME/.R
 Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
 
 # Force python3:
-alias python=python3
-alias pip=pip3
 python3 --version
 python --version
 pip3 --version
@@ -22,7 +20,9 @@ pip3 install --upgrade pip
 pip3 --version
 
 echo 'installed python packages'
-apt list --installed | grep 'python'
+which python3
+which python3.6
+which python3.7
 
 echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)\n' > $HOME/.R/Makevars
 echo 'max_size = 5.0G\n# important for R CMD INSTALL *.tar.gz as tarballs are expanded freshly -> fresh ctime\nsloppiness = include_file_ctime\n# also important as the (temp.) directory name will differ\nhash_dir = false' > ~/.ccache/ccache.conf
