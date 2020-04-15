@@ -4,10 +4,19 @@
 \alias{DownloadAndAppendCiteSeq}
 \title{DownloadAndAppendCiteSeq}
 \usage{
-DownloadAndAppendCiteSeq(seuratObject, outPath = ".")
+DownloadAndAppendCiteSeq(
+  seuratObj,
+  outPath = ".",
+  assayName = "ADT",
+  renameMarkersUsingDatabase = T
+)
 }
 \arguments{
-\item{seuratObject, }{A Seurat object.}
+\item{seuratObj, }{A Seurat object.}
+
+\item{assayName}{The name of the assay to store the ADT data.}
+
+\item{renameMarkersUsingDatabase}{If true, the ADT names will be remapped using data in the DISCVR/TCRdb module}
 }
 \value{
 A modified Seurat object.

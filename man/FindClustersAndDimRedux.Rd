@@ -14,7 +14,8 @@ FindClustersAndDimRedux(
   UMAP_NumNeib = 40L,
   UMAP_MinDist = 0.2,
   UMAP_Seed = 1234,
-  UMAP.NumEpoc = 500
+  UMAP.NumEpoc = 500,
+  maxTsneIter = 2000
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ FindClustersAndDimRedux(
 \item{minDimsToUse}{The minimum numbers of dims to use.  If dimsToUse is provided, this will override.}
 
 \item{umap.method}{The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP}
+
+\item{maxTsneIter}{The value of max_iter to provide to RunTSNE.  Increasing can help large datasets.}
 }
 \value{
 A modified Seurat object.
