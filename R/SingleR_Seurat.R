@@ -134,8 +134,8 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 #' @importFrom cowplot plot_grid
 DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
     plots <- list(
-      DimPlot(seuratObject, group.by = "SingleR_Labels") + theme_bw() + ggtitle("SingleR Predicted Classification") + theme(legend.position="bottom", vector.friendly = TRUE),
-      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine") + theme_bw() + ggtitle("SingleR Predicted Classification (Fine)") + theme(legend.position="bottom", vector.friendly = TRUE)
+      DimPlot(seuratObject, group.by = "SingleR_Labels", vector.friendly = TRUE) + theme_bw() + ggtitle("SingleR Predicted Classification") + theme(legend.position="bottom"),
+      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine", vector.friendly = TRUE) + theme_bw() + ggtitle("SingleR Predicted Classification (Fine)") + theme(legend.position="bottom")
     )
 
     if (plotIndividually){
