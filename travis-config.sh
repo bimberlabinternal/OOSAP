@@ -12,20 +12,21 @@ Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependenci
 
 # Force python3:
 echo 'alias python="python3.7"' >> ~/.bash_profile
-echo 'alias pip="pip3"' >> ~/.bash_profile
+echo 'alias python3="python3.7"' >> ~/.bash_profile
+echo 'alias pip="pip3.7"' >> ~/.bash_profile
+echo 'alias pip3="pip3.7"' >> ~/.bash_profile
 source ~/.bash_profile
 
 python3.7 -m pip install --upgrade pip
 
-echo 'installed python packages'
-python3 --version
+echo 'installed python packages:'
 python --version
-pip3 --version
 pip --version
-pip3 --version
 
+which python
 which python3
 which python3.7
+which pip
 which pip3
 which pip3.7
 
