@@ -31,7 +31,6 @@ Imports:
     rpart,
     rpart.plot,
     reticulate,
-    garnett,
     glmnet,
     ranger,
     org.Hs.eg.db,
@@ -60,7 +59,6 @@ Suggests:
     devtools,
     testthat (>= 2.1.0)
 Remotes:
-    cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
     bioc::release/DESeq2,
     bioc::release/MAST,
@@ -75,7 +73,6 @@ Collate:
     'CellHashing.R'
     'CiteSeq.R'
     'Classification_Caret.R'
-    'Classification_Garnett.R'
     'Classification_MCE.R'
     'Classification_SGS.R'
     'Classification_Sim.R'

@@ -10,6 +10,8 @@ mkdir $HOME/.R
 
 Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
 
+df -h /
+
 # Force python3:
 echo 'alias python="python3.6"' >> ~/.bash_profile
 echo 'alias python3="python3.6"' >> ~/.bash_profile
