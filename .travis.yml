@@ -1,7 +1,8 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 # and: https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/script/r.rb
 
-language: R
+dist: bionic
+language: r
 r: bioc-release
 cache:
   - packages
@@ -42,9 +43,6 @@ addons:
     sources:
       - deadsnakes
     packages:
-      - build-essential
-      - libtool
-      - r-cran-data.table
       - r-cran-kernlab
       - libgit2-dev
       - python3.6-dev
@@ -52,10 +50,10 @@ addons:
 
 deploy:
   - provider: releases
-    api_key: ${GH_TOKEN}
+    token: ${GH_TOKEN}
     file_glob: true
     file:
       - OOSAP_**.tar.gz
-    skip_cleanup: true
+    cleanup: false
     on:
       tags: true
