@@ -43,10 +43,12 @@ addons:
     sources:
       - deadsnakes
     packages:
+      - build-essential
+      - libtool
       - ccache
       - r-cran-data.table
       - r-cran-kernlab
-      - python3.6
+      - python3.6-dev
       - python3-pip
 
 deploy:
