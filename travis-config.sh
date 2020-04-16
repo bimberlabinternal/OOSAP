@@ -8,7 +8,7 @@ echo 'Running travis setup'
 
 mkdir $HOME/.R
 
-Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
+Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes', 'shiny'), dependencies=TRUE, ask = FALSE)"
 
 df -h /
 
