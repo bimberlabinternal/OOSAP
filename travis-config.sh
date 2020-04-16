@@ -11,7 +11,7 @@ mkdir $HOME/.R
 Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
 
 # Force python3:
-python3.6 -m pip install --upgrade pip
+python3.5 -m pip install --upgrade pip
 
 python3 --version
 python --version
