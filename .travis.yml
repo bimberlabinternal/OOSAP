@@ -46,7 +46,6 @@ addons:
   apt:
     packages:
       - ccache
-      - libedit-dev
       - r-cran-kernlab
       - libgit2-dev
       - python3-pip

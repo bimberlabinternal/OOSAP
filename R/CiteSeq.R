@@ -7,11 +7,11 @@
 #'
 #' @description Downloads matching Cite-seq counts using barcodePrefix on the seurat object
 #' @param seuratObj, A Seurat object.
-#' @param renameMarkersUsingDatabase If true, the ADT names will be remapped using data in the DISCVR/TCRdb module
+#' @param featureLabelTable An optional TSV file listing the markers and metadata.  It must contain a header row with at least the columns (lowercase): tagname, sequence. If it contains the column markername, this will be used to replace the rownames of the matrix.
 #' @param assayName The name of the assay to store the ADT data.
 #' @return A modified Seurat object.
 #' @export
-DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT', renameMarkersUsingDatabase = T){
+DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT', featureLabelTable = NULL){
 	if (is.null(seuratObj[['BarcodePrefix']])){
 		stop('Seurat object lacks BarcodePrefix column')
 	}
@@ -37,7 +37,7 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 			stop(paste0('Unable to download calls table for prefix: ', barcodePrefix, ', expected file: ', countDir))
 		}
 
-		seuratObj <- .AppendCiteSeq(seuratObj = seuratObj, countMatrixDir = countDir, barcodePrefix = barcodePrefix, assayName = assayName, renameMarkersUsingDatabase = renameMarkersUsingDatabase)
+		seuratObj <- AppendCiteSeq(seuratObj = seuratObj, countMatrixDir = countDir, barcodePrefix = barcodePrefix, assayName = assayName, featureLabelTable = featureLabelTable)
 	}
 
 	.PlotCiteSeqCountData(seuratObj, assayName = assayName)
@@ -225,7 +225,7 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 }
 
 #' @importFrom dplyr arrange
-.AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assayName = 'ADT', minRowSum = 10, renameMarkersUsingDatabase = T) {
+AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assayName = 'ADT', minRowSum = 10, featureLabelTable = NULL) {
 	initialCells <- ncol(seuratObj)
 	print(paste0('Initial cell barcodes in GEX data: ', ncol(seuratObj)))
 
@@ -265,34 +265,44 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 	}
 
 	#rename features based on DB
-	if (renameMarkersUsingDatabase) {
-		rows <- suppressWarnings(labkey.selectRows(
-			baseUrl=lkBaseUrl,
-			folderPath=lkDefaultFolder,
-			schemaName="tcrdb",
-			queryName="citeseq_antibodies",
-			colSort="-rowid",
-			colSelect="antibodyName,markerName,markerLabel,adaptersequence",
-			containerFilter=NULL,
-			colNameOpt="rname"
-		))
+	ft <- NULL
+	if (!is.null(featureLabelTable)) {
+		ft <- read.table(featureLabelTable, sep = '\t', header = T, stringsAsFactors = F)
+		if (!('tagName' %in% colnames(ft))) {
+			stop('Table must contain the column tagName')
+		}
 
-		if (nrow(rows) > 0){
+		rownames(ft) <- ft$featureName
+		shouldAddMetadata <- F
+
+		if ('tagName' %in% colnames(ft)){
 			print('Renaming ADTs')
-			rows$antibodyname <- paste0(rows$antibodyname, '-', rows$adaptersequence)
-			newRows <- data.frame(antibodyname = rownames(bData), sortorder = 1:nrow(bData), stringsAsFactors = F)
-			newRows <- merge(newRows , rows, by = 'antibodyname', all.x = T, all.y = F)
+			rows$tagname <- paste0(rows$tagname, '-', rows$sequence)
+			newRows <- data.frame(tagname = rownames(bData), sortorder = 1:nrow(bData), stringsAsFactors = F)
+			newRows <- merge(newRows , rows, by = 'tagname', all.x = T, all.y = F)
 			newRows <- newRows %>% arrange(sortorder)
-			newRows$markername <- dplyr::coalesce(newRows$markername, newRows$antibodyname)
-			newRows$markername <- make.names(newRows$markername,unique=T) #make unique
+			newRows <- newRows[names(newRows) != 'sortorder']
 
-			print(paste0('Total renamed: ', sum(newRows$markername != newRows$antibodyname)))
+			newRows$markername <- dplyr::coalesce(newRows$markername, newRows$tagname)
+			newRows$markername <- make.unique(newRows$markername)
+
+			print(paste0('Total renamed: ', sum(newRows$markername != newRows$tagname)))
 
 			rownames(bData) <- newRows$markername
+			shouldAddMetadata <- T
 		}
 	}
 
 	seuratObj[[assayName]] <- CreateAssayObject(counts = bData)
+	if (shouldAddMetadata) {
+		print('Adding feature metadata')
+		for (colname in names(ft)) {
+			toAdd <- ft[[colname]]
+			names(toAdd) <- ft$tagname
+			Seurat::AddMetadata(object = seuratObj[[assayName]], metadata = toAdd, col.name = colname)
+		}
+	}
+
 	seuratObj <- NormalizeData(seuratObj, assay = assayName, normalization.method = "CLR")
 	seuratObj <- ScaleData(seuratObj, assay = assayName)
 

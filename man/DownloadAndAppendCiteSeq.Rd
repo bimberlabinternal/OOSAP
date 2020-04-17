@@ -16,7 +16,7 @@ DownloadAndAppendCiteSeq(
 
 \item{assayName}{The name of the assay to store the ADT data.}
 
-\item{featureLabelTable}{An optional CSV file listing the markers and metadata.}
+\item{featureLabelTable}{An optional TSV file listing the markers and metadata.  It must contain a header row with at least the columns (lowercase): tagname, sequence. If it contains the column markername, this will be used to replace the rownames of the matrix.}
 }
 \value{
 A modified Seurat object.
