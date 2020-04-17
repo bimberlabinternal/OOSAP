@@ -66,7 +66,7 @@ Remotes:
     bioc::release/SummarizedExperiment,
     bioc::release/RDAVIDWebService,
     bioc::release/STRINGdb
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Collate: 
     'Utils.R'
     'LabKeySettings.R'

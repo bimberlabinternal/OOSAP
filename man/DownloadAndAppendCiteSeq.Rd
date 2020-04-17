@@ -8,7 +8,7 @@ DownloadAndAppendCiteSeq(
   seuratObj,
   outPath = ".",
   assayName = "ADT",
-  renameMarkersUsingDatabase = T
+  featureLabelTable = NULL
 )
 }
 \arguments{
@@ -16,7 +16,7 @@ DownloadAndAppendCiteSeq(
 
 \item{assayName}{The name of the assay to store the ADT data.}
 
-\item{renameMarkersUsingDatabase}{If true, the ADT names will be remapped using data in the DISCVR/TCRdb module}
+\item{featureLabelTable}{An optional CSV file listing the markers and metadata.}
 }
 \value{
 A modified Seurat object.

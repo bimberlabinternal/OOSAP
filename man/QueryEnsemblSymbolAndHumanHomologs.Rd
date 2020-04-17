@@ -10,7 +10,7 @@ QueryEnsemblSymbolAndHumanHomologs(
   dataset = "mmulatta_gene_ensembl",
   ensemblFilters = c("ensembl_gene_id"),
   version = NULL,
-  ensemblMirror = "uswest",
+  ensemblMirror = NULL,
   extraAttrs = NULL
 )
 }
