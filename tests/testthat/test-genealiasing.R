@@ -98,6 +98,8 @@ expect_test3a_david =
 
 
 test_that("Gene aliasing code works as expected", {
+	biomaRt::biomartCacheClear()
+
   #Ensembl
   testEnsemblWithId <- TranslateToEnsembl(ensemblIds = test1a, geneSymbols = NULL)
   expect_equal(as.character(testEnsemblWithId$EnsemblId), test1a)  #Ensure order preserved
@@ -146,5 +148,6 @@ test_that("Gene aliasing code works as expected", {
   expect_equal(as.character(testAliasTable$GeneSymbol), test3b)
   expect_equal(as.character(testAliasTable$DAVID.Symbol), c('LOC100427314','LOC694380','LOC100427785','LOC701769','ZNF669','ZNF695','C1H1orf101','KIAA1804','LOC695277','LOC100423131','METTL13','MIR214','MIR199A-1','MIR488'))
   #expect_equal(as.character(testAliasTable$ensembl_gene_id), c('ENSMMUG00000000016','ENSMMUG00000015664','ENSMMUG00000010387','ENSMMUG00000060218','ENSMMUG00000000065','ENSMMUG00000059499','ENSMMUG00000050963','ENSMMUG00000059669','ENSMMUG00000022935'))
-  
+
+	biomaRt::biomartCacheClear()
 })
