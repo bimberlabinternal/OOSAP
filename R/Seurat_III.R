@@ -620,12 +620,14 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   #Verify data exists.  This appears to get reset, possibly by DimRedux steps
   runJackStraw <- forceReCalc | !HasStepRun(seuratObj, 'JackStraw', forceReCalc = forceReCalc)
-  if (!runJackStraw && length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
-    warning('JackStraw marked as complete, but seurat object lacks data')
-    runJackStraw <- TRUE
+  if (!useSCTransform) {
+    if (!runJackStraw && length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
+      warning('JackStraw marked as complete, but seurat object lacks data')
+      runJackStraw <- TRUE
+    }
   }
 
-  if (runJackStraw) {
+  if (!useSCTransform && runJackStraw) {
     seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
     seuratObj <- ScoreJackStraw(object = seuratObj, dims = 1:20)
     seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
@@ -677,8 +679,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   print(paste0('After nFeature_RNA filter: ', length(colnames(x = seuratObj))))
 
   expr <- Seurat::FetchData(object = seuratObj, vars = 'p.mito')
-  seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
-  print(paste0('After p.mito filter: ', length(colnames(x = seuratObj))))
+  if (!all(is.na(expr)) && max(expr) != 0) {
+		seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
+		print(paste0('After p.mito filter: ', length(colnames(x = seuratObj))))
+  } else {
+    print('Either p.mito was NA or all values were 0')
+  }
 
   print(paste0('Final: ', length(colnames(x = seuratObj))))
   
@@ -691,7 +697,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
 
   print(DimPlot(object = seuratObj))
-  if (doCellCycle) {
+  if (doCellCycle && ('Phase' %in% names(seuratObj@meta.data))) {
     print(cowplot::plot_grid(plotlist = list(
       DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
       DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
