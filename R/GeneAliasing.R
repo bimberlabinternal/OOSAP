@@ -83,7 +83,7 @@
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
 #' @export
-TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = "ensembl"){
+TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = NULL, biomart = "ensembl"){
   .CheckGeneInputs(ensemblIds = ensemblIds, geneSymbols = geneSymbols)
   if (is.null(ensemblIds)) {
     ensemblIds <- NA
@@ -172,12 +172,18 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 		mirror = ensemblMirror
 	)
 
-	ensemblResults <- biomaRt::getBM(
-		attributes = c('ensembl_gene_id', 'hgnc_symbol', 'external_gene_name'),
-		filters = c(queryField),
-		values = inputIds,
-		mart = ensembl
-	)
+	ensemblResults <- NULL
+	tryCatch(expr = {
+		ensemblResults <- biomaRt::getBM(
+			attributes = c('ensembl_gene_id', 'hgnc_symbol', 'external_gene_name'),
+			filters = c(queryField),
+			values = inputIds,
+			mart = ensembl
+		)
+	}, error = function(e){
+		print(e)
+		stop(paste0('Error querying ensembl, using genes: ', paste0(inputIds, collapse = ';')))
+	})
 
 	#Drop duplicates.  Note: could consider group_concat on variables?
 	ensemblResults <- ensemblResults %>% group_by_at(queryField) %>% mutate(total = dplyr::n())
@@ -185,7 +191,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 	ensemblResults <- ensemblResults[names(ensemblResults) != 'total']
 
 	print(paste0('Found ', sum(!is.na(ensemblResults$ensembl_gene_id)), ' of ', length(inputIds)))
-	
+
 	return(ensemblResults)
 }
 
@@ -310,7 +316,7 @@ TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
 #' @export
 
 TranslateGeneNames <- function(ensemblIds = NULL, geneSymbols = NULL, davidEmail,
-                       ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = "uswest", biomart = 'ensembl', 
+                       ensemblDataset = "mmulatta_gene_ensembl", ensemblVersion = NULL, ensemblMirror = NULL, biomart = 'ensembl',
                        stringSpeciesId = 9606,
 											 useEnsembl = TRUE, useSTRINGdb = TRUE, useDAVID = TRUE){
 
