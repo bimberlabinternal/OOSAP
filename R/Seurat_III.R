@@ -49,7 +49,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
     geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
     names(geneIds) <- rownames(seuratObj)
     assayName <- DefaultAssay(seuratObj)
-    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = geneIds)
+    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = 'geneIds')
   }
 
   return(seuratObj)
