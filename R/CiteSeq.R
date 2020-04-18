@@ -226,8 +226,8 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 
 #' @importFrom dplyr arrange
 AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assayName = 'ADT', minRowSum = 10, featureLabelTable = NULL) {
-	initialCells <- ncol(seuratObj)
-	print(paste0('Initial cell barcodes in GEX data: ', ncol(seuratObj)))
+	gexCells <- colnames(seuratObj)
+	print(paste0('Initial cell barcodes in GEX data: ', length(gexCells)))
 
 	if (!dir.exists(countMatrixDir))
 	stop("Count matrix not found")
@@ -237,24 +237,14 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 	if (!is.null(barcodePrefix)) {
 		colnames(bData) <- paste0(barcodePrefix, '_', colnames(bData))
 
-		initialCells <- sum(seuratObj$BarcodePrefix == barcodePrefix)
-		print(paste0('Initial cell barcodes in GEX data for prefix: ', initialCells))
+		gexCells <- gexCells[seuratObj$BarcodePrefix == barcodePrefix]
+		print(paste0('Initial cell barcodes in GEX data for prefix: ', length(gexCells)))
 	}
 
 	print(paste0('Initial cells in cite-seq matrix: ', ncol(bData)))
 	bData <- bData[,which(colnames(bData) %in% colnames(seuratObj)), drop = F]
 	print(paste0('Intersect with GEX data: ', ncol(bData)))
 	bData <- as.sparse(bData)
-
-	#now add empty cells for those lacking ADTs:
-	#Append blank cells for any in GEX but missing in ADT:
-	missing <- colnames(seuratObj)[!(colnames(seuratObj) %in% colnames(bData))]
-	missingMat <- matrix(rep(0, nrow(bData) * length(missing)), nrow = nrow(bData), ncol = length(missing))
-	colnames(missingMat) <- missing
-	rm(missing)
-
-	bData <- cbind(bData, missingMat)
-	bData <- as.sparse(bData[,colnames(seuratObj)])
 
 	toDrop <- rowSums(bData) < minRowSum
 	if (sum(toDrop) > 0){
@@ -293,13 +283,49 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 		}
 	}
 
-	seuratObj[[assayName]] <- CreateAssayObject(counts = bData)
+	#Note: we need to support merging with any existing data and account for barcodePrefix:
+	assayData <- NULL
+	if (assayName %in% names(seuratObj@assays)) {
+		print('existing assay found, merging counts')
+		assayData <- GetAssayData(seuratObj, assay = assayName, slot = 'counts')
+
+		# Add any new ADTs from this dataset, if needed:
+		missing <- rownames(assayData)[!(rownames(assayData) %in% rownames(bData))]
+		if (length(missing) > 0) {
+			missingMat <- matrix(rep(0, ncol(bData) * length(missing)), ncol = ncol(bData), nrow = length(missing))
+			rownames(missingMat) <- missing
+			print(paste0('total ADT rows added: ', length(missing)))
+			bData <- rbind(bData, missingMat)
+		}
+		bData <- as.sparse(bData[rownames(assayData),])
+
+		assayData[rownames(assayData),colnames(bData)] <- bData
+		assayData <- Seurat::CreateAssayObject(counts = assayData)
+		assayData <- Seurat::AddMetadata(object = assayData, metadata = GetAssay(seuratObj, assay = assayName)@feature.meta)
+
+	} else {
+		print('no pre-existing assay, creating new')
+		#now add empty cells for those lacking ADTs:
+		#Append blank cells for any in GEX but missing in ADT:
+		missing <- colnames(seuratObj)[!(colnames(seuratObj) %in% colnames(bData))]
+		if (length(missing) > 0) {
+			missingMat <- matrix(rep(0, nrow(bData) * length(missing)), nrow = nrow(bData), ncol = length(missing))
+			colnames(missingMat) <- missing
+			print(paste0('total cells lacking data: ', length(missing)))
+			bData <- cbind(bData, missingMat)
+		}
+		bData <- as.sparse(bData[,colnames(seuratObj)])
+		assayData <- Seurat::CreateAssayObject(counts = bData)
+	}
+
+	seuratObj[[assayName]] <- assayData
+
 	if (shouldAddMetadata) {
 		print('Adding feature metadata')
 		for (colname in names(ft)) {
 			toAdd <- ft[[colname]]
 			names(toAdd) <- ft$tagname
-			Seurat::AddMetadata(object = seuratObj[[assayName]], metadata = toAdd, col.name = colname)
+			seuratObj[[assayName]] <- Seurat::AddMetadata(object = seuratObj[[assayName]], metadata = toAdd, col.name = colname)
 		}
 	}
 
