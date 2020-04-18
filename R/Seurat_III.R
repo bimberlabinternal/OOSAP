@@ -45,8 +45,11 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
   PrintQcPlots(seuratObj)
 
   if (storeGeneIds) {
-    seuratObj@misc$geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
-    names(seuratObj@misc$geneIds) <- rownames(seuratObj)
+    #store IDs in assay metadata
+    geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
+    names(geneIds) <- rownames(seuratObj)
+    assayName <- DefaultAssay(seuratObj)
+    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = geneIds)
   }
 
   return(seuratObj)
@@ -62,11 +65,20 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
 #' @return A named vector of the gene IDs
 #' @export
 GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
-  if (is.null(seuratObj@misc$geneIds)) {
-    stop('Expected gene IDs to be stored under seuratObj@misc$geneIds')
+	ret <- NULL
+
+  featureMeta <- GetAssay(seuratObj)@meta.features
+  if ('GeneId' %in% colnames(featureMeta)) {
+    ret <- seuratObj@misc$geneIds[geneNames]
+  }
+  #NOTE: in previous versions we stored geneIDs here:
+	else if ('geneIds' %in% names(seuratObj@misc)) {
+    ret <- seuratObj@misc$geneIds[geneNames]
   }
 
-  ret <- seuratObj@misc$geneIds[geneNames]
+  if (is.null(ret)) {
+  	stop('Expected gene IDs to be stored under GetAssay(seuratObj)@meta.features or seuratObj@misc$geneIds')
+  }
 
   if (throwIfGenesNotFound & sum(is.na(ret)) > 0) {
     notFound <- paste0(geneNames[is.na(ret)], collapse = ',')
