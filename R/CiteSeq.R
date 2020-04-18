@@ -284,9 +284,9 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 
 		if ('tagname' %in% colnames(ft)){
 			print('Renaming ADTs')
-			rows$tagname <- paste0(rows$tagname, '-', rows$sequence)
+			ft$tagname <- paste0(ft$tagname, '-', ft$sequence)
 			newRows <- data.frame(tagname = rownames(bData), sortorder = 1:nrow(bData), stringsAsFactors = F)
-			newRows <- merge(newRows , rows, by = 'tagname', all.x = T, all.y = F)
+			newRows <- merge(newRows , ft, by = 'tagname', all.x = T, all.y = F)
 			newRows <- newRows %>% arrange(sortorder)
 			newRows <- newRows[names(newRows) != 'sortorder']
 
@@ -308,16 +308,15 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 		assayData <- GetAssayData(seuratObj, assay = assayName, slot = 'counts')
 
 		# Add any new ADTs from this dataset, if needed:
-		missing <- rownames(assayData)[!(rownames(assayData) %in% rownames(bData))]
+		missing <- rownames(bData)[!(rownames(bData) %in% rownames(assayData))]
 		if (length(missing) > 0) {
-			missingMat <- matrix(rep(0, ncol(bData) * length(missing)), ncol = ncol(bData), nrow = length(missing))
+			missingMat <- matrix(rep(0, ncol(assayData) * length(missing)), ncol = ncol(assayData), nrow = length(missing))
 			rownames(missingMat) <- missing
-			print(paste0('total ADT rows added: ', length(missing)))
-			bData <- rbind(bData, missingMat)
+			print(paste0('total ADT rows added to assay: ', length(missing)))
+			assayData <- as.sparse(rbind(assayData, missingMat))
 		}
 
-		bData <- as.sparse(bData[rownames(assayData),,drop = F])
-		assayData[rownames(assayData),colnames(bData), drop = F] <- bData
+		assayData[rownames(bData),colnames(bData), drop = F] <- bData
 		assayData <- Seurat::CreateAssayObject(counts = assayData)
 
 		metaToAdd <- GetAssay(seuratObj, assay = assayName)@meta.features
