@@ -49,7 +49,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
     geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
     names(geneIds) <- rownames(seuratObj)
     assayName <- DefaultAssay(seuratObj)
-    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = 'geneIds')
+    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = 'GeneId')
   }
 
   return(seuratObj)
@@ -69,8 +69,9 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
 
   featureMeta <- GetAssay(seuratObj)@meta.features
   if ('GeneId' %in% colnames(featureMeta)) {
-    ret <- featureMeta$geneIds[geneNames]
+    ret <- featureMeta$GeneId
     names(ret) <- rownames(seuratObj)
+    ret <- ret[geneNames]
   }
   #NOTE: in previous versions we stored geneIDs here:
 	else if ('geneIds' %in% names(seuratObj@misc)) {
@@ -392,9 +393,9 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
       seuratObj <- seuratObjs[[exptNum]]
     } else {
 			assayName <- DefaultAssay(seuratObj)
-      geneIds1 <- GetAssay(seuratObj)@meta.features$geneIds
+      geneIds1 <- GetAssay(seuratObj)@meta.features$GeneId
 			names(geneIds1) <- rownames(seuratObj)
-      geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$geneIds
+      geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$GeneId
 			names(geneIds2) <- rownames(seuratObjs[[exptNum]])
 
       if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
@@ -406,15 +407,15 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
                          project = projectName)
 
       if (any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
-				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds2, col.name = 'geneIds')
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds2, col.name = 'GeneId')
       } else if (!any(is.na(geneIds1)) & any(is.na(geneIds2))) {
-				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'geneIds')
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
       } else if (!any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
         if (any(geneIds1 != geneIds2)) {
           stop('Gene IDs did not match between seurat objects!')
         }
       } else {
-        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'geneIds')
+        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
 			}
     }
   }
