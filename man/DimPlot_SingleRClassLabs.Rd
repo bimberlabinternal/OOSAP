@@ -2,7 +2,7 @@
 % Please edit documentation in R/SingleR_Seurat.R
 \name{DimPlot_SingleRClassLabs}
 \alias{DimPlot_SingleRClassLabs}
-\title{DimPlot SingleR Class Lables}
+\title{DimPlot SingleR Class Labels}
 \usage{
 DimPlot_SingleRClassLabs(seuratObject, plotIndividually = F)
 }
@@ -12,7 +12,7 @@ DimPlot_SingleRClassLabs(seuratObject, plotIndividually = F)
 \item{plotIndividually}{If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other}
 }
 \description{
-Dimplot Seurobject with SingleR class lables
+Create a Dimplot from a Seurat object with SingleR class labels
 }
 \keyword{Classification}
 \keyword{Dimplot}

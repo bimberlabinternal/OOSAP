@@ -124,8 +124,8 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 }
 
 
-#' @title DimPlot SingleR Class Lables
-#' @description Dimplot Seurobject with SingleR class lables
+#' @title DimPlot SingleR Class Labels
+#' @description Create a Dimplot from a Seurat object with SingleR class labels
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
 #' @keywords Dimplot SingleR Classification 
@@ -147,8 +147,8 @@ DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
 }
 
 
-#' @title Tabulate SingleR Class Lables
-#' @description Tabulate Seurobject with SingleR class lables
+#' @title Tabulate SingleR Class Labels
+#' @description Tabulate SingleR class labels from a Seurat object
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
 #' @keywords Tabulate SingleR Classification 

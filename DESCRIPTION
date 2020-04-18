@@ -31,7 +31,6 @@ Imports:
     rpart,
     rpart.plot,
     reticulate,
-    garnett,
     glmnet,
     ranger,
     org.Hs.eg.db,
@@ -53,13 +52,13 @@ Imports:
     reshape2,
     Rtsne,
     scales,
-    SummarizedExperiment
+    SummarizedExperiment,
+    shiny
 Suggests:
     ggvis,
     devtools,
     testthat (>= 2.1.0)
 Remotes:
-    cole-trapnell-lab/garnett,
     bioc::release/DropletUtils,
     bioc::release/DESeq2,
     bioc::release/MAST,
@@ -67,13 +66,13 @@ Remotes:
     bioc::release/SummarizedExperiment,
     bioc::release/RDAVIDWebService,
     bioc::release/STRINGdb
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Collate: 
     'Utils.R'
     'LabKeySettings.R'
     'CellHashing.R'
+    'CiteSeq.R'
     'Classification_Caret.R'
-    'Classification_Garnett.R'
     'Classification_MCE.R'
     'Classification_SGS.R'
     'Classification_Sim.R'

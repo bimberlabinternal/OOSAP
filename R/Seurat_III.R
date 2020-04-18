@@ -620,12 +620,14 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
   #Verify data exists.  This appears to get reset, possibly by DimRedux steps
   runJackStraw <- forceReCalc | !HasStepRun(seuratObj, 'JackStraw', forceReCalc = forceReCalc)
-  if (!runJackStraw && length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
-    warning('JackStraw marked as complete, but seurat object lacks data')
-    runJackStraw <- TRUE
+  if (!useSCTransform) {
+    if (!runJackStraw && length(seuratObj@reductions$pca@jackstraw$empirical.p.values) == 0) {
+      warning('JackStraw marked as complete, but seurat object lacks data')
+      runJackStraw <- TRUE
+    }
   }
 
-  if (runJackStraw) {
+  if (!useSCTransform && runJackStraw) {
     seuratObj <- JackStraw(object = seuratObj, num.replicate = 100, verbose = F)
     seuratObj <- ScoreJackStraw(object = seuratObj, dims = 1:20)
     seuratObj <- MarkStepRun(seuratObj, 'JackStraw', saveFile)
@@ -677,8 +679,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   print(paste0('After nFeature_RNA filter: ', length(colnames(x = seuratObj))))
 
   expr <- Seurat::FetchData(object = seuratObj, vars = 'p.mito')
-  seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
-  print(paste0('After p.mito filter: ', length(colnames(x = seuratObj))))
+  if (!all(is.na(expr)) && max(expr) != 0) {
+		seuratObj <- seuratObj[, which(x = expr > pMito.low & expr < pMito.high)]
+		print(paste0('After p.mito filter: ', length(colnames(x = seuratObj))))
+  } else {
+    print('Either p.mito was NA or all values were 0')
+  }
 
   print(paste0('Final: ', length(colnames(x = seuratObj))))
   
@@ -691,7 +697,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   print(LabelPoints(plot = VariableFeaturePlot(seuratObj), points = head(VariableFeatures(seuratObj), 20), repel = TRUE, xnudge = 0, ynudge = 0))
 
   print(DimPlot(object = seuratObj))
-  if (doCellCycle) {
+  if (doCellCycle && ('Phase' %in% names(seuratObj@meta.data))) {
     print(cowplot::plot_grid(plotlist = list(
       DimPlot(object = seuratObj, reduction = "pca", dims = c(1, 2), group.by = 'Phase'),
       DimPlot(object = seuratObj, reduction = "pca", dims = c(2, 3), group.by = 'Phase'),
@@ -793,12 +799,13 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 #' @param dimsToUse The number of dims to use.  If null, this will be inferred using FindSeuratElbow()
 #' @param minDimsToUse The minimum numbers of dims to use.  If dimsToUse is provided, this will override.
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
+#' @param maxTsneIter The value of max_iter to provide to RunTSNE.  Increasing can help large datasets.
 #' @param forceReCalc If true, all steps will be performed even if already marked complete
 #' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
 #' @return A modified Seurat object.
 #' @export
 FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
-                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500) {
+                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500, maxTsneIter = 2000) {
   if (is.null(dimsToUse)) {
     dimMax <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', dimMax))
@@ -829,7 +836,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
     perplexity <- .InferPerplexityFromSeuratObj(seuratObj)
-    seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity)
+    seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity, max_iter = maxTsneIter)
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
 

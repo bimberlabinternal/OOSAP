@@ -1,6 +1,8 @@
 context("scRNAseq")
 
 test_that("All aliases preserved", {
+    biomaRt::biomartCacheClear()
+
     # ENSMMUG00000040244: resolved by external_gene_name
     # ENSMMUG00000008350: resolved by homolog
     # CD8: Already  symbol, not resolved, return original
@@ -17,4 +19,6 @@ test_that("All aliases preserved", {
     #verify concat works when it returns two hits:
     aliased <- AliasGeneNames(c('ENSMMUG00000029821'), ensemblVersion = '97')
     expect_equal(aliased, c('HSPA1A,HSPA1B(hs)'))
+
+    biomaRt::biomartCacheClear()
 })

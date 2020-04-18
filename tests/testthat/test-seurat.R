@@ -49,6 +49,7 @@ test_that("Serat processing works as expected", {
 
   unlink(vgFile)
 
+  biomaRt::biomartCacheClear()
   mf <- paste0(outPrefix, '.markers.txt')
   md <- paste0(outPrefix, '.markers.rds')
   Find_Markers(seuratObj, resolutionToUse = resolutionToUse, outFile = mf, saveFileMarkers = md, testsToUse = c('wilcox', 't'))

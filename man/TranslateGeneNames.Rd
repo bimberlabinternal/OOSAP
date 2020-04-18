@@ -10,7 +10,7 @@ TranslateGeneNames(
   davidEmail,
   ensemblDataset = "mmulatta_gene_ensembl",
   ensemblVersion = NULL,
-  ensemblMirror = "uswest",
+  ensemblMirror = NULL,
   biomart = "ensembl",
   stringSpeciesId = 9606,
   useEnsembl = TRUE,

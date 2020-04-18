@@ -9,7 +9,7 @@ TranslateToEnsembl(
   geneSymbols = NULL,
   dataset = "mmulatta_gene_ensembl",
   ensemblVersion = NULL,
-  ensemblMirror = "uswest",
+  ensemblMirror = NULL,
   biomart = "ensembl"
 )
 }
