@@ -8,10 +8,11 @@
 #' @description Downloads matching Cite-seq counts using barcodePrefix on the seurat object
 #' @param seuratObj, A Seurat object.
 #' @param featureLabelTable An optional TSV file listing the markers and metadata.  It must contain a header row with at least the columns (lowercase): tagname, sequence. If it contains the column markername, this will be used to replace the rownames of the matrix.
+#' @param adtWhitelist An optional character vector of tag names, which must exactly match the rownames of the ADT count matrix.  If provided, data will be limited to these tags.
 #' @param assayName The name of the assay to store the ADT data.
 #' @return A modified Seurat object.
 #' @export
-DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT', featureLabelTable = NULL){
+DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT', featureLabelTable = NULL, adtWhitelist = NULL){
 	if (is.null(seuratObj[['BarcodePrefix']])){
 		stop('Seurat object lacks BarcodePrefix column')
 	}
@@ -37,7 +38,7 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 			stop(paste0('Unable to download calls table for prefix: ', barcodePrefix, ', expected file: ', countDir))
 		}
 
-		seuratObj <- AppendCiteSeq(seuratObj = seuratObj, countMatrixDir = countDir, barcodePrefix = barcodePrefix, assayName = assayName, featureLabelTable = featureLabelTable)
+		seuratObj <- AppendCiteSeq(seuratObj = seuratObj, countMatrixDir = countDir, barcodePrefix = barcodePrefix, assayName = assayName, featureLabelTable = featureLabelTable, adtWhitelist = adtWhitelist)
 	}
 
 	.PlotCiteSeqCountData(seuratObj, assayName = assayName)
@@ -225,7 +226,7 @@ DownloadAndAppendCiteSeq <- function(seuratObj, outPath = '.', assayName = 'ADT'
 }
 
 #' @importFrom dplyr arrange
-AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assayName = 'ADT', minRowSum = 10, featureLabelTable = NULL) {
+AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assayName = 'ADT', minRowSum = 10, featureLabelTable = NULL, adtWhitelist = NULL) {
 	gexCells <- colnames(seuratObj)
 	print(paste0('Initial cell barcodes in GEX data: ', length(gexCells)))
 
@@ -244,28 +245,44 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 	print(paste0('Initial cells in cite-seq matrix: ', ncol(bData)))
 	bData <- bData[,which(colnames(bData) %in% colnames(seuratObj)), drop = F]
 	print(paste0('Intersect with GEX data: ', ncol(bData)))
+	if (ncol(bData) == 0) {
+		stop('No cells are shared')
+	}
 	bData <- as.sparse(bData)
 
 	toDrop <- rowSums(bData) < minRowSum
 	if (sum(toDrop) > 0){
 		print(paste0('ADTs dropped due to low counts across cells: ', sum(toDrop)))
-		print(paste0(rownames(bData)[!toDrop], collapse = ','))
-		bData <- bData[which(rowSums(bData) > 0), , drop = FALSE]
+		print(paste0(rownames(bData)[toDrop], collapse = ','))
+		bData <- bData[!toDrop, , drop = FALSE]
 		print(paste0('ADTs after filter: ', nrow(bData)))
+		if (nrow(bData) == 0) {
+			stop('No ADTs remain after filter')
+		}
+	}
+
+	# Apply this prior to rename:
+	if (!is.null(adtWhitelist)) {
+		print('Filtering HTOs based on whitelist')
+		bData <- bData[rownames(bData) %in% adtWhitelist, , drop = FALSE]
+		print(paste0('ADTs after filter: ', nrow(bData)))
+		if (nrow(bData) == 0) {
+			stop('No rows left after filter!')
+		}
 	}
 
 	#rename features based on DB
 	ft <- NULL
+	shouldAddMetadata <- F
 	if (!is.null(featureLabelTable)) {
 		ft <- read.table(featureLabelTable, sep = '\t', header = T, stringsAsFactors = F)
-		if (!('tagName' %in% colnames(ft))) {
-			stop('Table must contain the column tagName')
+		if (!('tagname' %in% colnames(ft))) {
+			stop('Table must contain the column tagname')
 		}
 
 		rownames(ft) <- ft$featureName
-		shouldAddMetadata <- F
 
-		if ('tagName' %in% colnames(ft)){
+		if ('tagname' %in% colnames(ft)){
 			print('Renaming ADTs')
 			rows$tagname <- paste0(rows$tagname, '-', rows$sequence)
 			newRows <- data.frame(tagname = rownames(bData), sortorder = 1:nrow(bData), stringsAsFactors = F)
@@ -274,11 +291,12 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 			newRows <- newRows[names(newRows) != 'sortorder']
 
 			newRows$markername <- dplyr::coalesce(newRows$markername, newRows$tagname)
-			newRows$markername <- make.unique(newRows$markername)
+			newRows$markernameUnique <- make.unique(newRows$markername)
 
-			print(paste0('Total renamed: ', sum(newRows$markername != newRows$tagname)))
+			print(paste0('Total renamed: ', sum(newRows$markernameUnique != newRows$tagname)))
 
-			rownames(bData) <- newRows$markername
+			rownames(bData) <- newRows$markernameUnique
+			ft <- newRows
 			shouldAddMetadata <- T
 		}
 	}
@@ -297,11 +315,19 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 			print(paste0('total ADT rows added: ', length(missing)))
 			bData <- rbind(bData, missingMat)
 		}
-		bData <- as.sparse(bData[rownames(assayData),])
 
-		assayData[rownames(assayData),colnames(bData)] <- bData
+		bData <- as.sparse(bData[rownames(assayData),,drop = F])
+		assayData[rownames(assayData),colnames(bData), drop = F] <- bData
 		assayData <- Seurat::CreateAssayObject(counts = assayData)
-		assayData <- Seurat::AddMetadata(object = assayData, metadata = GetAssay(seuratObj, assay = assayName)@feature.meta)
+
+		metaToAdd <- GetAssay(seuratObj, assay = assayName)@meta.features
+		if (ncol(metaToAdd) > 0) {
+			assayData <- Seurat::AddMetaData(object = assayData, metadata = metaToAdd)
+		}
+
+		if (sum(colnames(seuratObj) != colnames(assayData)) > 0) {
+			stop('The columns of the ADT matrix do not equal the seurat object')
+		}
 
 	} else {
 		print('no pre-existing assay, creating new')
@@ -314,19 +340,17 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 			print(paste0('total cells lacking data: ', length(missing)))
 			bData <- cbind(bData, missingMat)
 		}
-		bData <- as.sparse(bData[,colnames(seuratObj)])
+		bData <- as.sparse(bData[,colnames(seuratObj), drop = F])
+		if (sum(colnames(seuratObj) != colnames(bData)) > 0) {
+			stop('The columns of the ADT matrix do not equal the seurat object')
+		}
 		assayData <- Seurat::CreateAssayObject(counts = bData)
 	}
 
 	seuratObj[[assayName]] <- assayData
 
 	if (shouldAddMetadata) {
-		print('Adding feature metadata')
-		for (colname in names(ft)) {
-			toAdd <- ft[[colname]]
-			names(toAdd) <- ft$tagname
-			seuratObj[[assayName]] <- Seurat::AddMetadata(object = seuratObj[[assayName]], metadata = toAdd, col.name = colname)
-		}
+		seuratObj[[assayName]] <- .AddFeatureMetadata(ft, seuratObj[[assayName]])
 	}
 
 	seuratObj <- NormalizeData(seuratObj, assay = assayName, normalization.method = "CLR")
@@ -334,6 +358,27 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 
 	return(seuratObj)
 }
+
+.AddFeatureMetadata <- function(ft, assayData) {
+	print('Adding feature metadata')
+	for (colname in names(ft)) {
+		print(paste0('adding column: ', colname))
+		toAdd <- ft[[colname]]
+		names(toAdd) <- ft$markernameUnique
+		select <- names(toAdd) %in% rownames(assayData)
+		toAdd <- toAdd[select]
+		if (length(toAdd) != nrow(ft)) {
+			print(paste0('Not all markers in feature table were present in found table, missing: ', paste0(ft$markernameUnique[!select])))
+		}
+
+		if (length(toAdd) > 0) {
+			assayData <- Seurat::AddMetaData(object = assayData, metadata = toAdd, col.name = colname)
+		}
+	}
+
+	return(assayData)
+}
+
 
 .PlotCiteSeqCountData <- function(seuratObj, assayName) {
 	assayData <- GetAssayData(seuratObj, slot = "counts", assay = assayName)
@@ -374,6 +419,7 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
 	origAssay <- DefaultAssay(seuratObj)
 	DefaultAssay(seuratObj) <- assayName
+	print(paste0('Processing ADT data, total features: ', rownames(seuratObj)))
 
 	#PCA:
 	seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
