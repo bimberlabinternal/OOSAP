@@ -1,11 +1,6 @@
-setwd("C:/Projects/OOSAP/tests/testthat")
-library(OOSAP)
-library(testthat)
-
-
 context("scRNAseq")
 
-#test_that("Cite-Seq works", {
+test_that("Cite-Seq works", {
   #Reduce size, touch up data:
   seuratObj <- readRDS('../testdata/seuratOutput.rds')
 	seuratObj <- seuratObj[1:1000,1:100]
@@ -51,8 +46,12 @@ context("scRNAseq")
 	
 	#Now add again, existing assay present:
 	seuratObjCite2 <- OOSAP:::AppendCiteSeq(seuratObj = seuratObjCite, countMatrixDir = inputPath2, barcodePrefix = '67890', minRowSum = 0)
-	
+	d1 <- Seurat::GetAssayData(seuratObjCite, 'ADT', slot = 'counts')
+	d2 <- Seurat::GetAssayData(seuratObjCite2, 'ADT', slot = 'counts')
+	expect_equal(d2[,1:50], d1[,1:50]) #The original data, should be identical
+	expect_equal(max(d2[,41:59]), 0) #These have no data
+	expect_equal(max(d2[,60:100]), 1) 
 	
 	unlink(inputPath1, recursive = T)
 	unlink(inputPath2, recursive = T)
-#})
+})
