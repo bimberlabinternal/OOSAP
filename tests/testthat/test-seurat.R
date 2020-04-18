@@ -10,8 +10,8 @@ test_that("Serat processing works as expected", {
 
   expect_equal(ncol(seuratObj), 3353, tolerance = 5)
 
-  expect_equal(nrow(seuratObj), length(seuratObj@misc$geneIds))
-  expect_equal(rownames(seuratObj), names(seuratObj@misc$geneIds))
+  expect_equal(nrow(seuratObj), length(seuratObj@assays$RNA@meta.features$geneIds))
+  expect_equal(rownames(seuratObj), names(seuratObj@assays$RNA@meta.features$geneIds))
   geneIds <- GetGeneIds(seuratObj, c('HES4', 'CALML6'))
   names(geneIds) <- NULL
   expect_equal(geneIds, c('ENSMMUG00000001817', 'ENSMMUG00000012392'))

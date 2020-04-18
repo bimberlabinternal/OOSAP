@@ -69,7 +69,8 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
 
   featureMeta <- GetAssay(seuratObj)@meta.features
   if ('GeneId' %in% colnames(featureMeta)) {
-    ret <- seuratObj@misc$geneIds[geneNames]
+    ret <- featureMeta$geneIds[geneNames]
+    names(ret) <- rownames(seuratObj)
   }
   #NOTE: in previous versions we stored geneIDs here:
 	else if ('geneIds' %in% names(seuratObj@misc)) {
@@ -390,8 +391,11 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
     if (is.null(seuratObj)) {
       seuratObj <- seuratObjs[[exptNum]]
     } else {
-      geneIds1 <- seuratObj@misc$geneIds
-      geneIds2 <- seuratObjs[[exptNum]]@misc$geneIds
+			assayName <- DefaultAssay(seuratObj)
+      geneIds1 <- GetAssay(seuratObj)@meta.features$geneIds
+			names(geneIds1) <- rownames(seuratObj)
+      geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$geneIds
+			names(geneIds2) <- rownames(seuratObjs[[exptNum]])
 
       if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
         stop('Gene names are not equal!')
@@ -402,16 +406,16 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
                          project = projectName)
 
       if (any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
-        seuratObj@misc$geneIds <- geneIds2
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds2, col.name = 'geneIds')
       } else if (!any(is.na(geneIds1)) & any(is.na(geneIds2))) {
-        seuratObj@misc$geneIds <- geneIds1
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'geneIds')
       } else if (!any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
         if (any(geneIds1 != geneIds2)) {
           stop('Gene IDs did not match between seurat objects!')
         }
-      }
-
-      seuratObj@misc$geneIds <- geneIds1
+      } else {
+        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'geneIds')
+			}
     }
   }
   
