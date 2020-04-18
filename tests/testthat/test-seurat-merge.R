@@ -20,7 +20,6 @@ test_that("Seurat-merge works as expected", {
 
   #Gene IDs preserved:
   expect_equal(nrow(seuratObj), length(seuratObj@assays$RNA@meta.features$GeneId))
-  expect_equal(rownames(seuratObj), names(seuratObj@assays$RNA@meta.features$GeneId))
   geneIds <- GetGeneIds(seuratObj, c('HES4', 'CALML6'))
   names(geneIds) <- NULL
   expect_equal(geneIds, c('ENSMMUG00000001817', 'ENSMMUG00000012392'))
