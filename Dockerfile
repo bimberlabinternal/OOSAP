@@ -1,5 +1,7 @@
 from bioconductor/bioconductor_docker:RELEASE_3_10
 
+# NOTE: if anything breaks the dockerhub build cache, you will probably need to build locally and push to dockerhub.
+# After the cache is in place, builds from github commits should be fast.
 RUN apt-get update -y \
 	&& apt-get install -y \
 		libhdf5-dev \
