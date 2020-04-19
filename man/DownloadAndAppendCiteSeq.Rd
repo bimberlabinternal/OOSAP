@@ -9,6 +9,7 @@ DownloadAndAppendCiteSeq(
   outPath = ".",
   assayName = "ADT",
   featureLabelTable = NULL,
+  minRowSum = 5,
   adtWhitelist = NULL
 )
 }
@@ -18,6 +19,8 @@ DownloadAndAppendCiteSeq(
 \item{assayName}{The name of the assay to store the ADT data.}
 
 \item{featureLabelTable}{An optional TSV file listing the markers and metadata.  It must contain a header row with at least the columns (lowercase): tagname, sequence. If it contains the column markername, this will be used to replace the rownames of the matrix.}
+
+\item{minRowSum}{If provided, any ADTs with a rowSum less than this value will be dropped.}
 
 \item{adtWhitelist}{An optional character vector of tag names, which must exactly match the rownames of the ADT count matrix.  If provided, data will be limited to these tags.}
 }
