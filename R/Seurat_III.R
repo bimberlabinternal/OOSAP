@@ -45,8 +45,11 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
   PrintQcPlots(seuratObj)
 
   if (storeGeneIds) {
-    seuratObj@misc$geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
-    names(seuratObj@misc$geneIds) <- rownames(seuratObj)
+    #store IDs in assay metadata
+    geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
+    names(geneIds) <- rownames(seuratObj)
+    assayName <- DefaultAssay(seuratObj)
+    seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = 'GeneId')
   }
 
   return(seuratObj)
@@ -62,11 +65,22 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
 #' @return A named vector of the gene IDs
 #' @export
 GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
-  if (is.null(seuratObj@misc$geneIds)) {
-    stop('Expected gene IDs to be stored under seuratObj@misc$geneIds')
+	ret <- NULL
+
+  featureMeta <- GetAssay(seuratObj)@meta.features
+  if ('GeneId' %in% colnames(featureMeta)) {
+    ret <- featureMeta$GeneId
+    names(ret) <- rownames(seuratObj)
+    ret <- ret[geneNames]
+  }
+  #NOTE: in previous versions we stored geneIDs here:
+	else if ('geneIds' %in% names(seuratObj@misc)) {
+    ret <- seuratObj@misc$geneIds[geneNames]
   }
 
-  ret <- seuratObj@misc$geneIds[geneNames]
+  if (is.null(ret)) {
+  	stop('Expected gene IDs to be stored under GetAssay(seuratObj)@meta.features or seuratObj@misc$geneIds')
+  }
 
   if (throwIfGenesNotFound & sum(is.na(ret)) > 0) {
     notFound <- paste0(geneNames[is.na(ret)], collapse = ',')
@@ -372,14 +386,17 @@ doMergeCCA <- function(seuratObjs, nameList,
 #' @param projectName The projectName to pass to Seurat
 doMergeSimple <- function(seuratObjs, nameList, projectName){
   seuratObj <- NULL
-  
+
   for (exptNum in nameList) {
     print(exptNum)
     if (is.null(seuratObj)) {
       seuratObj <- seuratObjs[[exptNum]]
     } else {
-      geneIds1 <- seuratObj@misc$geneIds
-      geneIds2 <- seuratObjs[[exptNum]]@misc$geneIds
+			assayName <- DefaultAssay(seuratObj)
+      geneIds1 <- GetAssay(seuratObj)@meta.features$GeneId
+			names(geneIds1) <- rownames(seuratObj)
+      geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$GeneId
+			names(geneIds2) <- rownames(seuratObjs[[exptNum]])
 
       if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
         stop('Gene names are not equal!')
@@ -390,16 +407,18 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
                          project = projectName)
 
       if (any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
-        seuratObj@misc$geneIds <- geneIds2
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds2, col.name = 'GeneId')
       } else if (!any(is.na(geneIds1)) & any(is.na(geneIds2))) {
-        seuratObj@misc$geneIds <- geneIds1
+				seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
       } else if (!any(is.na(geneIds1)) & !any(is.na(geneIds2))) {
         if (any(geneIds1 != geneIds2)) {
           stop('Gene IDs did not match between seurat objects!')
         }
-      }
 
-      seuratObj@misc$geneIds <- geneIds1
+        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
+      } else {
+        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
+			}
     }
   }
   
