@@ -386,7 +386,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 #' @param projectName The projectName to pass to Seurat
 doMergeSimple <- function(seuratObjs, nameList, projectName){
   seuratObj <- NULL
-  
+
   for (exptNum in nameList) {
     print(exptNum)
     if (is.null(seuratObj)) {
@@ -414,6 +414,8 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
         if (any(geneIds1 != geneIds2)) {
           stop('Gene IDs did not match between seurat objects!')
         }
+
+        seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
       } else {
         seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
 			}
