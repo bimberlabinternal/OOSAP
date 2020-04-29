@@ -14,7 +14,7 @@ test1a =
 test1b = 
  c("ADSS",
    "ZBTB18",
-   "BRP44",
+   "MPC2",
    "ENSMMUG00000060218",
    "CCDC181",
    "TNLG2A",
@@ -67,7 +67,7 @@ test3b =
 expect_test1a_ensembl = 
   c("ADSS2",
     "ZBTB18",
-    "BRP44",
+    "MPC2",
     "XCL1",
     "CCDC181",
     "TNFSF18",
@@ -103,18 +103,18 @@ test_that("Gene aliasing code works as expected", {
   #Ensembl
   testEnsemblWithId <- TranslateToEnsembl(ensemblIds = test1a, geneSymbols = NULL)
   expect_equal(as.character(testEnsemblWithId$EnsemblId), test1a)  #Ensure order preserved
-  expect_equal(as.character(testEnsemblWithId$external_gene_name), c('ADSS2','ZBTB18','BRP44','XCL1','CCDC181','TNFSF18','SNORD24','COP1','BRINP2'))
+  expect_equal(as.character(testEnsemblWithId$external_gene_name), c('ADSS2','ZBTB18','MPC2','XCL1','CCDC181','TNFSF18','SNORD24','COP1','BRINP2'))
   
   testEnsemblWithSymbol <- TranslateToEnsembl(ensemblIds = NA, geneSymbols = expect_test1a_ensembl)
   expect_equal(as.character(testEnsemblWithSymbol$GeneSymbol), expect_test1a_ensembl)
   expect_true(all(is.na(testEnsemblWithSymbol$EnsemblId)))
-  expect_equal(as.character(testEnsemblWithSymbol$external_gene_name), c('ADSS2','ZBTB18','BRP44','XCL1','CCDC181','TNFSF18', NA,'COP1','BRINP2'))
+  expect_equal(as.character(testEnsemblWithSymbol$external_gene_name), c('ADSS2','ZBTB18','MPC2','XCL1','CCDC181','TNFSF18', NA,'COP1','BRINP2'))
   expect_equal(as.character(testEnsemblWithSymbol$ensembl_gene_id), c('ENSMMUG00000000016','ENSMMUG00000015664','ENSMMUG00000010387','ENSMMUG00000060218','ENSMMUG00000000065','ENSMMUG00000059499',NA,'ENSMMUG00000059669','ENSMMUG00000022935'))
 
   testEnsemblWithBoth <- TranslateToEnsembl(ensemblIds = test1a, geneSymbols = expect_test1a_ensembl)
   expect_equal(as.character(testEnsemblWithBoth$GeneSymbol), expect_test1a_ensembl)
   expect_equal(as.character(testEnsemblWithBoth$EnsemblId), test1a)
-  expect_equal(as.character(testEnsemblWithBoth$external_gene_name), c('ADSS2','ZBTB18','BRP44','XCL1','CCDC181','TNFSF18', 'SNORD24','COP1','BRINP2'))
+  expect_equal(as.character(testEnsemblWithBoth$external_gene_name), c('ADSS2','ZBTB18','MPC2','XCL1','CCDC181','TNFSF18', 'SNORD24','COP1','BRINP2'))
   expect_equal(as.character(testEnsemblWithBoth$ensembl_gene_id), c('ENSMMUG00000000016','ENSMMUG00000015664','ENSMMUG00000010387','ENSMMUG00000060218','ENSMMUG00000000065','ENSMMUG00000059499','ENSMMUG00000050963','ENSMMUG00000059669','ENSMMUG00000022935'))
   
   #STRINGdb
