@@ -40,6 +40,7 @@ jobs:
         - R CMD check --no-tests *tar.gz
         - Rscript -e 'res=devtools::test(reporter="summary");df=as.data.frame(res);if(sum(df$failed) > 0 || any(df$error)) {q(status=1)}'
       after_script:
+        - Rscript -e 'BiocManager::valid()'
         - if [ -e ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out ];then cat ${TRAVIS_BUILD_DIR}/OOSAP.Rcheck/00install.out; else echo '00install.log not found'; fi
 
 addons:
