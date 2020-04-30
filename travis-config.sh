@@ -9,6 +9,7 @@ echo 'Running travis setup'
 mkdir $HOME/.R
 
 Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
+Rscript -e 'BiocManager::install(version="3.10")'
 
 # Force python3:
 python3.5 -m pip install --upgrade pip
@@ -33,7 +34,7 @@ CORES=`Rscript -e "getOption('Ncpus', 1L)"`
 echo "Final Ncpus: $CORES"
 
 
-# Note: this is a hack.  Add Bioconductor repos to default repos, so install.packages will pick them up.
+# Verify config, add Bioconductor repos to default repos, so install.packages will pick them up.
 if [ -e ~/.Rprofile ];then
     echo 'Rprofile exists:'
     cat ~/.Rprofile
@@ -45,8 +46,7 @@ if [ -e ~/.Rprofile.site ];then
 fi
 
 # Log repos to ensure Bioconductor used:
-#echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile
-#echo "options(repos = BiocManager::repositories(version = 'devel'))" >> ~/.Rprofile.site
+echo "options(repos = BiocManager::repositories(version = '3.10'));" >> ~/.Rprofile.site
 
 echo 'R repos:'
 Rscript -e "getOption('repos')"
