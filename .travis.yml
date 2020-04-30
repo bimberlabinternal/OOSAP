@@ -3,7 +3,9 @@
 
 dist: bionic
 language: r
-r: bioc-release
+r: 3.6.3
+bioc_required: true
+
 cache:
   - packages
   - pip
