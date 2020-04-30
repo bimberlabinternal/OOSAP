@@ -61,13 +61,13 @@ Suggests:
     testthat (>= 2.1.0)
 Remotes:
     cole-trapnell-lab/garnett,
-    bioc::release/DropletUtils,
-    bioc::release/DESeq2,
-    bioc::release/MAST,
-    bioc::release/SingleR,
-    bioc::release/SummarizedExperiment,
-    bioc::release/RDAVIDWebService,
-    bioc::release/STRINGdb
+    bioc::3.10/DropletUtils,
+    bioc::3.10/DESeq2,
+    bioc::3.10/MAST,
+    bioc::3.10/SingleR,
+    bioc::3.10/SummarizedExperiment,
+    bioc::3.10/RDAVIDWebService,
+    bioc::3.10/STRINGdb
 RoxygenNote: 7.1.0
 Collate: 
     'Utils.R'
