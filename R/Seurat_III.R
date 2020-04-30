@@ -31,7 +31,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
     stop(paste0("File is not a directory: ", dataDir))
   }
 
-  seuratRawData <- Read10X(data.dir = dataDir)
+  seuratRawData <- Read10X(data.dir = dataDir, strip.suffix = TRUE)
 
   #Cannot have underscores in feature names, Seurat will replace with hyphen anyway.  Perform upfront to avoid warning
   if (sum(grepl(x = rownames(seuratRawData), pattern = '_')) > 0) {
@@ -46,7 +46,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
 
   if (storeGeneIds) {
     #store IDs in assay metadata
-    geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1))
+    geneIds <- rownames(Read10X(data.dir = dataDir, gene.column = 1, strip.suffix = TRUE))
     names(geneIds) <- rownames(seuratObj)
     assayName <- DefaultAssay(seuratObj)
     seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds, col.name = 'GeneId')
@@ -1581,6 +1581,6 @@ PlotMarkerSet <- function(seuratObj, reduction, title, features) {
     return()
   }
 
-  print(AddTitleToMultiPlot(FeaturePlot(seuratObj, features = featuresToPlot, reduction = reduction), title))
+  print(AddTitleToMultiPlot(FeaturePlot(seuratObj, features = featuresToPlot, reduction = reduction, min.cutoff = 'q05', max.cutoff = 'q95'), title))
 }
 

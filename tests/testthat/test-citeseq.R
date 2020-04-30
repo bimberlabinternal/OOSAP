@@ -7,7 +7,7 @@ test_that("Cite-Seq works", {
 
 	#this is technically cell hashing, but shouldnt matter:
 	countDir <- '../testdata/cellHashing/umi_count'
-	citeseqData <- Seurat::Read10X(data.dir = countDir, gene.column=1)
+	citeseqData <- Seurat::Read10X(data.dir = countDir, gene.column=1, strip.suffix = TRUE)
 	citeseqData1 <- citeseqData[,1:40]
 	colnames(citeseqData1) <- colnames(seuratObj)[1:40]
 	inputPath1 <- './input1'

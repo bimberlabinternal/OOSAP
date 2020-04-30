@@ -237,7 +237,7 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 	if (!dir.exists(countMatrixDir))
 	stop("Count matrix not found")
 
-	bData <- Read10X(countMatrixDir, gene.column=1)
+	bData <- Read10X(countMatrixDir, gene.column=1, strip.suffix = TRUE)
 	bData <- bData[which(!(rownames(bData) %in% c('unmapped'))), , drop = F]
 	if (!is.null(barcodePrefix)) {
 		colnames(bData) <- paste0(barcodePrefix, '_', colnames(bData))
@@ -247,9 +247,11 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 	}
 
 	print(paste0('Initial cells in cite-seq matrix: ', ncol(bData)))
-	bData <- bData[,which(colnames(bData) %in% colnames(seuratObj)), drop = F]
+	bData <- bData[,which(colnames(bData) %in% gexCells), drop = F]
 	print(paste0('Intersect with GEX data: ', ncol(bData)))
 	if (ncol(bData) == 0) {
+		print(head(gexCells))
+		print(head(colnames(bData)))
 		stop('No cells are shared')
 	}
 	bData <- as.sparse(bData)

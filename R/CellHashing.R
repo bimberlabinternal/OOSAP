@@ -31,7 +31,7 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, maxValueForColSumFilt
 
   if (dir.exists(bFile)) {
     #CITE-seq-Count 1.4.2 and higher creates a folder
-    bData <- Read10X(bFile, gene.column=1)
+    bData <- Read10X(bFile, gene.column=1, strip.suffix = TRUE)
     bData <- bData[which(!(rownames(bData) %in% c('unmapped'))), , drop = F]
     bData <- as.matrix(bData)
   } else {
