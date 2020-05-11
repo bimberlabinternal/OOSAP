@@ -557,11 +557,20 @@ utils::globalVariables(
   datasetSelect <- seuratObject$BarcodePrefix == barcodePrefix
   gexBarcodes <- colnames(seuratObject)[datasetSelect]
 
-  tcr <- tcr[tcr$barcode %in% gexBarcodes,]
-  pct <- round(nrow(tcr) / origRows * 100, 2)
-  pct2 <- round(nrow(tcr) / length(gexBarcodes) * 100, 2)
+  tcrIntersect <- tcr[tcr$barcode %in% gexBarcodes,]
+  pct <- round(nrow(tcrIntersect) / origRows * 100, 2)
+  pct2 <- round(nrow(tcrIntersect) / length(gexBarcodes) * 100, 2)
 
-  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data (total ', length(gexBarcodes),'): ', nrow(tcr), " (", pct, "% / ", pct2, "%)"))
+  print(paste0('Barcodes with clonotypes: ', origRows, ', intersecting with GEX data (total ', length(gexBarcodes),'): ', nrow(tcrIntersect), " (", pct, "% / ", pct2, "%)"))
+  if (nrow(tcrIntersect) == 0) {
+    print('no barcodes shared')
+    print(paste0('first GEX barcodes:'))
+    print(head(gexBarcodes))
+    print(paste0('first TCR barcodes:'))
+    print(head(tcr$barcode))
+  }
+
+  tcr <- tcrIntersect
 
   merged <- merge(data.frame(barcode = gexBarcodes, sortOrder = 1:length(gexBarcodes)), tcr, by = c('barcode'), all.x = T)
   rownames(merged) <- merged$barcode
