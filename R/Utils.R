@@ -391,7 +391,9 @@ DownloadOutputDirectoryFromOutputFile <- function(outputFileId, outFile, overwri
     stop('Output file ID cannot be NA')
   }
 
-  if (file.exists(outFile) & !overwrite) {
+  # NOTE: labkey.webdav.downloadFolder expects the base folder to exist, so only perform this check for files.
+  # Otherwise let labkey.webdav.downloadFolder handle overwrite behaviors
+  if (!asDirectory && file.exists(outFile) & !overwrite) {
     print(paste0("File exists, will not overwrite: ", outFile))
     return(outFile)
   }
