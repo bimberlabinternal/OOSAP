@@ -606,6 +606,8 @@ utils::globalVariables(
     seuratObject[[colName]] <- as.factor(toUpdate)
   }
 
+  seuratObject$HasCDR3Data <- !is.na(seuratObject$CDR3s)
+
   return(seuratObject)
 }
 

@@ -1164,14 +1164,14 @@ DownloadAndAppendCellHashing <- function(seuratObject, outPath = '.'){
     viewName="",
     colSort="-rowid",
     colFilter = makeFilter(c("readsetId", "EQUALS", readset)),
-    colSelect="rowid,readsetid,hashingreadsetid",
+    colSelect="rowid,readsetid,hashingreadsetid,sortid/hto",
     containerFilter=NULL,
     colNameOpt="rname"
   )
 
   if (nrow(cDNAs) == 0) {
     stop(paste0('No cDNA records found for GEX readset: ', readset))
-  } else if (sum(!is.na(cDNAs$hashingreadsetid)) == 0) {
+  } else if (sum(!is.na(cDNAs$sortid_hto)) == 0 || sum(!is.na(cDNAs$hashingreadsetid)) == 0) {
     print(paste0('The cDNA library does not use cell hashing, aborting'))
     return(NULL)
   }
