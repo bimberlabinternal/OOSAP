@@ -1433,23 +1433,39 @@ FilterCloneNames <- function(seuratObj, minValue) {
 #' @param varName The resolution/ident to use
 #' @param genes A vector of genes to include
 #' @param slot The slot to use, passed to GetAssayData
+#' @param SerMethod This function now defaults to the base Seurat method set to T, unless when a simple average is needed set to F.
 #' @return A data.frame of avg expression per var
 #' @importFrom Matrix rowMeans
 #' @export
-AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = "scale.data"){
+AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = "data", SerMethod=T){
   #Slot : Specific information to pull (i.e. counts, data, scale.data, ...)
 
-  AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
-
-  ClustLS <- list()
-
-  for (lev in levels(AvlLevels)){
-    print(lev)
-    ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, features = genes, slot = slot)[genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
+  if(!varName %in% colnames(seuratObj@meta.data)) stop("varName provided is not in the meta.data of this object")
+  
+  if(SerMethod) {
+    Seurat::Idents(seuratObj) <- varName
+    if(slot=="scale.data") use.scale = T else use.scale = F
+    if(slot=="counts") use.counts = T else use.counts = F
+    ClustDF <- Seurat::AverageExpression(object=seuratObj, slot=slot, features = genes, use.scale = use.scale, use.counts = use.counts)[[1]]
+  } else {
+    
+    AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
+    
+    ClustLS <- list()
+    
+    for (lev in levels(AvlLevels)){
+      print(lev)
+      ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, slot = slot)[genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
+    }
+    
+    ClustDF <- as.data.frame(ClustLS)
+    colnames(ClustDF) <- paste0("clus", levels(AvlLevels))
+    
   }
-
-  ClustDF <- as.data.frame(ClustLS)
-  colnames(ClustDF) <- paste0("clus", levels(AvlLevels))
+  
+  
+  
+  
 
   return(ClustDF)
 }
