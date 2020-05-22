@@ -9,7 +9,7 @@ AvgCellExprs(
   varName = "ClusterNames_0.2",
   genes,
   slot = "data",
-  SerMethod = T
+  useSeuratMethod = T
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ AvgCellExprs(
 
 \item{slot}{The slot to use, passed to GetAssayData}
 
-\item{SerMethod}{This function now defaults to the base Seurat method set to T, unless when a simple average is needed set to F.}
+\item{useSeuratMethod}{This function now defaults to the base Seurat method set to T. If a simple average is needed set to F.}
 }
 \value{
 A data.frame of avg expression per var
