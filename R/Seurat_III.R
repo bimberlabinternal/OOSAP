@@ -1448,7 +1448,6 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = 
   } else {
     
     AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
-    
     ClustLS <- list()
     
     for (lev in levels(AvlLevels)){
