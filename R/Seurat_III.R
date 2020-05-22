@@ -1444,9 +1444,7 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = 
   
   if(SerMethod) {
     Seurat::Idents(seuratObj) <- varName
-    if(slot=="scale.data") use.scale = T else use.scale = F
-    if(slot=="counts") use.counts = T else use.counts = F
-    ClustDF <- Seurat::AverageExpression(object=seuratObj, slot=slot, features = genes, use.scale = use.scale, use.counts = use.counts)[[1]]
+    ClustDF <- Seurat::AverageExpression(object=seuratObj, slot=slot, features = genes)[[1]]
   } else {
     
     AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
