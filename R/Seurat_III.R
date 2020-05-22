@@ -1433,37 +1433,30 @@ FilterCloneNames <- function(seuratObj, minValue) {
 #' @param varName The resolution/ident to use
 #' @param genes A vector of genes to include
 #' @param slot The slot to use, passed to GetAssayData
-#' @param SerMethod This function now defaults to the base Seurat method set to T, unless when a simple average is needed set to F.
+#' @param useSeuratMethod This function now defaults to the base Seurat method set to T. If a simple average is needed set to F.
 #' @return A data.frame of avg expression per var
 #' @importFrom Matrix rowMeans
 #' @export
-AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = "data", SerMethod=T){
+AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = "data", useSeuratMethod = T) {
   #Slot : Specific information to pull (i.e. counts, data, scale.data, ...)
 
-  if(!varName %in% colnames(seuratObj@meta.data)) stop("varName provided is not in the meta.data of this object")
+  if (!varName %in% colnames(seuratObj@meta.data)) stop(paste0("varName provided is not in the meta.data of this object: ", varName))
   
-  if(SerMethod) {
+  if (useSeuratMethod) {
     Seurat::Idents(seuratObj) <- varName
     ClustDF <- Seurat::AverageExpression(object=seuratObj, slot=slot, features = genes)[[1]]
   } else {
-    
     AvlLevels <- factor(as.character(FetchData(seuratObj, varName)[,1]))
     ClustLS <- list()
     
-    for (lev in levels(AvlLevels)){
-      print(lev)
+    for (lev in levels(AvlLevels)) {
       ClustLS[[lev]] <- as.data.frame(Matrix::rowMeans(GetAssayData(object = seuratObj, slot = slot)[genes, colnames(seuratObj)[which(AvlLevels==lev)]  ]))
     }
     
     ClustDF <- as.data.frame(ClustLS)
     colnames(ClustDF) <- paste0("clus", levels(AvlLevels))
-    
   }
   
-  
-  
-  
-
   return(ClustDF)
 }
 
