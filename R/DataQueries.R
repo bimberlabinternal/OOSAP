@@ -702,9 +702,9 @@ utils::globalVariables(
 
 
 utils::globalVariables(
-names = c('chain', 'cdr3', 'LabelCol', 'barcode', 'ChainCDR3s', 'TRA', 'TRB', 'TRD', 'TRG', 'TRAV', 'TRBV', 'TRDV', 'TRGV', 'CloneName'),
-package = 'OOSAP',
-add = TRUE
+	names = c('chain', 'cdr3', 'LabelCol', 'barcode', 'ChainCDR3s', 'TRA', 'TRB', 'TRD', 'TRG', 'TRAV', 'TRBV', 'TRDV', 'TRGV', 'CloneName'),
+	package = 'OOSAP',
+	add = TRUE
 )
 
 .ProcessTcrClonotypes <- function(clonotypeFile){
@@ -812,4 +812,38 @@ add = TRUE
   }
 
   return(tcr)
+}
+
+
+#' @title Download10xRawDataForLoupeFile
+#' @description Downloads the raw_feature_bc_matrix folder associated with the provided Loupe file
+#' @param outputFileId The outputfile Id of the loupe file
+#' @param outFile The local path to write this file. The data will be written to a subfolder named raw_feature_bc_matrix
+#' @param overwrite If true, any pre-existing local copy will be replaced.
+#' @param countType Either raw_feature_bc_matrix or filtered_feature_bc_matrix
+#' @export
+#'
+#' @import Rlabkey
+Download10xRawDataForLoupeFile <- function(outputFileId, outFile, overwrite = T, countType = 'raw_feature_bc_matrix') {
+	if (!dir.exists(outFile)) {
+    print('Creating output folder')
+		dir.create(outFile)
+	}
+
+  if (substr(outFile, nchar(outFile), nchar(outFile)) != '/'){
+    outFile <- paste0(outFile, '/')
+  }
+
+	expectedDir <- paste0(outFile, '/', countType)
+	if (!overwrite && dir.exists(outFile)) {
+		print('File exists, will not overwrite')
+    return(outFile)
+	} else if (overwrite && dir.exists(outFile)) {
+		print('File exists, deleting')
+		unlink(expectedDir, recursive = T)
+	}
+
+	return(DownloadOutputDirectoryFromOutputFile(outputFileId = outputFileId, outFile = outFile, overwrite = overwrite, pathTranslator = function(x){
+		return(paste0(dirname(x), '/', countType))
+	}))
 }
