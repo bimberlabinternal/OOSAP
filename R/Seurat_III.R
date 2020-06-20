@@ -1483,7 +1483,7 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   # XCL1 = ENSMMUG00000060218
   # CCL4 = ENSMMUG00000008111
   # LOC100423131 = XCL1, ENSMMUG00000013779
-  PlotMarkerSeries(seuratObj, reduction, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4' 'ENSMMUG00000008111'), 'CD8 Activation Markers')
+  PlotMarkerSeries(seuratObj, reduction, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111'), 'CD8 Activation Markers')
 
   PlotMarkerSeries(seuratObj, reduction, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
