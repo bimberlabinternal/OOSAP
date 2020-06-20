@@ -1470,7 +1470,7 @@ AvgCellExprs <- function(seuratObj, varName = "ClusterNames_0.2", genes, slot = 
 #' @import Seurat
 PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   #ENSMMUG00000003532=CD8b
-  PlotMarkerSet(seuratObj, reduction, 'CD8/CD4 Markers', c('CD8A', 'ENSMMUG00000003532', 'CD4', 'IL7R'))
+  PlotMarkerSet(seuratObj, reduction, 'CD8/CD4 Markers', c('CD8A', 'CD8B', 'ENSMMUG00000003532', 'CD4', 'IL7R'))
 
   #Eff v. Mem:
   #IL7R = CD127
@@ -1480,7 +1480,10 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   PlotMarkerSeries(seuratObj, reduction, c('CCR7', 'SELL', 'GZMB', 'CCR5', 'IL2RA', 'PTPRC', 'IL7R', 'CTLA4'), 'Effector vs. Memory')
 
   #CD8 Activation
-  PlotMarkerSeries(seuratObj, reduction, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'ENSMMUG00000013779', 'ENSMMUG00000060218', 'ENSMMUG00000008111'), 'CD8 Activation Markers')
+  # XCL1 = ENSMMUG00000060218
+  # CCL4 = ENSMMUG00000008111
+  # LOC100423131 = XCL1, ENSMMUG00000013779
+  PlotMarkerSeries(seuratObj, reduction, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4' 'ENSMMUG00000008111'), 'CD8 Activation Markers')
 
   PlotMarkerSeries(seuratObj, reduction, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
@@ -1504,7 +1507,8 @@ PlotImmuneMarkers <- function(seuratObj, reduction = 'tsne') {
   cytokines <- c('IL1A','IL1B','IL1R1','IL1R2','IL1RAP','IL1RAPL1','IL1RAPL2','IL1RL1','IL1RL2','IL1RN','IL2','IL2RA','IL2RB','IL2RG','IL3','IL3RA','IL4','IL4I1','IL4R','IL5','IL5RA','IL6','IL6R','IL6ST','IL7','IL7R','IL9','IL10','IL10RA','IL11','IL12A','IL12B','IL12RB1','IL12RB2','IL13','IL13RA2','IL15','IL15Ra','IL16','IL17A','IL17B','IL17C','IL17D','IL17F','IL17RA','IL17RB','IL17RC','IL17RD','IL17RE','IL18BP','IL18R1','IL18RAP','IL19','IL20','IL20RA','IL20RB','IL21','IL21R','IL22','IL22RA2','IL23A','IL24','IL25','IL26','IL27','IL27RA','IL31','IL31RA','IL33','IL34','IL36A','IL36B','IL36G','IL37','ILDR1','ILDR2','ILF2','ILF3','ILK','ILKAP','ILVBL')
   PlotMarkerSeries(seuratObj, reduction, cytokines, 'Cytokines/Receptors')
 
-  klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'ENSMMUG00000050862')
+  # KLRC2 = ENSMMUG00000050862
+  klrs <- c('KLRB1', 'KLRC1', 'KLRD1', 'KLRF1', 'KLRF2', 'KLRG1', 'KLRG2', 'KLRC2', 'KLRC3', 'ENSMMUG00000050862')
   PlotMarkerSeries(seuratObj, reduction, klrs, 'KLRs')
 
   PlotMarkerSet(seuratObj, reduction, 'Resident Memory', c('ITGAE', 'CD69', 'CXCR6'))
