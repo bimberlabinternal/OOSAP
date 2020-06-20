@@ -9,6 +9,10 @@ test_that("All aliases preserved", {
     homologs <- QueryEnsemblSymbolAndHumanHomologs(c('ENSMMUG00000040244', 'ENSMMUG00000008350', 'CD8'), dataset = 'mmulatta_gene_ensembl', version = '97')
     expect_equal(homologs$Label, c('TRAV1-1', 'MDK(hs)', 'CD8'))
 
+    #This will fail the regexp and should not get queried
+    homologs <- QueryEnsemblSymbolAndHumanHomologs(c('foo'), dataset = 'mmulatta_gene_ensembl', version = '97')
+    expect_equal(homologs$Label, c('foo'))
+
     # This is a private method, but test directly anyway
     cdg <- OOSAP:::RenameGenesUsingCD(c('PTPR', '12345', 'DPP4', 'ENSMMUG00000040244'))
     expect_equal(cdg, c('PTPR', '12345', 'DPP4 (CD26,ADCP2)', 'ENSMMUG00000040244'))
