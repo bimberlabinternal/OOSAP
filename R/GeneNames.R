@@ -19,30 +19,42 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
 
     homologs <- NULL
     tryCatch(expr = {
-        homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
+        ensemblIdsToQuery <- ensemblIds[grepl(ensemblIds, pattern = '^ENS')]
+        if (length(ensemblIdsToQuery) > 0) {
+            homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
+            homologs <- homologs %>% group_by(ensembl_gene_id) %>% summarise(
+                ensembl_transcript_id = paste(sort(unique(ensembl_transcript_id)), collapse=','),
+                external_gene_name = paste(sort(unique(external_gene_name)), collapse=','),
+                hsapiens_homolog_ensembl_gene = paste(sort(unique(hsapiens_homolog_ensembl_gene)), collapse=','),
+                hsapiens_homolog_associated_gene_name = paste(sort(unique(hsapiens_homolog_associated_gene_name)), collapse=',')
+            )
+
+            if (nrow(homologs) > 0 && sum(homologs == '') > 0) {
+                homologs[homologs == ''] <- NA
+            }
+        } else {
+            print('None of the input IDs started with ENS, skipping emsembl query')
+        }
     }, error = function(e){
         print(e)
         stop(paste0('Error querying ensembl, using genes: ', paste0(ensemblIds, collapse = ';')))
     })
 
-    homologs <- homologs %>% group_by(ensembl_gene_id) %>% summarise(
-        ensembl_transcript_id = paste(sort(unique(ensembl_transcript_id)), collapse=','),
-        external_gene_name = paste(sort(unique(external_gene_name)), collapse=','),
-        hsapiens_homolog_ensembl_gene = paste(sort(unique(hsapiens_homolog_ensembl_gene)), collapse=','),
-        hsapiens_homolog_associated_gene_name = paste(sort(unique(hsapiens_homolog_associated_gene_name)), collapse=',')
-    )
-
-    if (nrow(homologs) > 0 && sum(homologs == '') > 0) {
-        homologs[homologs == ''] <- NA
+    ret <- data.frame(ensembl_gene_id = ensemblIds, SortOrder = 1:length(ensemblIds))
+    ret$Label <- as.character(ret$ensembl_gene_id)
+    if (!all(is.null(homologs))) {
+        ret <- merge(ret, homologs, by = c('ensembl_gene_id'), all.x = T)
+        ret$Label[!is.na(ret$hsapiens_homolog_associated_gene_name)] <- paste0(ret$hsapiens_homolog_associated_gene_name[!is.na(ret$hsapiens_homolog_associated_gene_name)], '(hs)')
+        ret$Label[!is.na(ret$external_gene_name)] <- ret$external_gene_name[!is.na(ret$external_gene_name)]
+    } else {
+        ret <- ret[order(ret$SortOrder),]
+        ret$ensembl_transcript_id <- NA
+        ret$external_gene_name <- NA
+        ret$hsapiens_homolog_ensembl_gene <- NA
+        ret$hsapiens_homolog_associated_gene_name <- NA
     }
 
-    ret <- data.frame(ensembl_gene_id = ensemblIds, SortOrder = 1:length(ensemblIds))
-    ret <- merge(ret, homologs, by = c('ensembl_gene_id'), all.x = T)
-    ret <- ret[order(ret$SortOrder),]
-
-    ret$Label <- as.character(ret$ensembl_gene_id)
-    ret$Label[!is.na(ret$hsapiens_homolog_associated_gene_name)] <- paste0(ret$hsapiens_homolog_associated_gene_name[!is.na(ret$hsapiens_homolog_associated_gene_name)], '(hs)')
-    ret$Label[!is.na(ret$external_gene_name)] <- ret$external_gene_name[!is.na(ret$external_gene_name)]
+    ret <- ret[names(ret) != 'SortOrder']
 
     return(ret)
 }
