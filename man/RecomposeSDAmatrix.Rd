@@ -6,7 +6,7 @@
 \usage{
 RecomposeSDAmatrix(
   SDAseuratObj = NULL,
-  QCpassOnly = T,
+  WhichComp = "batch",
   metaDF = NULL,
   spikeGenes = NULL,
   nfeatures = 2000,
@@ -19,7 +19,7 @@ RecomposeSDAmatrix(
 \arguments{
 \item{SDAseuratObj}{Final seurat object from SDA processing}
 
-\item{QCpassOnly}{logical. If TRUE, will use only QC_components from SDAseuratObj}
+\item{WhichComp}{Three (3) options, "all", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.}
 
 \item{metaDF}{metadata datframe}
 

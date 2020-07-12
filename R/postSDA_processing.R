@@ -70,7 +70,7 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
 
 #' @title RecomposeSDAmatrix
 #' @param SDAseuratObj Final seurat object from SDA processing
-#' @param QCpassOnly logical. If TRUE, will use only QC_components from SDAseuratObj
+#' @param WhichComp Three (3) options, "all", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.
 #' @param metaDF metadata datframe
 #' @param spikeGenes list of genes to be added beyond the default VariableGenes()
 #' @param nfeatures The number of VariableFeatures to identify
@@ -81,8 +81,15 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
 #' @import Seurat
 #' @export
-RecomposeSDAmatrix <- function(SDAseuratObj = NULL, QCpassOnly = T, metaDF = NULL, spikeGenes = NULL, nfeatures = 2000, 
+RecomposeSDAmatrix <- function(SDAseuratObj = NULL, WhichComp = "batch", 
+                               metaDF = NULL, spikeGenes = NULL, nfeatures = 2000, 
                                tSNE_perplexity = 100, UMAP_MinDist = 0.5, UMAP_NumNeib = 60L, saveFile = NULL) {
+  
+  
+  if(! WhichComp %in% c("all", "qc", "batch")) {
+    warning("WhichComp was not correctly parameterized: choose all, qc, or batch default to batch")
+    WhichComp = "batch"
+  }
   
   SDAseuratObj$Barcode <- rownames(SDAseuratObj@meta.data)
   
@@ -104,10 +111,19 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, QCpassOnly = T, metaDF = NUL
   }
   
   #keep only passing componenets or all componenets
-  if(QCpassOnly)
-    compsToKeep <- SDAseuratObj@misc$SDA_processing_results$QC_components
-  else
+  if(WhichComp == "all") {
     compsToKeep <- 1:ncol(SDAseuratObj@reductions$SDA@cell.embeddings)
+  } else {
+    if(WhichComp == "qc"){
+      compsToKeep <- SDAseuratObj@misc$SDA_processing_results$QC_components
+    } else {
+      if(WhichComp == "all"){
+        compsToKeep <- as.numeric(SDAseuratObj@misc$SDA_processing_results$Remove_comps)
+      }
+    }
+  }
+    
+    
   
   #do dot product of cell embeddings and gene loadings to get approximate/imputed raw seurat matrix
   print("Performing dot product...")
