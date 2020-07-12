@@ -117,7 +117,7 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, WhichComp = "batch",
     if(WhichComp == "qc"){
       compsToKeep <- SDAseuratObj@misc$SDA_processing_results$QC_components
     } else {
-      if(WhichComp == "all"){
+      if(WhichComp == "batch"){
         compsToKeep <- as.numeric(SDAseuratObj@misc$SDA_processing_results$Remove_comps)
       }
     }
