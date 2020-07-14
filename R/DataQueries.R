@@ -477,12 +477,12 @@ CompareCellBarcodeSets <- function(workbooks, savePath = './') {
 
   t1 <- read.table(htoCallFile, header = T, sep = '\t')
   t1 <- t1 %>% group_by(HTO) %>% summarise(Count = dplyr::n())
-  t1 <- t1[!(t1$HTO %in% c('Doublet', 'Negative')),]
+  t1 <- t1[!(t1$HTO %in% c('Doublet', 'Negative', 'Discordant')),]
   t1$Fraction <- t1$Count / sum(t1$Count)
 
   t2 <- read.table(compareFile, header = T, sep = '\t')
   t2 <- t2 %>% group_by(HTO) %>% summarise(Count = dplyr::n())
-  t2 <- t2[!(t2$HTO %in% c('Doublet', 'Negative')),]
+  t2 <- t2[!(t2$HTO %in% c('Doublet', 'Negative', 'Discordant')),]
   t2$Fraction <- t2$Count / sum(t2$Count)
 
   df <- merge(x = t1, y = t2, by = 'HTO', all = T, suffixes = c('.HTO', '.Compare'))
