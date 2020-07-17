@@ -70,7 +70,7 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
 
 #' @title RecomposeSDAmatrix
 #' @param SDAseuratObj Final seurat object from SDA processing
-#' @param WhichComp Three (3) options, "all", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.
+#' @param compKeepSet Three (3) options, "all", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.
 #' @param metaDF metadata datframe
 #' @param spikeGenes list of genes to be added beyond the default VariableGenes()
 #' @param nfeatures The number of VariableFeatures to identify
@@ -81,14 +81,14 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
 #' @import Seurat
 #' @export
-RecomposeSDAmatrix <- function(SDAseuratObj = NULL, WhichComp = "batch", 
+RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compKeepSet = "batch", 
                                metaDF = NULL, spikeGenes = NULL, nfeatures = 2000, 
                                tSNE_perplexity = 100, UMAP_MinDist = 0.5, UMAP_NumNeib = 60L, saveFile = NULL) {
   
   
-  if(! WhichComp %in% c("all", "qc", "batch")) {
-    warning("WhichComp was not correctly parameterized: choose all, qc, or batch default to batch")
-    WhichComp = "batch"
+  if(! compKeepSet %in% c("all", "qc", "batch")) {
+    warning("compKeepSet was not correctly parameterized: choose all, qc, or batch default to batch")
+    compKeepSet = "batch"
   }
   
   SDAseuratObj$Barcode <- rownames(SDAseuratObj@meta.data)
@@ -111,14 +111,14 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, WhichComp = "batch",
   }
   
   #keep only passing componenets or all componenets
-  if(WhichComp == "all") {
+  if(compKeepSet == "all") {
     compsToKeep <- 1:ncol(SDAseuratObj@reductions$SDA@cell.embeddings)
   } else {
-    if(WhichComp == "qc"){
-      compsToKeep <- SDAseuratObj@misc$SDA_processing_results$QC_components
+    if(compKeepSet == "qc"){
+      compsToKeep <- setdiff(1:ncol(SDAseuratObj@reductions$SDA@cell.embeddings), as.numeric(SDAseuratObj@misc$SDA_processing_results$QC_components))
     } else {
-      if(WhichComp == "batch"){
-        compsToKeep <- as.numeric(SDAseuratObj@misc$SDA_processing_results$Remove_comps)
+      if(compKeepSet == "batch"){
+        compsToKeep <- setdiff(1:ncol(SDAseuratObj@reductions$SDA@cell.embeddings), as.numeric(SDAseuratObj@misc$SDA_processing_results$Remove_comps))
       }
     }
   }
