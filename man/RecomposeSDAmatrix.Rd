@@ -6,7 +6,7 @@
 \usage{
 RecomposeSDAmatrix(
   SDAseuratObj = NULL,
-  compKeepSet = "batch",
+  compRemoveSet = "batch",
   metaDF = NULL,
   spikeGenes = NULL,
   nfeatures = 2000,
@@ -19,7 +19,7 @@ RecomposeSDAmatrix(
 \arguments{
 \item{SDAseuratObj}{Final seurat object from SDA processing}
 
-\item{compKeepSet}{Three (3) options, "all", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.}
+\item{compRemoveSet}{Three (3) options, "none", "qc", or "batch" default to "batch" which is comps removed by ShinySDA.}
 
 \item{metaDF}{metadata datframe}
 
