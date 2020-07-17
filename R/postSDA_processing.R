@@ -102,6 +102,7 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
   if(! compRemoveSet %in% c("none", "qc", "batch")) {
     warning("compRemoveSet was not correctly parameterized: choose none, qc, or batch default to batch")
     compRemoveSet = "batch"
+  }
   
   SDAseuratObj$Barcode <- rownames(SDAseuratObj@meta.data)
   if (!is.null(metaDF)) {
@@ -148,6 +149,6 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
   
   return(imputedSeuratObj)
   }
-}
+
 
 
