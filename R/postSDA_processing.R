@@ -147,6 +147,7 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
                                                       UMAP_NumNeib=UMAP_NumNeib, UMAP_MinDist=UMAP_MinDist, UMAP_Seed=UMAP_Seed, UMAP.NumEpoc=UMAP.NumEpoc)
   
   return(imputedSeuratObj)
+  }
 }
 
 
