@@ -11,11 +11,17 @@ RecreateSeuratObjFromSDAmatrix(
   projectName = "SDAproject",
   dimsToUse = 15,
   spikeGenes = NULL,
+  onlyUseSpikeGenes = F,
   nfeatures = 500,
-  tSNE_perplexity = 0.3,
-  UMAP_MinDist = 0.3,
-  UMAP_NumNeib = 35L,
-  UMAP.NumEpoc = 500
+  tSNE_perplexity = 100,
+  UMAP_MinDist = 0.5,
+  UMAP_NumNeib = 60L,
+  UMAP.NumEpoc = 5000,
+  tsne_max_iter = 500,
+  scale.factor = 10000,
+  removeNegExpr = T,
+  normalization.method = "LogNormalize",
+  npcs = 50
 )
 }
 \arguments{
@@ -31,6 +37,8 @@ RecreateSeuratObjFromSDAmatrix(
 
 \item{spikeGenes}{list of genes to be added beyond the default VariableGenes()}
 
+\item{onlyUseSpikeGenes}{If TRUE the only genes used in spikeGenes used exclusdes genes grom VariableGenes()}
+
 \item{nfeatures}{The number of VariableFeatures to identify}
 
 \item{tSNE_perplexity}{tSNE perplexity. Passed directly to Seurat::RunTSNE()}
@@ -40,6 +48,16 @@ RecreateSeuratObjFromSDAmatrix(
 \item{UMAP_NumNeib}{UMAP number of neighboring points. Passed directly to Seurat::RunUMAP()}
 
 \item{UMAP.NumEpoc}{UMAP min. distance. Passed directly to Seurat::RunUMAP()}
+
+\item{tsne_max_iter}{tSBE max. iterations. 500-10000. Passed directly to Seurat::RunTSNE()}
+
+\item{scale.factor}{Passed directly to Seurat::NormalizeData}
+
+\item{removeNegExpr}{The dot product of the cell scores and gene loadings matrices has negative values. These can be dealt with prior or after normalization. Overall relationships are maintained overall. However removing them after has the artifact of negative expression values.}
+
+\item{normalization.method}{Passed directly to Seurat::NormalizeData}
+
+\item{npcs}{Passed directly to Seurat::RunPCA}
 }
 \description{
 RecreateSeuratObjFromSDAmatrix

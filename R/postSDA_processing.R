@@ -6,15 +6,28 @@
 #' @param projectName Title of project
 #' @param dimsToUse The number of dims to use
 #' @param spikeGenes list of genes to be added beyond the default VariableGenes()
+#' @param onlyUseSpikeGenes If TRUE the only genes used in spikeGenes used exclusdes genes grom VariableGenes()
 #' @param nfeatures The number of VariableFeatures to identify
 #' @param tSNE_perplexity tSNE perplexity. Passed directly to Seurat::RunTSNE()
 #' @param UMAP_MinDist UMAP min. distance. Passed directly to Seurat::RunUMAP()
 #' @param UMAP_NumNeib UMAP number of neighboring points. Passed directly to Seurat::RunUMAP()
 #' @param UMAP.NumEpoc UMAP min. distance. Passed directly to Seurat::RunUMAP()
+#' @param tsne_max_iter tSBE max. iterations. 500-10000. Passed directly to Seurat::RunTSNE()
+#' @param scale.factor  Passed directly to Seurat::NormalizeData
+#' @param removeNegExpr The dot product of the cell scores and gene loadings matrices has negative values. These can be dealt with prior or after normalization. Overall relationships are maintained overall. However removing them after has the artifact of negative expression values.
+#' @param normalization.method Passed directly to Seurat::NormalizeData
+#' @param npcs Passed directly to Seurat::RunPCA
 #' @import Seurat
 #' @export
-RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NULL, metaDF, projectName = "SDAproject", dimsToUse = 15, spikeGenes = NULL, nfeatures = 500, 
-                                           tSNE_perplexity = 0.3, UMAP_MinDist = 0.3, UMAP_NumNeib = 35L, UMAP.NumEpoc = 500) {
+RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NULL, metaDF, 
+                                           projectName = "SDAproject", dimsToUse = 15, 
+                                           spikeGenes = NULL, onlyUseSpikeGenes = F,
+                                           nfeatures = 500, 
+                                           tSNE_perplexity = 100, UMAP_MinDist = 0.5, 
+                                           UMAP_NumNeib = 60L, UMAP.NumEpoc = 5000,
+                                           tsne_max_iter=500, scale.factor= 10000,
+                                           removeNegExpr=T, normalization.method = "LogNormalize",
+                                           npcs = 50) {
   
   #confirm that gene are rows and columns are cells
   if(any(grepl("CD1", rownames(recomposedMat)))) {
@@ -30,37 +43,51 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
   rownames(metaDF) <- metaDF$Barcode
   #genes should be in rows and cells in columns. 
   
-  # with imputed full matrix, create seurat object 
-  seuratObj <- CreateSeuratObject(counts = recomposedMat, min.features = 10, project = projectName, meta.data = metaDF)
-  
-  #TODO: if the imputed is pre-normalized is this redundant?
-  seuratObj <- NormalizeData(seuratObj, normalization.method = "LogNormalize", scale.factor = 10000)
-  tempData <- as.data.frame(seuratObj@assays$RNA@data)
-  tempData[is.na(tempData)] <- 0
-  tempData <- as(as.matrix(tempData), "dgCMatrix")
-  seuratObj@assays$RNA@data <- tempData
-  
-  DefaultAssay(seuratObj) <- "RNA"
-  seuratObj <- FindVariableFeatures(object = seuratObj, selection.method="vst", nfeatures = nfeatures)
-  if(!is.null(spikeGenes)) {
-    seuratObj@assays$RNA@var.features <- unique(c(spikeGenes, seuratObj@assays$RNA@var.features))
+  if(removeNegExpr){
+    print("Removing negative values")
+    recomposedMat[recomposedMat<0] = 0
   }
   
-  # (is.na(SeurComboObj_SDA@assays$RNA@counts))
-  #NAs to 0, since some cells become NA by normalization step and mess things downstream for DE
-  seuratObj <- ScaleData(object = seuratObj, min.cells.to.block = 2000, features = rownames(seuratObj))
-  seuratObj <- RunPCA(object = seuratObj, npcs = 40)
-  ElbowPlot(seuratObj)
+  print("Creating Seurat Object")
+  seuratObj <- CreateSeuratObject(counts = recomposedMat, min.features = 10, project = projectName, meta.data = metaDF)
   
+  print("Normalizing")
+  #TODO: Try other normalization methods which might offer better results 
+  seuratObj <- NormalizeData(seuratObj, normalization.method = normalization.method, scale.factor = scale.factor)
+  
+  if(!removeNegExpr){
+    print("removing NAs post normalization since removeNegExpr = F")
+    tempData <- as.data.frame(seuratObj@assays$RNA@data)
+    tempData[is.na(tempData)] <- 0
+    tempData <- as(as.matrix(tempData), "dgCMatrix")
+    seuratObj@assays$RNA@data <- tempData
+  }
+  
+
+  DefaultAssay(seuratObj) <- "RNA"
+  seuratObj <- FindVariableFeatures(object = seuratObj, selection.method="vst", nfeatures = nfeatures)
+  
+  if(!is.null(spikeGenes)) {
+    if(onlyUseSpikeGenes) {
+      seuratObj@assays$RNA@var.features <- unique(spikeGenes)
+    } else {
+      seuratObj@assays$RNA@var.features <- unique(c(spikeGenes, seuratObj@assays$RNA@var.features))
+    }
+  }
+  
+  seuratObj <- ScaleData(object = seuratObj, min.cells.to.block = 2000, 
+                         features = rownames(seuratObj))
+  seuratObj <- RunPCA(object = seuratObj, npcs = npcs)
+
   seuratObj <- FindNeighbors(object = seuratObj, dims = 1:dimsToUse)
+  
   seuratObj <- FindClusters(object = seuratObj, resolution = 0.1)
   seuratObj <- FindClusters(object = seuratObj, resolution = 0.6)
   seuratObj <- FindClusters(object = seuratObj, resolution = 1.2)
-  seuratObj <- RunTSNE(object = seuratObj, dims = 1:dimsToUse, perplexity = tSNE_perplexity, max_iter = 5000, num_threads = 10)
+  
+  seuratObj <- RunTSNE(object = seuratObj, dims = 1:dimsToUse, perplexity = tSNE_perplexity, max_iter = tsne_max_iter, num_threads = 10)
   seuratObj <- RunUMAP(object = seuratObj, dims = 1:dimsToUse, n.neighbors = UMAP_NumNeib, min.dist = UMAP_MinDist, 
                        metric = "correlation", seed.use = 11358, umap.method = "umap-learn", n.epochs = UMAP.NumEpoc)
-  
-  DimPlot(seuratObj)
   
   return(seuratObj)
 }
