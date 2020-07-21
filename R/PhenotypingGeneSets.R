@@ -56,17 +56,10 @@ Phenotyping_GeneList <- function(QuickGO.path="./data/QuickGO"){
       SGS.LS$MonocytesCD34p     <- c("CD34", "THY1", "ENG", "KIT", "PROM1" )
 
 
-    SGS.LS$HighlyActivated    <- c("TNFRSF9", "NFKBID", "ENSMMUG00000008111", "CCL4L1", "IRF8", "IFNG", "CD83", "CD82", "PLEK", "RGCC") #"ENSMMUG00000013779"
-    SGS.LS$HighlyActivated2   <- c("TNFRSF9", "NFKBID", "ENSMMUG00000008111", "IRF8", "IFNG", "CD82", "PLEK", "RGCC", "PIGT")
-    #SGS.LS$HighlyActivated3   <- c("TNFRSF9", "NFKBID", "CCL4", "CCL4L2", "IRF8", "CD83", "CD82", "PLEK", "RGCC") #same as first without IFNG due to typo in original set
-    # SGS.LS$HighlyActivated2   <- c("NR4A2", "NR4A1", "LMNA", "SDC4", "SLA", "JARID2",
-    #                                "IRF4", "RGS16", "ENSMMUG00000045612", "TXNIP", "ENSMMUG00000031417", "LTB",
-    #                                "GZMK", "IRF8", "c-fos", "RGS1", "KLF10", "ARID5B",
-    #                                "CD83", "AHI1", "MYC", "SPAG9", "ID2", "TNFAIP3",
-    #                                "HIVEP3", "BACH2", "ZFP36", "GZMA", "ENSMMUG00000041662", "ISG15",
-    #                                "KLRB1", "SPINK2", "ENSMMUG00000042057", "SAMHD1", "APOL2", "TCF7",
-    #                                "CD74", "S100A6", "S100A4", "IFI6", "CCL5", "ARL5B",
-    #                                "CDKN1A", "CD160", "CENPF")
+    #LOC100426537, LOC114673087 = C-C motif chemokine 3-like
+    #"CD83", "CD82": possibly 'less activated'?
+    SGS.LS$HighlyActivated    <- c("TNFSF14", "NFKBID", "CCL3", "CCL4L1", "IRF8", "IFNG", "PLEK", "RGCC", "NR4A2", "NR4A3", "LOC100426537", "LOC114673087", "KLF10", "GADD45B")
+    SGS.LS$HighlyActivated2   <- c("TNFSF14", "NFKBID", "CCL3", "IRF8", "IFNG", "CD82", "PLEK", "RGCC", "PIGT")
     SGS.LS$HighlyActivated2   <- c("NR4A1", "KLF10", "IRF8", "NR4A2", "RGS1", "AHI1", "ZFP36",
                                    "ID2", "BACH2", "MYC", "TNFAIP3", "KLRB1", "TCF7", "TXNIP", "LTB")
     SGS.LS$HighlyActivated3 <- unique(c(SGS.LS$HighlyActivated, SGS.LS$HighlyActivated2))
