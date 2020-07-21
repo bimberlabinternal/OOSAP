@@ -821,10 +821,15 @@ RemoveCellCycle <- function(seuratObj, pcaResultFile = NULL,
 #' @param maxTsneIter The value of max_iter to provide to RunTSNE.  Increasing can help large datasets.
 #' @param forceReCalc If true, all steps will be performed even if already marked complete
 #' @param umap.method The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP
+#' @param tSNE_perplexity tSNE perplexity. Passed directly to Seurat::RunTSNE(), but OOSAP:::.InferPerplexityFromSeuratObj() corrects it if need be based dataset dims.
+#' @param clusterResSet a vector of clustering resolutions, default is (0.2, 0.4, 0.6, 0.8, 1.2).
 #' @return A modified Seurat object.
 #' @export
-FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, minDimsToUse = NULL, umap.method = 'umap-learn',
-                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, UMAP.NumEpoc = 500, maxTsneIter = 2000) {
+FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL, forceReCalc = F, 
+                                    minDimsToUse = NULL, umap.method = 'umap-learn',
+                                   UMAP_NumNeib = 40L, UMAP_MinDist = 0.2, UMAP_Seed = 1234, 
+                                   UMAP.NumEpoc = 500, maxTsneIter = 10000, tSNE_perplexity=30,
+                                   clusterResSet = c(0.2, 0.4, 0.6, 0.8, 1.2) ){
   if (is.null(dimsToUse)) {
     dimMax <- FindSeuratElbow(seuratObj)
     print(paste0('Inferred elbow: ', dimMax))
@@ -846,7 +851,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'FindClusters', forceReCalc = forceReCalc)) {
-    for (resolution in c(0.2, 0.4, 0.8, 1.2, 0.6)){
+    for (resolution in clusterResSet){
       seuratObj <- FindClusters(object = seuratObj, resolution = resolution)
       seuratObj[[paste0("ClusterNames_", resolution)]] <- Idents(object = seuratObj, verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'FindClusters', saveFile)
@@ -854,7 +859,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
-    perplexity <- .InferPerplexityFromSeuratObj(seuratObj)
+    perplexity <- .InferPerplexityFromSeuratObj(seuratObj, perplexity=)
     seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity, max_iter = maxTsneIter)
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
@@ -870,15 +875,13 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
     seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
 
   }
-
+                                
   for (reduction in c('tsne', 'umap')){
-    plot1 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.2", label = TRUE) + ggtitle('Resolution: 0.2')
-    plot2 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.4", label = TRUE) + ggtitle('Resolution: 0.4')
-    plot3 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.6", label = TRUE) + ggtitle('Resolution: 0.6')
-    plot4 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_0.8", label = TRUE) + ggtitle('Resolution: 0.8')
-    plot5 <- DimPlot(object = seuratObj, reduction = reduction, group.by = "ClusterNames_1.2", label = TRUE) + ggtitle('Resolution: 1.2')
-
-    print(CombinePlots(plots = list(plot1, plot2, plot3, plot4, plot5), legend = 'none'))
+    plotLS <- list()
+    for (res in clusterResSet){
+      plotLS[[res]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE) + ggtitle(paste0("Resolution: ", res))
+    }
+    print(CombinePlots(plots = plotLS, legend = 'none'))
   }
 
   return(seuratObj)
