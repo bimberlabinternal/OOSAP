@@ -39,7 +39,7 @@ test_that("Seurat-merge works as expected", {
   expect_equal("Integrated", Seurat::DefaultAssay(seuratObj))
   expect_equal("cca", seuratObj@misc$MergeMethod)
   expect_equal(7987, ncol(seuratObj), tolerance = 10)
-  expect_equal(nrow(seuratObj), 2354)
+  expect_equal(nrow(seuratObj), 2355)
 
   #barcodes should have prefix:
   expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
@@ -59,13 +59,13 @@ test_that("Seurat-merge works as expected", {
   expectedSpike = intersect(rownames(seuratObjs[[1]]), spikeGenes)
 
   #Not all genes will be present:
-  expect_equal(length(intersect(rownames(seuratObj), expectedSpike)), 44)
+  expect_equal(length(intersect(rownames(seuratObj), expectedSpike)), 46)
 
 
   #Repeat with spike genes
   seuratObj <- MergeSeuratObjs(seuratObjs, NULL, method = 'cca', spike.genes = spikeGenes)
 
-  expect_equal(nrow(seuratObj), 2358)
+  expect_equal(nrow(seuratObj), 2359)
   
   #barcodes should have prefix:
   expect_equal(sum(!grepl(colnames(seuratObj), pattern = '^Set')), 0)
