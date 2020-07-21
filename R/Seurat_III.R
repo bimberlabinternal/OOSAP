@@ -859,7 +859,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   }
 
   if (forceReCalc | !HasStepRun(seuratObj, 'RunTSNE', forceReCalc = forceReCalc)) {
-    perplexity <- .InferPerplexityFromSeuratObj(seuratObj, perplexity=)
+    perplexity <- .InferPerplexityFromSeuratObj(seuratObj, perplexity=tSNE_perplexity)
     seuratObj <- RunTSNE(object = seuratObj, dims.use = dimsToUse, check_duplicates = FALSE, perplexity = perplexity, max_iter = maxTsneIter)
     seuratObj <- MarkStepRun(seuratObj, 'RunTSNE', saveFile)
   }
