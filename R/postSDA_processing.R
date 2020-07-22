@@ -4,7 +4,7 @@
 #' @param recomposedMat recomposed matrix
 #' @param metaDF metadata datframe
 #' @param projectName Title of project
-#' @param dimsToUse The number of dims to use
+#' @param dimsToUse The number of PCA dims to use for steps downstream of PCA
 #' @param spikeGenes list of genes to be added beyond the default VariableGenes()
 #' @param onlyUseSpikeGenes If TRUE the only genes used in spikeGenes used exclusdes genes grom VariableGenes()
 #' @param nfeatures The number of VariableFeatures to identify
@@ -22,10 +22,11 @@
 RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NULL, metaDF, 
                                            projectName = "SDAproject", dimsToUse = 15, 
                                            spikeGenes = NULL, onlyUseSpikeGenes = F,
-                                           nfeatures = 500, 
-                                           tSNE_perplexity = 100, UMAP_MinDist = 0.5, 
-                                           UMAP_NumNeib = 60L, UMAP.NumEpoc = 5000,
-                                           tsne_max_iter=500, scale.factor= 10000,
+                                           nfeatures = 2000, 
+                                           tSNE_perplexity = 150, UMAP_MinDist = 0.5, 
+                                           UMAP_NumNeib = 60L, UMAP.NumEpoc = 10000,
+                                           tsne_max_iter=10000, 
+                                           scale.factor= 10000,
                                            removeNegExpr=T, normalization.method = "LogNormalize",
                                            npcs = 50) {
   
@@ -78,17 +79,13 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
   seuratObj <- ScaleData(object = seuratObj, min.cells.to.block = 2000, 
                          features = rownames(seuratObj))
   seuratObj <- RunPCA(object = seuratObj, npcs = npcs)
+  
+  seuratObj <- FindClustersAndDimRedux(seuratObj, dimsToUse = 1:dimsToUse, saveFile = NULL, forceReCalc = F, 
+                                      minDimsToUse = NULL, umap.method = 'umap-learn',
+                                      UMAP_NumNeib = UMAP_NumNeib, UMAP_MinDist = UMAP_MinDist, UMAP_Seed = 1234, 
+                                      UMAP.NumEpoc = UMAP.NumEpoc, maxTsneIter = 10000, tSNE_perplexity=tSNE_perplexity,
+                                      clusterResSet = c(0.1, 0.5, 1.0) )
 
-  seuratObj <- FindNeighbors(object = seuratObj, dims = 1:dimsToUse)
-  
-  seuratObj <- FindClusters(object = seuratObj, resolution = 0.1)
-  seuratObj <- FindClusters(object = seuratObj, resolution = 0.6)
-  seuratObj <- FindClusters(object = seuratObj, resolution = 1.2)
-  
-  seuratObj <- RunTSNE(object = seuratObj, dims = 1:dimsToUse, perplexity = tSNE_perplexity, max_iter = tsne_max_iter, num_threads = 10)
-  seuratObj <- RunUMAP(object = seuratObj, dims = 1:dimsToUse, n.neighbors = UMAP_NumNeib, min.dist = UMAP_MinDist, 
-                       metric = "correlation", seed.use = 11358, umap.method = "umap-learn", n.epochs = UMAP.NumEpoc)
-  
   return(seuratObj)
 }
 

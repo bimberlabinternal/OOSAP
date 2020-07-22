@@ -12,12 +12,12 @@ RecreateSeuratObjFromSDAmatrix(
   dimsToUse = 15,
   spikeGenes = NULL,
   onlyUseSpikeGenes = F,
-  nfeatures = 500,
-  tSNE_perplexity = 100,
+  nfeatures = 2000,
+  tSNE_perplexity = 150,
   UMAP_MinDist = 0.5,
   UMAP_NumNeib = 60L,
-  UMAP.NumEpoc = 5000,
-  tsne_max_iter = 500,
+  UMAP.NumEpoc = 10000,
+  tsne_max_iter = 10000,
   scale.factor = 10000,
   removeNegExpr = T,
   normalization.method = "LogNormalize",
@@ -33,7 +33,7 @@ RecreateSeuratObjFromSDAmatrix(
 
 \item{projectName}{Title of project}
 
-\item{dimsToUse}{The number of dims to use}
+\item{dimsToUse}{The number of PCA dims to use for steps downstream of PCA}
 
 \item{spikeGenes}{list of genes to be added beyond the default VariableGenes()}
 

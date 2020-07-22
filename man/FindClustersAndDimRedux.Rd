@@ -15,7 +15,9 @@ FindClustersAndDimRedux(
   UMAP_MinDist = 0.2,
   UMAP_Seed = 1234,
   UMAP.NumEpoc = 500,
-  maxTsneIter = 2000
+  maxTsneIter = 10000,
+  tSNE_perplexity = 30,
+  clusterResSet = c(0.2, 0.4, 0.6, 0.8, 1.2)
 )
 }
 \arguments{
@@ -32,6 +34,10 @@ FindClustersAndDimRedux(
 \item{umap.method}{The UMAP method, either uwot or umap-learn, passed directly to Seurat::RunUMAP}
 
 \item{maxTsneIter}{The value of max_iter to provide to RunTSNE.  Increasing can help large datasets.}
+
+\item{tSNE_perplexity}{tSNE perplexity. Passed directly to Seurat::RunTSNE(), but OOSAP:::.InferPerplexityFromSeuratObj() corrects it if need be based dataset dims.}
+
+\item{clusterResSet}{a vector of clustering resolutions, default is (0.2, 0.4, 0.6, 0.8, 1.2).}
 }
 \value{
 A modified Seurat object.
