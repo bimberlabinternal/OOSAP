@@ -873,17 +873,15 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
                            umap.method = umap.method,
                            seed.use = UMAP_Seed, n.epochs = UMAP.NumEpoc)
     seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
-
   }
                                 
   for (reduction in c('tsne', 'umap')){
     plotLS <- list()
-    for (res in clusterResSet){
+    for (res in as.character(clusterResSet)){
       plotLS[[res]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE) + ggtitle(paste0("Resolution: ", res))
     }
     print(CombinePlots(plots = plotLS, legend = 'none'))
   }
-
   return(seuratObj)
 }
 
