@@ -80,7 +80,7 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
                          features = rownames(seuratObj))
   seuratObj <- RunPCA(object = seuratObj, npcs = npcs)
   
-  FindClustersAndDimRedux(seuratObj, dimsToUse = 1:dimsToUse, saveFile = NULL, forceReCalc = F, 
+  seuratObj <- FindClustersAndDimRedux(seuratObj, dimsToUse = 1:dimsToUse, saveFile = NULL, forceReCalc = F, 
                                       minDimsToUse = NULL, umap.method = 'umap-learn',
                                       UMAP_NumNeib = UMAP_NumNeib, UMAP_MinDist = UMAP_MinDist, UMAP_Seed = 1234, 
                                       UMAP.NumEpoc = UMAP.NumEpoc, maxTsneIter = 10000, tSNE_perplexity=tSNE_perplexity,
