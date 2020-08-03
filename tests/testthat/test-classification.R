@@ -51,7 +51,11 @@ test_that("Highly Activated Cells Called", {
   df <- utils::read.table(sf, sep = '\t', header = T)
   expect_equal(nrow(df), 3)
   val <- df$Value[df$MetricName == 'FractionActivated']
-  expect_equal(val, 0.5)
+
+  expected <- sum(seuratObj2$HighlyActivated.Call) / ncol(seuratObj2)
+  expect_equal(expected, 0.00179)
+
+  expect_equal(val, expected )
 
   unlink(sf)
 
