@@ -1224,7 +1224,7 @@ WriteSummaryMetrics <- function(seuratObj, file) {
   df <- rbind(df, data.frame(Category = "Seurat", MetricName = "TotalFeatures", Value = nrow(seuratObj)))
 
   if ('HighlyActivated.Call' %in% names(seuratObj@meta.data)) {
-    val <- sum(seuratObj$HighlyActivated.Call) / nrow(seuratObj)
+    val <- sum(seuratObj$HighlyActivated.Call) / ncol(seuratObj)
     df <- rbind(df, data.frame(Category = "Seurat", MetricName = "FractionActivated", Value = val))
   }
 
