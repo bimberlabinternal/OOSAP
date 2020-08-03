@@ -78,7 +78,7 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
     ret <- seuratObj@misc$geneIds[geneNames]
   }
 
-  if (is.null(ret)) {
+  if (all(is.null(ret))) {
   	stop('Expected gene IDs to be stored under GetAssay(seuratObj)@meta.features or seuratObj@misc$geneIds')
   }
 
@@ -331,7 +331,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 		features <- unique(c(features, slot(object = anchors, name = "anchor.features")))
 
 		if (includeCellCycleGenes) features <- unique(c(features, .GetSPhaseGenes(), .GetG2MGenes()))
-		if (!is.null(spike.genes)) features <- unique(c(features, spike.genes))
+		if (!all(is.null(spike.genes))) features <- unique(c(features, spike.genes))
     if (spikeImmuneGenes) {
       SGS.LS <- Phenotyping_GeneList()
       immuneSpikeGenes <- unique(c(
@@ -459,7 +459,7 @@ MergeSeuratObjs <- function(seuratObjs, metadata=NULL,
   print(paste0("Starting merge.  Method: ", method))
 
   nameList <- NULL
-  if (is.null(metadata)){
+  if (all(is.null(metadata))){
     nameList <- names(seuratObjs)
   } else {
     nameList <- names(metadata)
@@ -621,7 +621,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     }
   }
   
-  if (!is.null(spikeGenes)){
+  if (!all(is.null(spikeGenes))){
     VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
   }
 
@@ -1222,6 +1222,11 @@ FindElbow <- function(y, plot = FALSE, ignore.concavity = FALSE, min.y = NA, min
 WriteSummaryMetrics <- function(seuratObj, file) {
   df <- data.frame(Category = "Seurat", MetricName = "TotalCells", Value = ncol(seuratObj))
   df <- rbind(df, data.frame(Category = "Seurat", MetricName = "TotalFeatures", Value = nrow(seuratObj)))
+
+  if ('HighlyActivated.Call' %in% names(seuratObj@meta.data)) {
+    val <- sum(seuratObj$HighlyActivated.Call) / ncol(seuratObj)
+    df <- rbind(df, data.frame(Category = "Seurat", MetricName = "FractionActivated", Value = val))
+  }
 
   write.table(df, file = file, quote = F, row.names = F, sep = '\t')
 }
