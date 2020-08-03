@@ -44,6 +44,17 @@ test_that("Highly Activated Cells Called", {
   ts <- seuratObj2$HighlyActivated.Score
   names(ts) <- NULL
   expect_equal(df[['HighlyActivated.Score']], ts)
+
+  # This should write metrics to a file:
+  sf <- 'summary.txt'
+  WriteSummaryMetrics(seuratObj2, file = sf)
+  df <- utils::read.table(sf, sep = '\t', header = T)
+  expect_equal(nrow(df), 3)
+  val <- df$Value[df$MetricName == 'FractionActivated']
+  expect_equal(val, 0.5)
+
+  unlink(sf)
+
 })
 
 
