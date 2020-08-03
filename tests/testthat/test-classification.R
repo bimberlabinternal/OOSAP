@@ -50,12 +50,15 @@ test_that("Highly Activated Cells Called", {
   WriteSummaryMetrics(seuratObj2, file = sf)
   df <- utils::read.table(sf, sep = '\t', header = T)
   expect_equal(nrow(df), 3)
-  val <- df$Value[df$MetricName == 'FractionActivated']
 
-  expected <- sum(seuratObj2$HighlyActivated.Call) / ncol(seuratObj2)
-  expect_equal(expected, 0.00179)
+  totalActivated <- sum(seuratObj2$HighlyActivated.Call)
+  print(paste0('Total activated: ', totalActivated))
+  expect_equal(totalActivated, 100)
 
-  expect_equal(val, expected )
+  fractionActivated <- totalActivated / ncol(seuratObj2)
+  print(paste0('Fraction activated: ', fractionActivated))
+  expect_equal(fractionActivated, 0.0373)
+  expect_equal(df$Value[df$MetricName == 'FractionActivated'], fractionActivated)
 
   unlink(sf)
 
