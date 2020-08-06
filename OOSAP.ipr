@@ -7,6 +7,9 @@
     </profile>
     <version value="1.0" />
   </component>
+  <component name="ProjectCodeStyleConfiguration">
+    <option name="PREFERRED_PROJECT_CODE_STYLE" value="Default" />
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/OOSAP.iml" filepath="$PROJECT_DIR$/OOSAP.iml" />
