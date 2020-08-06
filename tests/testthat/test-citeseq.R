@@ -51,7 +51,9 @@ test_that("Cite-Seq works", {
 	expect_equal(rownames(seuratObjCite@assays$ADT), rownames(citeseqData1)[rownames(citeseqData1) != 'unmapped'])
 	data <- Seurat::GetAssayData(seuratObjCite, assay = 'ADT', slot = 'counts')
 	expect_equal(max(data[,41:100]), 0) #These have no data
-	expect_equal(max(data[,1:40]), 6) 
+	expect_equal(max(data[,1:40]), 6)
+
+	OOSAP:::.PlotCiteSeqCountData(seuratObj = seuratObjCite, assayName = 'ADT')
 	
 	#Now add again, existing assay present:
 	seuratObjCite2 <- OOSAP:::AppendCiteSeq(seuratObj = seuratObjCite, countMatrixDir = inputPath2, barcodePrefix = '67890', minRowSum = 0)
