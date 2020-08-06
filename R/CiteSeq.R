@@ -388,20 +388,20 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 }
 
 
-.PlotCiteSeqCountData <- function(seuratObj, assayName) {
+.PlotCiteSeqCountData <- function(seuratObj, assayName = 'ADT') {
 	assayData <- GetAssayData(seuratObj, slot = "counts", assay = assayName)
 
-	# featuresToPlot <- rownames(assayData)
-	# setSize <- 8
-	# steps <- ceiling(length(featuresToPlot) / setSize) - 1
-	#
-	# for (i in 0:steps) {
-	# 	start <- (i * 4) + 1
-	# 	end <- min((start + 3), length(featuresToPlot))
-	# 	features <- featuresToPlot[start:end]
-	#
-	# 	print(RidgePlot(seuratObj, assay = assayName, features = features, ncol = 2))
-	# }
+	featuresToPlot <- rownames(assayData)
+	setSize <- 4
+	steps <- ceiling(length(featuresToPlot) / setSize) - 1
+
+	for (i in 0:steps) {
+		start <- (i * setSize) + 1
+		end <- min((start + setSize - 1), length(featuresToPlot))
+		features <- featuresToPlot[start:end]
+
+		print(RidgePlot(seuratObj, assay = assayName, features = features))
+	}
 
 	# Also total per ADT
 	countsPerAdt <- rowSums(as.matrix(assayData))
