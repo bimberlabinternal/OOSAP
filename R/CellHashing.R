@@ -497,11 +497,16 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
   Idents(object = seuratObj, cells = names(x = init.clusters$clustering), drop = TRUE) <- init.clusters$clustering
 
   # Calculate tSNE embeddings with a distance matrix
-  perplexity <- .InferPerplexityFromSeuratObj(seuratObj, 100)
-  seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay, perplexity = perplexity)
-  P <- DimPlot(seuratObj, reduction = 'hto_tsne', label = TRUE)
-  P <- P + ggtitle('Clusters: clara')
-  print(P)
+	tryCatch({
+		perplexity <- .InferPerplexityFromSeuratObj(seuratObj, 100)
+		seuratObj[['hto_tsne']] <- RunTSNE(dist(t(data)), assay = assay, perplexity = perplexity)
+		P <- DimPlot(seuratObj, reduction = 'hto_tsne', label = TRUE)
+		P <- P + ggtitle('Clusters: clara')
+		print(P)
+	}, error = function(e){
+		print(e)
+		print('Error generating tSNE, skipping')
+	})
 
   average.expression <- AverageExpression(
     object = seuratObj,
