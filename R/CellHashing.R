@@ -688,9 +688,14 @@ HtoSummary <- function(seuratObj, htoClassificationField, globalClassificationFi
 
   if (doTSNE) {
     perplexity <- .InferPerplexityFromSeuratObj(seuratObj, 100)
-    seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay, perplexity = perplexity)
-    print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = FALSE) + ggtitle(label))
-    print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = FALSE) + ggtitle(label))
+    tryCatch({
+      seuratObj[['hto_tsne']] <- RunTSNE(dist(Matrix::t(GetAssayData(seuratObj, slot = "data", assay = assay))), assay = assay, perplexity = perplexity)
+      print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = htoClassificationField, label = FALSE) + ggtitle(label))
+      print(DimPlot(seuratObj, reduction = 'hto_tsne', group.by = globalClassificationField, label = FALSE) + ggtitle(label))
+    }, error = function(e){
+      print(e)
+      print('Error generating tSNE, skipping')
+    })
   }
 
   if (doHeatmap) {
