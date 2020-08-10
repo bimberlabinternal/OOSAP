@@ -411,6 +411,9 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 		geom_density() +
 		xlab('Total Count/ADT') +
 		ylab('Density') +
+		theme(
+			axis.text.x = element_text(angle = 90, hjust = 1)
+		) +
 		labs(title = 'Total Counts Per ADT')
 
 	print(P1)
@@ -419,6 +422,9 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 		geom_bar(stat = 'identity') +
 		xlab('Marker') +
 		ylab('Total Count') +
+		theme(
+			axis.text.x = element_text(angle = 90, hjust = 1)
+		) +
 		labs(title = 'Total Counts Per ADT')
 
 	print(P2)
