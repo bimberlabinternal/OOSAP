@@ -426,7 +426,6 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   #TODO: Find discordant duplicates add as second col or convert to doublets or some error
   barcodeCallTable <- unique(barcodeCallTable)
 
-
   barcodeCallTable <- barcodeCallTable[barcodeCallTable$HTO != 'Negative',]
   if (nrow(barcodeCallTable)==0) stop("Something is wrong, table became 0 rows")
 
@@ -445,6 +444,20 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   datasetSelect <- seuratObj$BarcodePrefix == barcodePrefix
   df <- data.frame(CellBarcode = colnames(seuratObj)[datasetSelect])
   df$sortOrder = 1:nrow(df)
+
+  bcIntersect <- barcodeCallTable[barcodeCallTable$CellBarcode %in% df$CellBarcode,]
+  pct <- round(nrow(bcIntersect) / rnow(barcodeCallTable) * 100, 2)
+  pct2 <- round(nrow(bcIntersect) / nrow(df) * 100, 2)
+
+  print(paste0('Barcodes with calls: ', nrow(barcodeCallTable), ', intersecting with GEX data (total ', nrow(df),'): ', nrow(bcIntersect), " (", pct, "% / ", pct2, "%)"))
+  if (nrow(bcIntersect) == 0) {
+    print('no barcodes shared')
+    print(paste0('first GEX barcodes:'))
+    print(head(df$CellBarcode))
+    print(paste0('first Hashing barcodes:'))
+    print(head(barcodeCallTable$CellBarcode))
+  }
+
   df <- merge(df, barcodeCallTable, all.x = T, all.y = F, by = c('CellBarcode'))
   df <- dplyr::arrange(df, sortOrder)
   df <- df[names(df) != 'sortOrder']

@@ -17,12 +17,13 @@ utils::globalVariables(
 #' @param dataDir The directory holding raw count data
 #' @param datasetName A name to use when creating the Seurat object
 #' @param emptyDropNIters The number of iterations to use with PerformEmptyDrops()
+#' @param emptyDropsLower Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.
 #' @param storeGeneIds If true, a map to translate geneId and name (by default rownames will use gene name)
 #' @return A Seurat object.
 #' @keywords ReadAndFilter10X
 #' @export
 #' @importFrom Seurat Read10X
-ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, storeGeneIds=TRUE) {
+ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, storeGeneIds=TRUE, emptyDropsLower = 100) {
   if (!file.exists(dataDir)){
     stop(paste0("File does not exist: ", dataDir))
   }
@@ -39,7 +40,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
     rownames(seuratRawData) <- gsub(x = rownames(seuratRawData), pattern = '_', replacement = '-')
   }
 
-  seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters)
+  seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters, emptyDropsLower=emptyDropsLower)
 
   seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
   PrintQcPlots(seuratObj)
@@ -58,7 +59,6 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
 
 #' @title Retrieve the gene IDs from a seuratObj created using ReadAndFilter10xData.
 #'
-#' @description Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
 #' @param seuratObj The seurat object
 #' @param datasetName A name to use when creating the Seurat object
 #' @param throwIfGenesNotFound If true and any of the requested gene names are not found, an error will be thrown.  Otherwise, the result will contain NAs
@@ -142,9 +142,10 @@ PrintQcPlots <- function(seuratObj) {
 #' @param seuratRawData Raw data
 #' @param fdrThreshold FDR threshold, passed directly to PerformEmptyDrops()
 #' @param emptyDropNIters Number of iterations, passed directly to PerformEmptyDrops()
+#' @param emptyDropsLower Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.
 #' @return Plot
 #' @importFrom DropletUtils barcodeRanks
-PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000) {
+PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, emptyDropNIters=10000, emptyDropsLower=100) {
   br.out <- DropletUtils::barcodeRanks(seuratRawData)
 
   # Making a plot.
@@ -158,7 +159,7 @@ PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, empty
   legend=c("knee", "inflection")
   )
 
-  e.out <- PerformEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold)
+  e.out <- PerformEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters, fdrThreshold = fdrThreshold, emptyDropsLower = emptyDropsLower)
 
   toPlot <- e.out[is.finite(e.out$LogProb),]
   if (nrow(toPlot) > 0) {
@@ -181,12 +182,13 @@ PerformEmptyDropletFiltering <- function(seuratRawData, fdrThreshold=0.01, empty
 #' @param seuratRawData Raw data
 #' @param fdrThreshold FDR threshold, passed directly to PerformEmptyDrops()
 #' @param emptyDropNIters Number of iterations, passed directly to PerformEmptyDrops()
+#' @param emptyDropsLower Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.
 #' @return A modified Seurat object.
 #' @importFrom DropletUtils emptyDrops
-PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01){
+PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01, emptyDropsLower = 100){
   print(paste0('Performing emptyDrops with ', emptyDropNIters, ' iterations'))
 
-  e.out <- DropletUtils::emptyDrops(seuratRawData, niters = emptyDropNIters)
+  e.out <- DropletUtils::emptyDrops(seuratRawData, niters = emptyDropNIters, lower = emptyDropsLower)
 
   print(paste0('Input cells: ', nrow(e.out)))
   e.out <- e.out[!is.na(e.out$LogProb),]
@@ -200,7 +202,7 @@ PerformEmptyDrops <- function(seuratRawData, emptyDropNIters, fdrThreshold=0.01)
   if (totalLimited == 0){
     return(e.out)
   } else {
-    return(PerformEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold))
+    return(PerformEmptyDrops(seuratRawData, emptyDropNIters = emptyDropNIters * 2, fdrThreshold = fdrThreshold, emptyDropsLower = emptyDropsLower))
   }
 }
 

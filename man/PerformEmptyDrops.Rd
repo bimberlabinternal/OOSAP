@@ -4,7 +4,12 @@
 \alias{PerformEmptyDrops}
 \title{PerformEmptyDrops}
 \usage{
-PerformEmptyDrops(seuratRawData, emptyDropNIters, fdrThreshold = 0.01)
+PerformEmptyDrops(
+  seuratRawData,
+  emptyDropNIters,
+  fdrThreshold = 0.01,
+  emptyDropsLower = 100
+)
 }
 \arguments{
 \item{seuratRawData}{Raw data}
@@ -12,6 +17,8 @@ PerformEmptyDrops(seuratRawData, emptyDropNIters, fdrThreshold = 0.01)
 \item{emptyDropNIters}{Number of iterations, passed directly to PerformEmptyDrops()}
 
 \item{fdrThreshold}{FDR threshold, passed directly to PerformEmptyDrops()}
+
+\item{emptyDropsLower}{Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.}
 }
 \value{
 A modified Seurat object.
