@@ -46,7 +46,8 @@ if [ -e ~/.Rprofile.site ];then
 fi
 
 # Log repos to ensure Bioconductor used:
-echo "options(repos = BiocManager::repositories(version = '3.10'));" >> ~/.Rprofile.site
+# See: https://stackoverflow.com/questions/26042751/cannot-install-package-xml-to-r
+echo "options(repos = c(BiocManager::repositories(version = '3.10'), 'http://www.omegahat.net/R'));" >> ~/.Rprofile.site
 
 echo 'R repos:'
 Rscript -e "getOption('repos')"

@@ -1,8 +1,8 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 # and: https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/script/r.rb
 
-# Note: restore this when fixed:
-#dist: bionic
+# Note: restore this when fixed: https://travis-ci.community/t/r-install-broken-travis-ci-rstudio-org-returns-403/9640
+# dist: bionic
 language: r
 r: 3.6.3
 bioc_required: true
