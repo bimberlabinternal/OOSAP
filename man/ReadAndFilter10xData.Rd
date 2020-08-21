@@ -8,7 +8,8 @@ ReadAndFilter10xData(
   dataDir,
   datasetName,
   emptyDropNIters = 10000,
-  storeGeneIds = TRUE
+  storeGeneIds = TRUE,
+  emptyDropsLower = 100
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ ReadAndFilter10xData(
 \item{emptyDropNIters}{The number of iterations to use with PerformEmptyDrops()}
 
 \item{storeGeneIds}{If true, a map to translate geneId and name (by default rownames will use gene name)}
+
+\item{emptyDropsLower}{Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.}
 }
 \value{
 A Seurat object.

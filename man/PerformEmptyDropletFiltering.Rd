@@ -7,7 +7,8 @@
 PerformEmptyDropletFiltering(
   seuratRawData,
   fdrThreshold = 0.01,
-  emptyDropNIters = 10000
+  emptyDropNIters = 10000,
+  emptyDropsLower = 100
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ PerformEmptyDropletFiltering(
 \item{fdrThreshold}{FDR threshold, passed directly to PerformEmptyDrops()}
 
 \item{emptyDropNIters}{Number of iterations, passed directly to PerformEmptyDrops()}
+
+\item{emptyDropsLower}{Passed directly to emptyDrops(). The lower bound on the total UMI count, at or below which all barcodes are assumed to correspond to empty droplets.}
 }
 \value{
 Plot

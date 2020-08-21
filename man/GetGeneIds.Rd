@@ -17,5 +17,5 @@ GetGeneIds(seuratObj, geneNames, throwIfGenesNotFound = TRUE)
 A named vector of the gene IDs
 }
 \description{
-Reads in 10X files using Read10X and filters abberent cells using PerformEmptyDropletFiltering and returns a Seurat object.
+Retrieve the gene IDs from a seuratObj created using ReadAndFilter10xData.
 }
