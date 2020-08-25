@@ -1,12 +1,12 @@
 
-#' @title QueryEnsemblSymbolAndHumanHomologs
+#' @title cells2AvgExprDGE
 #' @param so A Seurat Object
 #' @param group.by a parameter in the Seurat Objects's meta to sample againts factor-levels
 #' @param downSample If True random sampling is performed to return equal number of cells across group.by. if sampleNmax = NULL this is set by min cells found across all group.by factor levels
 #' @param sampleNmax maximum number of cells to sample from, if greater than any given group.by factor level since relace = F the maximum number avaiable for that level is taken. leave as NULL if equal number of samples across all levels is desired determined by the lowest number of cells across group.by factor-levels. 
 #' @param slot Passed directly to Seurat::AverageExpression slot parameter. 
 #' @param genes A vector of genes desired, leave as NULL for all genes. 
-cellsToSamples <- function(so=NULL, group.by=NULL, downSample=F, sampleNmax = NULL, slot="data", genes = NULL){
+cells2AvgExprDGE <- function(so=NULL, group.by=NULL, downSample=F, sampleNmax = NULL, slot="data", genes = NULL){
   # so = ComboSeuratObj_QC; group.by = "ExpID"
   if(is.null(so)) stop("No Seurat Object provided")
   if(is.null(group.by)) stop("group.by is null")
