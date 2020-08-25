@@ -385,7 +385,7 @@ doMergeCCA <- function(seuratObjs, nameList,
 #' @description An internal method to do simple merging of seurat objects from a list of them.
 #' @param seuratObjs A list of seurat objects, optionally named (in which case these will be used as dataset names). Also can use SplitObject(, split.by =)
 #' @param nameList A list of names from MergeSeuratObjs()
-#' @param projectName The projectName to pass to Seurat
+#' @param projectName The projectName to pass to Seurat 
 doMergeSimple <- function(seuratObjs, nameList, projectName){
   seuratObj <- NULL
 
@@ -395,13 +395,20 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
       seuratObj <- seuratObjs[[exptNum]]
     } else {
 			assayName <- DefaultAssay(seuratObj)
-      geneIds1 <- GetAssay(seuratObj)@meta.features$GeneId
-			names(geneIds1) <- rownames(seuratObj)
-      geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$GeneId
-			names(geneIds2) <- rownames(seuratObjs[[exptNum]])
-
-      if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
-        stop('Gene names are not equal!')
+			hasGeneId = ifelse(is.null(GetAssay(seuratObjs[[exptNum]])@meta.features$GeneId), F, T)
+			
+			if (any(rownames(seuratObj) != rownames(seuratObjs[[exptNum]]))) {
+			  stop('Gene names are not equal!')
+			}
+	
+      if(hasGeneId) {
+        geneIds1 <- GetAssay(seuratObj)@meta.features$GeneId
+		  	geneIds2 <- GetAssay(seuratObjs[[exptNum]])@meta.features$GeneId
+		  	names(geneIds1) <- rownames(seuratObj)
+		  	names(geneIds2) <- rownames(seuratObjs[[exptNum]])
+      } else {
+        geneIds1 <- rownames(seuratObj)
+        geneIds2 <- rownames(seuratObjs[[exptNum]])
       }
 
       seuratObj <- merge(x = seuratObj,
@@ -416,7 +423,6 @@ doMergeSimple <- function(seuratObjs, nameList, projectName){
         if (any(geneIds1 != geneIds2)) {
           stop('Gene IDs did not match between seurat objects!')
         }
-
         seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
       } else {
         seuratObj[[assayName]] <- AddMetaData(seuratObj[[assayName]], metadata = geneIds1, col.name = 'GeneId')
