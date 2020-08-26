@@ -446,7 +446,7 @@ AppendCellHashing <- function(seuratObj, barcodeCallFile, barcodePrefix = NULL) 
   df$sortOrder = 1:nrow(df)
 
   bcIntersect <- barcodeCallTable[barcodeCallTable$CellBarcode %in% df$CellBarcode,]
-  pct <- round(nrow(bcIntersect) / rnow(barcodeCallTable) * 100, 2)
+  pct <- round(nrow(bcIntersect) / nrow(barcodeCallTable) * 100, 2)
   pct2 <- round(nrow(bcIntersect) / nrow(df) * 100, 2)
 
   print(paste0('Barcodes with calls: ', nrow(barcodeCallTable), ', intersecting with GEX data (total ', nrow(df),'): ', nrow(bcIntersect), " (", pct, "% / ", pct2, "%)"))
