@@ -85,6 +85,7 @@ Collate:
     'GeneNames.R'
     'Monocle_III.R'
     'PhenotypingGeneSets.R'
+    'PseudoBulk.R'
     'Seurat_III_Fixes.R'
     'Seurat_III.R'
     'SingleR_Seurat.R'
