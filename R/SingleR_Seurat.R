@@ -99,7 +99,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 
             print(paste0('Filtering ', label, ' below: ', minFraction))
             d <- table(Label = l)
-            print(kable(d))
+            print(kable(d, 'html'))
 
             d <- d / sum(d)
             toRemove <- names(d)[d < minFraction]
@@ -113,7 +113,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
             print('After filter:')
             l <- unlist(seuratObj[[label]])
             d <- table(Label = l)
-            print(kable(d))
+            print(kable(d, 'html'))
         }
     }
 

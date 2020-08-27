@@ -1008,7 +1008,7 @@ numGenesToSave = 20, onlyPos = F, includeNameTranslation = T) {
 
       topGene <- toWrite %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
       print(DoHeatmap(object = seuratObj, features = unique(as.character(topGene$gene))))
-  		print(kable(topGene))
+  		print(kable(topGene, 'html'))
     }
   }
 }

@@ -66,7 +66,7 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, maxValueForColSumFilt
     print('No HTOs remaining')
   } else {
     rowSummary <- GenerateByRowSummary(bData)
-    print(kable(rowSummary, caption = 'HTO Summary After Filter', row.names = F))
+    print(kable(rowSummary, caption = 'HTO Summary After Filter', row.names = F, 'html'))
   }
 
   return(bData)
@@ -106,7 +106,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
 
   #summarise
   rowSummary <- GenerateByRowSummary(bData)
-  print(kable(rowSummary, caption = 'HTO Summary', row.names = F))
+  print(kable(rowSummary, caption = 'HTO Summary', row.names = F, format = 'html'))
 
   #rowmean
   toDrop <- sum(rowMeans(bData) < minRowMean)
@@ -120,7 +120,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
 
   #summarise
   rowSummary <- GenerateByRowSummary(bData)
-  print(kable(rowSummary, caption = 'HTO Summary', row.names = F))
+  print(kable(rowSummary, caption = 'HTO Summary', row.names = F, format = 'html'))
 
   #Drop HTOs with zero strong cells:
   barcodeMatrix <- as.matrix(bData)
@@ -138,7 +138,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
   barcodeMatrix <- as.matrix(bData)
   meanNonZero <- (rowSums(barcodeMatrix) / rowSums(!!barcodeMatrix))
   meanNonZeroRatio <- meanNonZero / rowMeans(barcodeMatrix)
-  print(kable(data.frame(HTO = rownames(barcodeMatrix), MeanCountOfNonZeroCells = meanNonZero, RatioOfMeanToNonZeroMean = meanNonZeroRatio), row.names = F))
+  print(kable(data.frame(HTO = rownames(barcodeMatrix), MeanCountOfNonZeroCells = meanNonZero, RatioOfMeanToNonZeroMean = meanNonZeroRatio), row.names = F, format = 'html'))
 
   toDrop <- meanNonZero < minMeanNonZeroCount
   if (sum(toDrop) > 0){
@@ -292,7 +292,7 @@ GenerateQcPlots <- function(barcodeData){
 
   topBarcodes <- sort(tail(countsPerCell, n = 20), decreasing = T)
 
-  print(kable(data.frame(CellBarcode = names(topBarcodes), Count = topBarcodes), row.names = F))
+  print(kable(data.frame(CellBarcode = names(topBarcodes), Count = topBarcodes), row.names = F, format = "html"))
 
   #boxplot per HTO:
   barcodeMatrix <- as.matrix(barcodeData)
@@ -527,7 +527,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
     verbose = FALSE
   )[[assay]]
 
-  print(knitr::kable(average.expression, label = 'clara'))
+  print(knitr::kable(average.expression, label = 'clara', format = 'html'))
 
   if (reportKmeans) {
     print('kmeans:')
@@ -549,7 +549,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
       verbose = FALSE
     )[[assay]]
 
-    print(knitr::kable(average.expression, label = 'kmeans'))
+    print(knitr::kable(average.expression, label = 'kmeans', format = 'html'))
   }
 }
 
@@ -857,7 +857,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   )
   rownames(df) <- c('Seurat', 'MultiSeq', 'Final')
   df <- t(df)
-  print(knitr::kable(df))
+  print(knitr::kable(df, format = 'html'))
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
@@ -928,7 +928,7 @@ PrintFinalSummary <- function(df, barcodeData){
   rownames(tbl)[rownames(tbl) == T] <- c('Seurat Call')
   rownames(tbl)[rownames(tbl) == F] <- c('Seurat No Call')
 
-  print(kable(tbl))
+  print(kable(tbl, format = 'html'))
 
   print(ggplot(merged, aes(x = HTO)) +
           geom_bar(stat = 'count') +
@@ -940,7 +940,7 @@ PrintFinalSummary <- function(df, barcodeData){
   tbl <- table(HTO = merged$HTO)
   df <- data.frame(tbl)
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
-  print(kable(df))
+  print(kable(df, format = 'html'))
 
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
@@ -1011,7 +1011,7 @@ PrintFinalSummary <- function(df, barcodeData){
   tbl <- table(HTO_Classification = merged$HTO_Classification)
   df <- data.frame(tbl)
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
-  print(kable(df))
+  print(kable(df, format = 'html'))
 
   getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
   colorValues <- getPalette(length(names(tbl)))
