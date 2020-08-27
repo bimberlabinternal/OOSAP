@@ -51,6 +51,7 @@ Imports:
     STRINGdb,
     stringr,
     reshape2,
+    patchwork,
     Rtsne,
     scales,
     SummarizedExperiment,
