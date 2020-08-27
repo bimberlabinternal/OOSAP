@@ -4,12 +4,12 @@
 \alias{PlotMarkerSet}
 \title{PlotMarkerSeries}
 \usage{
-PlotMarkerSet(seuratObj, reduction, title, features)
+PlotMarkerSet(seuratObj, reductions, title, features)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
 
-\item{reduction}{The reduction to use}
+\item{reductions}{The reduction(s) to use}
 
 \item{title}{The title for the plot}
 

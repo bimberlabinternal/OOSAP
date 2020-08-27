@@ -11,7 +11,7 @@ RemoveUnchangedOrZero(seuratObj, reduction, features)
 
 \item{reduction}{The reduction to use}
 
-\item{features}{The features to evalute}
+\item{features}{The features to evaluate}
 }
 \value{
 The updated set of features
