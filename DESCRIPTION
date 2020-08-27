@@ -55,7 +55,10 @@ Imports:
     scales,
     SummarizedExperiment,
     shiny,
-    patchwork
+    patchwork,
+    destiny,
+    gtools,
+    ggbeeswarm
 Suggests:
     ggvis,
     devtools,
