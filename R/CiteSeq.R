@@ -470,7 +470,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
 	tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 4)
 
 	# Note: for this comparison, both the RNA and protein clustering are visualized on a tSNE generated using the ADT distance matrix.
-	print(CombinePlots(plots = list(tsne_orig, tsne_adt), ncol = 2))
+	print(patchwork::wrap_plots(list(tsne_orig, tsne_adt), ncol = 2))
 
 	return(seuratObj)
 }
