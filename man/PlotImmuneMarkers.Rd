@@ -4,12 +4,12 @@
 \alias{PlotImmuneMarkers}
 \title{PlotImmuneMarkers}
 \usage{
-PlotImmuneMarkers(seuratObj, reduction = "tsne")
+PlotImmuneMarkers(seuratObj, reductions = c("tsne", "umap"))
 }
 \arguments{
 \item{seuratObj}{A seurat object}
 
-\item{reduction}{The reduction to use}
+\item{reductions}{Vector of reduction(s) to use}
 }
 \description{
 Generate a set of Seurat FeaturePlots for common immune cell markers

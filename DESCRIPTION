@@ -51,10 +51,13 @@ Imports:
     STRINGdb,
     stringr,
     reshape2,
+    patchwork,
     Rtsne,
     scales,
     SummarizedExperiment,
-    shiny
+    shiny,
+    kableExtra (>= 1.2.0),
+    DT
 Suggests:
     ggvis,
     devtools,
