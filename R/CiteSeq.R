@@ -461,11 +461,11 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
 	DefaultAssay(seuratObj) <- origAssay
 
 	#Compare new/old:
-	tsne_orig <- DimPlot(seuratObj, reduction = "tsne_adt", group.by = "origClusterID") + NoLegend()
+	tsne_orig <- DimPlot(seuratObj, reduction = "tsne_adt", group.by = "origClusterID", combine = FALSE) + NoLegend()
 	tsne_orig <- tsne_orig + ggtitle("Clustering based on scRNA-seq") + theme(plot.title = element_text(hjust = 0.5))
 	tsne_orig <- LabelClusters(plot = tsne_orig, id = "origClusterID", size = 4)
 
-	tsne_adt <- DimPlot(seuratObj, reduction = "tsne_adt", pt.size = 0.5) + NoLegend()
+	tsne_adt <- DimPlot(seuratObj, reduction = "tsne_adt", pt.size = 0.5, combine = FALSE) + NoLegend()
 	tsne_adt <- tsne_adt + ggtitle("Clustering based on ADT signal") + theme(plot.title = element_text(hjust = 0.5))
 	tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 4)
 
