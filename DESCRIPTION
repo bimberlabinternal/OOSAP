@@ -58,7 +58,6 @@ Imports:
     shiny,
     kableExtra (>= 1.2.0),
     DT,
-    patchwork,
     destiny,
     gtools,
     ggbeeswarm
