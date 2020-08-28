@@ -71,6 +71,9 @@ test_that("Serat processing works as expected", {
 
   unlink(dr)
 
+  #At least execute this code, so over errors are caught
+  PlotImmuneMarkers(seuratObj)
+
   #Note: if the expectations change, save this output as a reference:
   #seuratObjSS <- seuratObj[1:100]
   #saveRDS(seuratObjSS, file = '../testdata/seuratOutputSS.rds')
