@@ -15,7 +15,6 @@
 #' @return
 #' @keywords CITE-Seq,
 #' @export
-#' @importFrom knitr kable
 ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, maxValueForColSumFilter = 5) {
   if (is.na(bFile)){
     stop("No file set: change bFile")
@@ -66,7 +65,7 @@ ProcessCiteSeqCount <- function(bFile=NA, doRowFilter = T, maxValueForColSumFilt
     print('No HTOs remaining')
   } else {
     rowSummary <- GenerateByRowSummary(bData)
-    print(kable(rowSummary, caption = 'HTO Summary After Filter', row.names = F, 'html'))
+    print(kableExtra::kbl(rowSummary, caption = 'HTO Summary After Filter', row.names = F) %>% kableExtra::kable_styling())
   }
 
   return(bData)
@@ -106,7 +105,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
 
   #summarise
   rowSummary <- GenerateByRowSummary(bData)
-  print(kable(rowSummary, caption = 'HTO Summary', row.names = F, format = 'html'))
+  print(kableExtra::kbl(rowSummary, caption = 'HTO Summary', row.names = F) %>% kableExtra::kable_styling())
 
   #rowmean
   toDrop <- sum(rowMeans(bData) < minRowMean)
@@ -120,7 +119,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
 
   #summarise
   rowSummary <- GenerateByRowSummary(bData)
-  print(kable(rowSummary, caption = 'HTO Summary', row.names = F, format = 'html'))
+  print(kableExtra::kbl(rowSummary, caption = 'HTO Summary', row.names = F) %>% kableExtra::kable_styling())
 
   #Drop HTOs with zero strong cells:
   barcodeMatrix <- as.matrix(bData)
@@ -138,7 +137,7 @@ DoRowFiltering <- function(bData, minRowSum = 5,
   barcodeMatrix <- as.matrix(bData)
   meanNonZero <- (rowSums(barcodeMatrix) / rowSums(!!barcodeMatrix))
   meanNonZeroRatio <- meanNonZero / rowMeans(barcodeMatrix)
-  print(kable(data.frame(HTO = rownames(barcodeMatrix), MeanCountOfNonZeroCells = meanNonZero, RatioOfMeanToNonZeroMean = meanNonZeroRatio), row.names = F, format = 'html'))
+  print(kableExtra::kbl(data.frame(HTO = rownames(barcodeMatrix), MeanCountOfNonZeroCells = meanNonZero, RatioOfMeanToNonZeroMean = meanNonZeroRatio), row.names = F) %>% kableExtra::kable_styling())
 
   toDrop <- meanNonZero < minMeanNonZeroCount
   if (sum(toDrop) > 0){
@@ -276,7 +275,6 @@ utils::globalVariables(
 #'
 #' @description Generate QC plots for HTO/barcode data
 #' @return A modified Seurat object.
-#' @importFrom knitr kable
 #' @export
 #' @import ggplot2
 GenerateQcPlots <- function(barcodeData){
@@ -292,7 +290,7 @@ GenerateQcPlots <- function(barcodeData){
 
   topBarcodes <- sort(tail(countsPerCell, n = 20), decreasing = T)
 
-  print(kable(data.frame(CellBarcode = names(topBarcodes), Count = topBarcodes), row.names = F, format = "html"))
+  print(kableExtra::kbl(data.frame(CellBarcode = names(topBarcodes), Count = topBarcodes), row.names = F) %>% kableExtra::kable_styling())
 
   #boxplot per HTO:
   barcodeMatrix <- as.matrix(barcodeData)
@@ -527,7 +525,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
     verbose = FALSE
   )[[assay]]
 
-  print(knitr::kable(average.expression, label = 'clara', format = 'html'))
+  print(kableExtra::kbl(average.expression, label = 'clara') %>% kableExtra::kable_styling())
 
   if (reportKmeans) {
     print('kmeans:')
@@ -549,7 +547,7 @@ DebugDemux <- function(seuratObj, assay = 'HTO', reportKmeans = FALSE) {
       verbose = FALSE
     )[[assay]]
 
-    print(knitr::kable(average.expression, label = 'kmeans', format = 'html'))
+    print(kableExtra::kbl(average.expression, label = 'kmeans') %>% kableExtra::kable_styling())
   }
 }
 
@@ -857,7 +855,7 @@ ProcessEnsemblHtoCalls <- function(mc, sc, barcodeData,
   )
   rownames(df) <- c('Seurat', 'MultiSeq', 'Final')
   df <- t(df)
-  print(knitr::kable(df, format = 'html'))
+  print(kableExtra::kbl(df) %>% kableExtra::kable_styling())
 
   if (!is.na(allCallsOutFile) && nrow(merged) > 0) {
     write.table(merged, file = allCallsOutFile, row.names = F, sep = '\t', quote = F)
@@ -886,7 +884,6 @@ utils::globalVariables(
 #'
 #' @return A modified Seurat object.
 #' @importFrom naturalsort naturalfactor
-#' @importFrom knitr kable
 #' @param The data table with calls
 #' @param The barcode counts matrix
 #' @import ggplot2
@@ -928,7 +925,7 @@ PrintFinalSummary <- function(df, barcodeData){
   rownames(tbl)[rownames(tbl) == T] <- c('Seurat Call')
   rownames(tbl)[rownames(tbl) == F] <- c('Seurat No Call')
 
-  print(kable(tbl, format = 'html'))
+  print(kableExtra::kbl(tbl) %>% kableExtra::kable_styling())
 
   print(ggplot(merged, aes(x = HTO)) +
           geom_bar(stat = 'count') +
@@ -940,7 +937,7 @@ PrintFinalSummary <- function(df, barcodeData){
   tbl <- table(HTO = merged$HTO)
   df <- data.frame(tbl)
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
-  print(kable(df, format = 'html'))
+  print(kableExtra::kbl(df) %>% kableExtra::kable_styling())
 
   print(ggplot(df, aes(x = '', y=Freq, fill=HTO)) +
     geom_bar(width = 1, stat = "identity", color = "black") +
@@ -1011,7 +1008,7 @@ PrintFinalSummary <- function(df, barcodeData){
   tbl <- table(HTO_Classification = merged$HTO_Classification)
   df <- data.frame(tbl)
   df$Pct <- round((df$Freq / sum(df$Freq)) * 100, 2)
-  print(kable(df, format = 'html'))
+  print(kableExtra::kbl(df) %>% kableExtra::kable_styling())
 
   getPalette <- colorRampPalette(RColorBrewer::brewer.pal(max(3, min(9, length(names(tbl)))), "Set1"))
   colorValues <- getPalette(length(names(tbl)))

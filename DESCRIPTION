@@ -55,7 +55,9 @@ Imports:
     Rtsne,
     scales,
     SummarizedExperiment,
-    shiny
+    shiny,
+    kableExtra (>= 1.2.0),
+    DT
 Suggests:
     ggvis,
     devtools,
