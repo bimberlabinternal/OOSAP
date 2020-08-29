@@ -885,7 +885,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   for (reduction in c('tsne', 'umap')){
     plotLS <- list()
     for (res in as.character(clusterResSet)){
-      plotLS[[res]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE) + ggtitle(paste0("Resolution: ", res))
+      plotLS[[res]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE, combine = FALSE) + ggtitle(paste0("Resolution: ", res))
     }
     print(patchwork::wrap_plots(plotLS))
   }

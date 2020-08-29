@@ -395,16 +395,21 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 	setSize <- 4
 	steps <- ceiling(length(featuresToPlot) / setSize) - 1
 
-	plotList <- list()
+	P <- NULL
 	for (i in 0:steps) {
 		start <- (i * setSize) + 1
 		end <- min((start + setSize - 1), length(featuresToPlot))
 		features <- featuresToPlot[start:end]
 
-		plotList[i + 1] <- RidgePlot(seuratObj, assay = assayName, features = features)
+		P1 <- RidgePlot(seuratObj, assay = assayName, features = features)
+		if (is.null(P)) {
+			P <- P1
+		} else {
+			P <- P | P1
+		}
 	}
 
-	print(patchwork::wrap_plots(plotList))
+	print(P)
 
 	# Also total per ADT
 	countsPerAdt <- rowSums(as.matrix(assayData))
