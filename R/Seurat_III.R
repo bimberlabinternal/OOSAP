@@ -881,14 +881,18 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
                            seed.use = UMAP_Seed, n.epochs = UMAP.NumEpoc)
     seuratObj <- MarkStepRun(seuratObj, 'RunUMAP', saveFile)
   }
-                                
+
   for (reduction in c('tsne', 'umap')){
     plotLS <- list()
+    i <- 0
     for (res in as.character(clusterResSet)){
-      plotLS[[res]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE, combine = FALSE) + ggtitle(paste0("Resolution: ", res))
+      i <- i + 1
+      plotLS[[i]] <- DimPlot(object = seuratObj, reduction = reduction, group.by = paste0("ClusterNames_", res), label = TRUE) + patchwork::plot_annotation(title = paste0("Resolution: ", res))
+
     }
     print(patchwork::wrap_plots(plotLS))
   }
+
   return(seuratObj)
 }
 
@@ -1007,7 +1011,9 @@ numGenesToSave = 20, onlyPos = F, includeNameTranslation = T) {
 
       topGene <- toWrite %>% group_by(cluster, test) %>% top_n(20, avg_logFC)
       print(DoHeatmap(object = seuratObj, features = unique(as.character(topGene$gene))))
-  		print(DT::datatable(topGene,
+
+      #Note: return the datatable, so it will be printed correctly by Rmarkdown::render()
+  		return(DT::datatable(topGene,
         caption = 'Top DE Genes',
         filter = 'none',
         escape = FALSE,
