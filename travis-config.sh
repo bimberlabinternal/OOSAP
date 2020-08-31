@@ -61,12 +61,13 @@ Rscript -e "BiocManager::install(version='${R_BIOC_VERSION}')"
 # This is to pre-install two packages with exceptionally large logging, to avoid travis-ci log size errors:
 trap 'catch' ERR
 catch() {
+  echo 'Error installing R packages:'
   cat ~/installWithoutConsole.log
   exit 1
 }
 
 echo 'Installing packages with output suppressed to reduce log size'
-Rscript -e "install.packages(c('RSQLite', 'igraph', 'RcppEigen', 'glmnet', 'rJava'), dependencies=TRUE, ask = FALSE)" > ~/installWithoutConsole.log
-echo 'Installing more packages with output suppressed to reduce log size'
-Rscript -e "install.packages(c('BiocParallel', 'viridis', 'isoband', 'Rgraphviz'), dependencies=TRUE, ask = FALSE)" >> ~/installWithoutConsole.log
+Rscript -e "install.packages(c('RSQLite', 'igraph', 'glmnet', 'rJava'), dependencies=TRUE, ask = FALSE)" > ~/installWithoutConsole.log
+#echo 'Installing more packages with output suppressed to reduce log size'
+#Rscript -e "install.packages(c('BiocParallel', 'viridis', 'isoband', 'Rgraphviz'), dependencies=TRUE, ask = FALSE)" >> ~/installWithoutConsole.log
 echo 'Done installing'
