@@ -22,7 +22,7 @@ echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu
 echo 'max_size = 5.0G\n# important for R CMD INSTALL *.tar.gz as tarballs are expanded freshly -> fresh ctime\nsloppiness = include_file_ctime\n# also important as the (temp.) directory name will differ\nhash_dir = false' > ~/.ccache/ccache.conf
 
 # See: https://stackoverflow.com/questions/49525561/rcppeigen-package-pragma-clang-diagnostic-pop-warnings
-echo -e 'PKG_CXXFLAGS=-w -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS' >> $HOME/.R/Makevars
+echo -e 'PKG_CXXFLAGS=-DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS' >> $HOME/.R/Makevars
 
 CORES=`Rscript -e "getOption('Ncpus', 1L)"`
 echo "Existing Ncpus: $CORES"
@@ -57,17 +57,3 @@ Rscript -e "getOption('repos')"
 
 # Bioconductor
 Rscript -e "BiocManager::install(version='${R_BIOC_VERSION}')"
-
-# This is to pre-install two packages with exceptionally large logging, to avoid travis-ci log size errors:
-trap 'catch' ERR
-catch() {
-  echo 'Error installing R packages:'
-  cat ~/installWithoutConsole.log
-  exit 1
-}
-
-echo 'Installing packages with output suppressed to reduce log size'
-Rscript -e "install.packages(c('RSQLite', 'igraph', 'glmnet', 'rJava'), dependencies=TRUE, ask = FALSE)" > ~/installWithoutConsole.log
-#echo 'Installing more packages with output suppressed to reduce log size'
-#Rscript -e "install.packages(c('BiocParallel', 'viridis', 'isoband', 'Rgraphviz'), dependencies=TRUE, ask = FALSE)" >> ~/installWithoutConsole.log
-echo 'Done installing'
