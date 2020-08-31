@@ -8,8 +8,10 @@ echo 'Running travis setup'
 
 mkdir $HOME/.R
 
+export R_BIOC_VERSION='3.10'
+
 Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependencies=TRUE, ask = FALSE)"
-Rscript -e 'BiocManager::install(version="3.10")'
+Rscript -e "BiocManager::install(version='${R_BIOC_VERSION}')"
 
 # Force python3:
 python3 -m pip install --upgrade pip
@@ -46,7 +48,7 @@ if [ -e ~/.Rprofile.site ];then
 fi
 
 # See: https://stackoverflow.com/questions/26042751/cannot-install-package-xml-to-r
-echo "options(repos = c(BiocManager::repositories(version = '3.10'), c('xml' = 'http://www.omegahat.net/R')));" >> ~/.Rprofile.site
+echo "options(repos = c(BiocManager::repositories(version = '${R_BIOC_VERSION}'), c('xml' = 'http://www.omegahat.net/R')));" >> ~/.Rprofile.site
 
 # Log repos to ensure Bioconductor used:
 echo 'R repos:'
