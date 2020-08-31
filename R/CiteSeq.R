@@ -400,7 +400,7 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
 		end <- min((start + setSize - 1), length(featuresToPlot))
 		features <- featuresToPlot[start:end]
 
-		print(RidgePlot(seuratObj, assay = assayName, features = features))
+		print(RidgePlot(seuratObj, assay = assayName, features = features, ncol = 1))
 	}
 
 	# Also total per ADT
