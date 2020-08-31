@@ -24,7 +24,7 @@ echo 'max_size = 5.0G\n# important for R CMD INSTALL *.tar.gz as tarballs are ex
 # See: https://stackoverflow.com/questions/49525561/rcppeigen-package-pragma-clang-diagnostic-pop-warnings
 CXXFLAGS=`R CMD config CXXFLAGS`
 echo "CXXFLAGS: "$CXXFLAGS
-echo -e "CXXFLAGS=${CXXFLAGS} -w  -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS\n' >> $HOME/.R/Makevars
+echo -e "CXXFLAGS=${CXXFLAGS} -w  -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS\n" >> $HOME/.R/Makevars
 R CMD config CXXFLAGS
 
 CORES=`Rscript -e "getOption('Ncpus', 1L)"`
