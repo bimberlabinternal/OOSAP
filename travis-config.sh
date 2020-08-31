@@ -12,7 +12,7 @@ Rscript -e "install.packages(c('devtools', 'BiocManager', 'remotes'), dependenci
 Rscript -e 'BiocManager::install(version="3.10")'
 
 # Force python3:
-python3.5 -m pip install --upgrade pip
+python3 -m pip install --upgrade pip
 
 python3 --version
 python --version

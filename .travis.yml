@@ -25,7 +25,7 @@ os:
 before_install:
   #NOTE: this goes against the 'bioc-release' directive above, which will always use the latest bioconductor release. This allows us to lag slightly if needed.
   - export R_BIOC_VERSION='3.10'
-  - chmod +x ./travis-config.sh && ./travis-config.sh && python3.5 -m pip install --user wheel setuptools && python3.5 -m pip install --user llvmlite==0.31.0 umap-learn==0.3.10
+  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 -m pip install --user wheel setuptools && python3 -m pip install --user llvmlite==0.31.0 umap-learn==0.3.10
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
