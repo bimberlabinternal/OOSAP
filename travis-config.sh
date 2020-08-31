@@ -59,3 +59,7 @@ Rscript -e "getOption('repos')"
 
 # Bioconductor
 Rscript -e "BiocManager::install(version='${R_BIOC_VERSION}')"
+
+# This is to pre-install two packages with exceptionally large logging, to avoid travis-ci log size errors:
+Rscript -e "install.packages(c('RSQLite'), dependencies=TRUE, ask = FALSE)" > /dev/null 2>&1
+Rscript -e "install.packages(c('igraph'), dependencies=TRUE, ask = FALSE)" > /dev/null 2>&1
