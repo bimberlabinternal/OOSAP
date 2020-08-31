@@ -36,7 +36,7 @@ jobs:
       script: true
     - stage: test
       script:
-        - R CMD build .
+        - R CMD build --no-build-vignettes --no-manual .
         # See: https://github.com/r-lib/testthat/issues/515
         - # consider adding --as-cran
         - R CMD check --no-tests *tar.gz
