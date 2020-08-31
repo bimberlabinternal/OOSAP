@@ -21,11 +21,6 @@ pip --version
 echo -e 'CXX_STD = CXX14\n\nVER=\nCCACHE=ccache\nCC=$(CCACHE) gcc$(VER) -std=gnu99\nCXX=$(CCACHE) g++$(VER)\nC11=$(CCACHE) g++$(VER)\nC14=$(CCACHE) g++$(VER)\nFC=$(CCACHE) gfortran$(VER)\nF77=$(CCACHE) gfortran$(VER)\n' > $HOME/.R/Makevars
 echo 'max_size = 5.0G\n# important for R CMD INSTALL *.tar.gz as tarballs are expanded freshly -> fresh ctime\nsloppiness = include_file_ctime\n# also important as the (temp.) directory name will differ\nhash_dir = false' > ~/.ccache/ccache.conf
 
-R CMD config CFLAGS
-CFLAGS=`R CMD config CFLAGS | sed 's/-Wall/-w/'`
-echo -e "CFLAGS=${CFLAGS}\n" >> $HOME/.R/Makevars
-cat $HOME/.R/Makevars
-
 CORES=`Rscript -e "getOption('Ncpus', 1L)"`
 echo "Existing Ncpus: $CORES"
 
@@ -61,5 +56,6 @@ Rscript -e "getOption('repos')"
 Rscript -e "BiocManager::install(version='${R_BIOC_VERSION}')"
 
 # This is to pre-install two packages with exceptionally large logging, to avoid travis-ci log size errors:
-Rscript -e "install.packages(c('RSQLite'), dependencies=TRUE, ask = FALSE)" > /dev/null 2>&1
-Rscript -e "install.packages(c('igraph'), dependencies=TRUE, ask = FALSE)" > /dev/null 2>&1
+echo 'Installing packages with output suppressed to reduce log size'
+Rscript -e "install.packages(c('RSQLite', 'igraph', 'RcppEigen', 'glmnet'), dependencies=TRUE, ask = FALSE)" > /dev/null 2>&1
+echo 'Done installing'
