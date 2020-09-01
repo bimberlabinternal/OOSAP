@@ -26,7 +26,7 @@ addFlags() {
     VAR=$1
 
     VALUE=`R CMD config ${VAR}`
-    echo $VAR": "VALUE
+    echo $VAR": "$VALUE
     if [[ ${VALUE} != *"ERROR"* ]];then
         echo -e $VAR"="${VALUE}" -Wall -pipe -pedantic -DEIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS\n" >> $HOME/.R/Makevars
         R CMD config ${VAR}
