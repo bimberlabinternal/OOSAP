@@ -20,12 +20,8 @@ os:
   - linux
 
 # see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
-# Note: previously this required numba 0.42, but seems to have been fixed: https://github.com/lmcinnes/umap/issues/209
-# Note: 0.48 is failing, probably due to a problem in their build: "File "/tmp/pip-build-ju5e2h89/numba/setup.py", line 305 build_requires = [f'numpy >={min_numpy_build_version}']"
 before_install:
-  #NOTE: this goes against the 'bioc-release' directive above, which will always use the latest bioconductor release. This allows us to lag slightly if needed.
-  - export R_BIOC_VERSION='3.10'
-  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 -m pip install --user wheel setuptools && python3 -m pip install --user llvmlite==0.31.0 umap-learn==0.3.10
+  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 -m pip install --user wheel setuptools && python3 -m pip install --user umap-learn
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
@@ -40,7 +36,7 @@ jobs:
       script: true
     - stage: test
       script:
-        - R CMD build .
+        - R CMD build --no-build-vignettes --no-manual .
         # See: https://github.com/r-lib/testthat/issues/515
         - # consider adding --as-cran
         - R CMD check --no-tests *tar.gz
