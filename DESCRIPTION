@@ -57,7 +57,10 @@ Imports:
     SummarizedExperiment,
     shiny,
     kableExtra (>= 1.2.0),
-    DT
+    DT,
+    destiny,
+    gtools,
+    ggbeeswarm
 Suggests:
     ggvis,
     devtools,
@@ -71,7 +74,7 @@ Remotes:
     bioc::3.10/SummarizedExperiment,
     bioc::3.10/RDAVIDWebService,
     bioc::3.10/STRINGdb
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Collate: 
     'Utils.R'
     'LabKeySettings.R'
@@ -96,4 +99,5 @@ Collate:
     'Viz.R'
     'data.R'
     'mcl.R'
+    'plotDiffusionMaps.R'
     'postSDA_processing.R'
