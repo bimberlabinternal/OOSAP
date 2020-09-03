@@ -23,7 +23,7 @@ utils::globalVariables(
 #' @keywords ReadAndFilter10X
 #' @export
 #' @importFrom Seurat Read10X
-ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, storeGeneIds=TRUE, emptyDropsLower = 100) {
+ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, storeGeneIds=TRUE, emptyDropsLower = 100, gtfFile = NA) {
   if (!file.exists(dataDir)){
     stop(paste0("File does not exist: ", dataDir))
   }
@@ -42,7 +42,7 @@ ReadAndFilter10xData <- function(dataDir, datasetName, emptyDropNIters=10000, st
 
   seuratRawData <- PerformEmptyDropletFiltering(seuratRawData, emptyDropNIters=emptyDropNIters, emptyDropsLower=emptyDropsLower)
 
-  seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName)
+  seuratObj <- CreateSeuratObj(seuratRawData, project = datasetName, gtfFile = gtfFile)
   PrintQcPlots(seuratObj)
 
   if (storeGeneIds) {
@@ -103,16 +103,61 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
 #' @return A Seurat object with p.mito calculated.
 #' @keywords CreateSeuratObj
 #' @importFrom Matrix colSums
-CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, mitoGenesPattern = "^MT-"){
+CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, mitoGenesPattern = "^MT-", gtfFile = NA){
   seuratObj <- CreateSeuratObject(counts = seuratData, min.cells = minCells, min.features = minFeatures, project = project)
-
-  mito.features <- grep(pattern = mitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
-  p.mito <- Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts'))
-  seuratObj[['p.mito']] <- p.mito
+  seuratObj<- AnnotateMitoGenes(seuratObj, mitoGenesPattern = mitoGenesPattern, gtfFile = gtfFile)
 
   return(seuratObj)
 }
 
+AnnotateMitoGenes <- function(seuratObj, mitoGenesPattern = "^MT-", gtfFile = NA, mitoContigName = 'MT') {
+	mito.features <- NULL
+  if (is.na(gtfFile)) {
+    mito.features <- grep(pattern = mitoGenesPattern, x = rownames(x = seuratObj), value = TRUE)
+  } else {
+		mito.features <- .InferMitoFeaturesFromGtf(gtfFile = gtfFile, mitoContigName = mitoContigName)
+	}
+
+  print(paste0('Total mito features: ', length(mito.features)))
+	print(paste0('Total intersecting with seurat rownames (total: ', length(rownames(seuratObj)),'): ', length(intersect(mito.features, rownames(seuratObj)))))
+
+	if (all(is.null(mito.features)) || length(mito.features) == 0) {
+  	print('No mito features found')
+		seuratObj[['p.mito']] <- 0
+	} else {
+	  p.mito <- Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts')[mito.features, ]) / Matrix::colSums(x = GetAssayData(object = seuratObj, slot = 'counts'))
+  	seuratObj[['p.mito']] <- p.mito
+	}
+
+  return(seuratObj)
+}
+
+
+.InferMitoFeaturesFromGtf <- function(gtfFile = gtfFile, mitoContigName = mitoContigName) {
+	print(paste0('Parsing GTF file for contig: ', mitoContigName))
+
+	gtfDf <- read.table(gtfFile, sep = '\t', comment.char = '#', stringsAsFactors = FALSE)
+	names(gtfDf) <- c("chr","source","type","start","end","score","strand","phase","attributes")
+	gtfDf <- gtfDf[gtfDf$type == 'exon',]
+
+	gtfDf$GeneId = sapply(gtfDf$attributes, function(x){
+		att <- unlist(strsplit(x, " "))
+		if ('gene_name' %in% att){
+			return(gsub("\"|;","", att[which(att == 'gene_name')+1]))
+		} else if ('gene_id' %in% att) {
+			return(gsub("\"|;","", att[which(att == 'gene_id')+1]))
+		} else {
+			return(NA)
+		}
+	})
+
+	mito.features <- sort(unique(gtfDf$GeneId[gtfDf$chr == mitoContigName]))
+	print(paste0('Initial mito features: ', nrow(mito.features)))
+	mito.features <- mito.features[!(mito.features %in% unique(gtfDf$GeneId[gtfDf$chr != mitoContigName]))]
+	print(paste0('After removing name conflicts with other contigs: ', length(mito.features)))
+
+	return(mito.features)
+}
 
 #' @title PrintQcPlots
 #'
