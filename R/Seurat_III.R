@@ -652,6 +652,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- MarkStepRun(seuratObj, 'FilterCells', saveFile)
   }
 
+	totalPMito = length(unique(seuratObj[['p.mito']]))
+	toRegress <- c("nCount_RNA")
+	if (totalPMito > 1) {
+		toRegress <- c(toRegress, "p.mito")
+	}
+
   if (!useSCTransform) {
     if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData', forceReCalc = forceReCalc)) {
       print('Normalizing data:')
@@ -664,12 +670,6 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
       seuratObj <- FindVariableFeatures(object = seuratObj, mean.cutoff = mean.cutoff, dispersion.cutoff = dispersion.cutoff , verbose = F, selection.method = variableFeatureSelectionMethod, nfeatures = nVariableFeatures)
       seuratObj <- MarkStepRun(seuratObj, 'FindVariableFeatures', saveFile)
     }
-
-		totalPMito = length(unique(seuratObj[['p.mito']]))
-		toRegress <- c("nCount_RNA")
-		if (totalPMito > 1) {
-			toRegress <- c(toRegress, "p.mito")
-		}
 
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
       print('Scale data:')
