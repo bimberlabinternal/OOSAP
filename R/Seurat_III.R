@@ -152,7 +152,8 @@ AnnotateMitoGenes <- function(seuratObj, mitoGenesPattern = "^MT-", gtfFile = NA
 	})
 
 	mito.features <- sort(unique(gtfDf$GeneId[gtfDf$chr == mitoContigName]))
-	print(paste0('Initial mito features: ', nrow(mito.features)))
+	mito.features <- mito.features[mito.features != '' && !is.na(mito.features)]
+	print(paste0('Initial mito features: ', length(mito.features)))
 	mito.features <- mito.features[!(mito.features %in% unique(gtfDf$GeneId[gtfDf$chr != mitoContigName]))]
 	print(paste0('After removing name conflicts with other contigs: ', length(mito.features)))
 
@@ -166,8 +167,19 @@ AnnotateMitoGenes <- function(seuratObj, mitoGenesPattern = "^MT-", gtfFile = NA
 #' @return NULL
 #' @importFrom Matrix colSums
 PrintQcPlots <- function(seuratObj) {
-  print(VlnPlot(object = seuratObj, features = c("nFeature_RNA", "nCount_RNA", "p.mito"), ncol = 3))
-  print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito"))
+	totalPMito = length(unique(seuratObj[['p.mito']]))
+	feats <- c("nFeature_RNA", "nCount_RNA")
+	if (totalPMito > 1) {
+		feats <- c(feats, "p.mito")
+	}
+
+  print(VlnPlot(object = seuratObj, features = feats, ncol = length(feats)))
+
+	if (totalPMito > 1) {
+  	print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito"))
+	} else {
+		print("p.mito absent or identical across all cells, will not plot")
+	}
   print(FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA"))
 
   #10x-like plot
@@ -640,6 +652,12 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     seuratObj <- MarkStepRun(seuratObj, 'FilterCells', saveFile)
   }
 
+	totalPMito = length(unique(seuratObj[['p.mito']]))
+	toRegress <- c("nCount_RNA")
+	if (totalPMito > 1) {
+		toRegress <- c(toRegress, "p.mito")
+	}
+
   if (!useSCTransform) {
     if (forceReCalc | !HasStepRun(seuratObj, 'NormalizeData', forceReCalc = forceReCalc)) {
       print('Normalizing data:')
@@ -655,7 +673,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
 
     if (forceReCalc | !HasStepRun(seuratObj, 'ScaleData', forceReCalc = forceReCalc)) {
       print('Scale data:')
-      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = c("nCount_RNA", "p.mito"), verbose = F)
+      seuratObj <- ScaleData(object = seuratObj, features = rownames(x = seuratObj), vars.to.regress = toRegress, verbose = F)
       seuratObj <- MarkStepRun(seuratObj, 'ScaleData', saveFile)
     }
 
@@ -665,7 +683,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
     }
   } else {
     print('Using SCTransform')
-    seuratObj <- SCTransform(seuratObj, vars.to.regress = c("nCount_RNA", "p.mito"), verbose = FALSE, return.only.var.genes = F)
+    seuratObj <- SCTransform(seuratObj, vars.to.regress = toRegress, verbose = FALSE, return.only.var.genes = F)
     
     if (doCellCycle & (forceReCalc | !HasStepRun(seuratObj, 'CellCycle', forceReCalc = forceReCalc))) {
       seuratObj <- RemoveCellCycle(seuratObj, pcaResultFile = ccPcaResultFile, useSCTransform = T)
@@ -726,19 +744,24 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   seuratObj@misc$OriginalCells <- length(colnames(x = seuratObj))
   print(paste0('Initial cells: ', length(colnames(x = seuratObj))))
 
-  P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito")
-  P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.low), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.high), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_hline(aes(yintercept=pMito.low), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_hline(aes(yintercept=pMito.high), color="blue", linetype="dashed", size=1)
-  print(P1)
+	totalPMito = length(unique(seuratObj[['p.mito']]))
+	if (totalPMito > 1) {
+		P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "p.mito")
+		P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.low), color="blue", linetype="dashed", size=1)
+		P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.high), color="blue", linetype="dashed", size=1)
+		P1 <- P1 + geom_hline(aes(yintercept=pMito.low), color="blue", linetype="dashed", size=1)
+		P1 <- P1 + geom_hline(aes(yintercept=pMito.high), color="blue", linetype="dashed", size=1)
+		print(P1)
+	} else {
+		print("p.mito is either absent or identical across all cells")
+	}
 
-  P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
-  P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.low), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.high), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_hline(aes(yintercept=nFeature.low), color="blue", linetype="dashed", size=1)
-  P1 <- P1 + geom_hline(aes(yintercept=nFeature.high), color="blue", linetype="dashed", size=1)
-  print(P1)
+	P1 <- FeatureScatter(object = seuratObj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+	P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.low), color="blue", linetype="dashed", size=1)
+	P1 <- P1 + geom_vline(aes(xintercept=nCount_RNA.high), color="blue", linetype="dashed", size=1)
+	P1 <- P1 + geom_hline(aes(yintercept=nFeature.low), color="blue", linetype="dashed", size=1)
+	P1 <- P1 + geom_hline(aes(yintercept=nFeature.high), color="blue", linetype="dashed", size=1)
+	print(P1)
 
   #See: https://github.com/satijalab/seurat/issues/1053#issuecomment-454512002
   expr <- Seurat::FetchData(object = seuratObj, vars = 'nCount_RNA')
