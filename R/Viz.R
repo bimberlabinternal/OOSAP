@@ -34,7 +34,7 @@ PlotAvgExpr <- function(GenesNames2Show, X_avg, Y_avg, features=NULL, Xlab="Xlab
   p1 <- ggplot(avg.combo.cells, aes(X, Y)) + geom_point() + 
     geom_text(aes(label=gene3), size=3, colour=HighColor,
               vjust=0, hjust=-0.1) +
-    ggtitle(Title) + xlab(Xlab) + ylab(Ylab) + 
+    labs(title = Title) + xlab(Xlab) + ylab(Ylab) + 
     theme_bw() +
     geom_point(data=subset(avg.combo.cells, gene2 == "show"), aes(x=X, y=Y), colour="dodgerblue", size=2)
   
@@ -59,7 +59,7 @@ PlotMyTable <- function(MyTable, Title="", legend.position="bottom", PlotCombo =
           theme(legend.position=legend.position,
                 legend.direction="horizontal",
                 legend.title = element_blank()) +
-          ggtitle(paste0(Title, "\n Total Contribution")) + ylab("Total No."))
+           labs(title = paste0(Title, "\n Total Contribution")) + ylab("Total No."))
   
   
   p2<- (ggplot(tempMeltDF) +
@@ -70,7 +70,7 @@ PlotMyTable <- function(MyTable, Title="", legend.position="bottom", PlotCombo =
                 legend.title = element_blank())+
           scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
                              labels = scales::percent(c(0, 0.25, 0.5, 0.75, 1))) +
-          ggtitle(paste0(Title, "\n Relative % Contribution")) + ylab("(%)"))
+          labs(title = paste0(Title, "\n Relative % Contribution"))  + ylab("(%)"))
   
   if(PlotCombo) print(cowplot::plot_grid(p1, p2, ncol = 1)) else {
     print(p1)
@@ -98,7 +98,7 @@ PlotBin2D <- function(DF, bins = 75, ncol = 3){
     
     ggplot(subset(DF, Fac == xN), aes(V1, V2)) + geom_bin2d(bins = bins) + theme_bw() +
       theme(legend.position = "bottom") +
-      ggtitle(paste0(xN)) +
+      labs(title = paste0(xN)) +
       scale_fill_viridis() + guides(colour = guide_legend(override.aes = list(size=2, alpha=1)))
     
   }),
@@ -146,7 +146,7 @@ PlotExprThrTab <- function(SeuratObj, GeneName = NULL, CutThresh = NULL, PlotBar
             legend.direction="horizontal",
             legend.title = element_blank(),
             axis.text.x = element_text(angle = 90)) +
-      ggtitle(paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells")
+        labs(title = paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra))  + ylab("Number of cells")
     
     print(p2)
     
@@ -176,7 +176,7 @@ PlotExprThrTab <- function(SeuratObj, GeneName = NULL, CutThresh = NULL, PlotBar
               legend.direction="horizontal",
               legend.title = element_blank(),
               axis.text.x = element_text(angle = 90)) +
-        ggtitle(paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells"),
+        labs(title = paste0(GeneName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells"),
       
       vp,
       
@@ -189,7 +189,7 @@ PlotExprThrTab <- function(SeuratObj, GeneName = NULL, CutThresh = NULL, PlotBar
               axis.text.x = element_text(angle = 90))+
         scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
                            labels = scales::percent(c(0, 0.25, 0.5, 0.75, 1))) +
-        ggtitle("\n Relative Contribution") + ylab("Relative % cells"),
+        labs(title = "\n Relative Contribution") + ylab("Relative % cells"),
       
       ncol = 2)
     
@@ -227,7 +227,8 @@ PlotHistDensOptima <- function(dftemp, Print = F, col_vector = col_vector, nn = 
     geom_vline(aes(xintercept=mean(var1) + 2*sd(var1)), color="dodgerblue", linetype="dashed", size=.5) +
     geom_vline(aes(xintercept=peaks[1] ), color="plum", size=.8) +
     geom_vline(aes(xintercept=dips[1] ), color="red", size=1)  +
-    theme_bw() + ggtitle(Title)
+    theme_bw() +
+    labs(title = Title)
   
   
   if((length(peaks) >= 2)) p1 <- p1 + geom_vline(aes(xintercept=peaks[2] ), color="plum", size=.8)
@@ -277,8 +278,9 @@ PlotFeatThrTab <- function(SeuratObj, FeatName = NULL, CutThresh = NULL, PlotBar
         theme(legend.position="bottom",
               legend.direction="horizontal",
               legend.title = element_blank(),
-              axis.text.x = element_text(angle = 90)) +
-        ggtitle(paste0(FeatName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells")
+              axis.text.x = element_text(angle = 90))  +
+        labs(title = paste0(FeatName, ">", CutThresh, " :: count", "\n", TitleExtra)) + 
+        ylab("Number of cells")
     
     print(p2)
     
@@ -308,7 +310,7 @@ PlotFeatThrTab <- function(SeuratObj, FeatName = NULL, CutThresh = NULL, PlotBar
               legend.direction="horizontal",
               legend.title = element_blank(),
               axis.text.x = element_text(angle = 90)) +
-        ggtitle(paste0(FeatName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells"),
+        labs(title = paste0(FeatName, ">", CutThresh, " :: count", "\n", TitleExtra)) + ylab("Number of cells"),
       
       vp,
       
@@ -321,7 +323,7 @@ PlotFeatThrTab <- function(SeuratObj, FeatName = NULL, CutThresh = NULL, PlotBar
               axis.text.x = element_text(angle = 90))+
         scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1),
                            labels = scales::percent(c(0, 0.25, 0.5, 0.75, 1))) +
-        ggtitle("\n Relative Contribution") + ylab("Relative % cells"),
+        labs(title = "\n Relative Contribution") + ylab("Relative % cells"),
       
       ncol = 2)
     
