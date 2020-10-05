@@ -430,49 +430,83 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
   print(P2)
 }
 
-ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT', dist.method="euclidean"){
+ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT', 
+                               dist.method="euclidean", forceReCalc=F,
+                               print.plot = T){
   origAssay <- DefaultAssay(seuratObj)
   DefaultAssay(seuratObj) <- assayName
   print(paste0('Processing ADT data, features: ', paste0(rownames(seuratObj), collapse = ',')))
   
-  #PCA:
-  seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
-  print(DimPlot(seuratObj, reduction = "pca_adt"))
-  
-  adt.data <- GetAssayData(seuratObj, slot = "data")
-  adt.dist <- dist(t(adt.data), method = dist.method)
-  
   # Before we recluster the data on ADT levels, we'll stash the original cluster IDs for later
   seuratObj[["origClusterID"]] <- Idents(seuratObj)
   
-  # Now, we rerun tSNE using our distance matrix defined only on ADT (protein) levels.
-  seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
-  seuratObj[["adt_snn"]] <- FindNeighbors(adt.dist)$snn
+  #PCA:
+  if(!HasStepRun(seuratObj, 'PCA_ADT', forceReCalc = forceReCalc)){
+    print("Performing PCA on ADT")
+    seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
+    if(print.plot) print(DimPlot(seuratObj, reduction = "pca_adt"))
+    MarkStepRun(seuratObj, 'PCA_ADT')
+  }
   
-  #Cluster with a few different resolutions
-  seuratObj <- FindClusters(seuratObj, resolution = 0.1, graph.name = "adt_snn")
-  seuratObj <- FindClusters(seuratObj, resolution = 0.2, graph.name = "adt_snn")
-  seuratObj <- FindClusters(seuratObj, resolution = 0.5, graph.name = "adt_snn")
-  seuratObj <- FindClusters(seuratObj, resolution = 1.0, graph.name = "adt_snn")
+  #SNN:
+  if(!HasStepRun(seuratObj, 'SNN_ADT', forceReCalc = forceReCalc)){
+    print("Calculating Distance Matrix")
+    adt.data <- GetAssayData(seuratObj, slot = "data")
+    adt.dist <- dist(t(adt.data), method = dist.method)
+    seuratObj[["adt_snn"]]  <- FindNeighbors(adt.dist)$snn
+    
+    #Cluster with a few different resolutions
+    seuratObj <- FindClusters(seuratObj, resolution = 0.1, graph.name = "adt_snn")
+    seuratObj <- FindClusters(seuratObj, resolution = 0.2, graph.name = "adt_snn")
+    seuratObj <- FindClusters(seuratObj, resolution = 0.5, graph.name = "adt_snn")
+    seuratObj <- FindClusters(seuratObj, resolution = 1.0, graph.name = "adt_snn")
+    
+    MarkStepRun(seuratObj, 'SNN_ADT')
+  }
+
+  #tSNE:
+  if(!HasStepRun(seuratObj, 'tSNE_ADT', forceReCalc = forceReCalc)){
+    # Now, we rerun tSNE using our distance matrix defined only on ADT (protein) levels.
+    print("Performing tSNE on ADT")
+    seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
+    
+    if(print.plot) print(DimPlot(seuratObj, reduction = "tsne_adt"))
+    MarkStepRun(seuratObj, 'tSNE_ADT')
+  }
+  
+  #UMAP:
+  if(!HasStepRun(seuratObj, 'UMAP_ADT', forceReCalc = forceReCalc)){
+    # Now, we rerun UMAP using our distance matrix defined only on ADT (protein) levels.
+    print("Performing UMAP on ADT")
+    seuratObj[["umap_adt"]] <- RunUMAP(adt.dist, assay = assayName, reduction.key = "adtUMAP_")
+   
+    if(print.plot) print(DimPlot(seuratObj, reduction = "umap_adt"))
+    MarkStepRun(seuratObj, 'UMAP_ADT')
+  }
+  
+  
   
   #Restore original state:
   Idents(seuratObj) <- seuratObj[["origClusterID"]]
   DefaultAssay(seuratObj) <- origAssay
   
-  #Compare new/old:
-  tsne_orig <- DimPlot(seuratObj, reduction = "tsne", group.by = "origClusterID", combine = FALSE)[[1]] + NoLegend()
-  tsne_orig <- tsne_orig  +
-    labs(title = 'Clustering based on scRNA-seq')  + 
-    theme(plot.title = element_text(hjust = 0.5))
-  tsne_orig <- LabelClusters(plot = tsne_orig, id = "origClusterID", size = 6)
-  
-  tsne_adt <- DimPlot(seuratObj, reduction = "tsne_adt", pt.size = 0.5, combine = FALSE)[[1]] + NoLegend()
-  tsne_adt <- tsne_adt  +
+  if(print.plot) {
+    #Compare new/old:
+    tsne_orig <- DimPlot(seuratObj, reduction = "tsne", group.by = "origClusterID", combine = FALSE)[[1]] + NoLegend()
+    tsne_orig <- tsne_orig  +
+      labs(title = 'Clustering based on scRNA-seq')  + 
+      theme(plot.title = element_text(hjust = 0.5))
+    tsne_orig <- LabelClusters(plot = tsne_orig, id = "origClusterID", size = 6)
+    
+    tsne_adt <- DimPlot(seuratObj, reduction = "tsne_adt", pt.size = 0.5, combine = FALSE)[[1]] + NoLegend()
+    tsne_adt <- tsne_adt  +
     labs(title = 'Clustering based on ADT signal') + theme(plot.title = element_text(hjust = 0.5))
-  tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 6)
-  
-  # Note: for this comparison, both the RNA and protein clustering are visualized on a tSNE generated using the ADT distance matrix.
-  print(patchwork::wrap_plots(list(tsne_orig, tsne_adt), ncol = 2))
+    tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 6)
+    
+    # Note: for this comparison, both the RNA and protein clustering are visualized on a tSNE generated using the ADT distance matrix.
+    print(patchwork::wrap_plots(list(tsne_orig, tsne_adt), ncol = 2))
+  }
+
   
   return(seuratObj)
 }
