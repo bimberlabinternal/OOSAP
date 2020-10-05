@@ -445,7 +445,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
     print("Performing PCA on ADT")
     seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
     if(print.plot) print(DimPlot(seuratObj, reduction = "pca_adt"))
-    MarkStepRun(seuratObj, 'PCA_ADT')
+    seuratObj <- MarkStepRun(seuratObj, 'PCA_ADT')
   }
   
   #SNN:
@@ -461,7 +461,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
     seuratObj <- FindClusters(seuratObj, resolution = 0.5, graph.name = "adt_snn")
     seuratObj <- FindClusters(seuratObj, resolution = 1.0, graph.name = "adt_snn")
     
-    MarkStepRun(seuratObj, 'SNN_ADT')
+    seuratObj <- MarkStepRun(seuratObj, 'SNN_ADT')
   }
 
   #tSNE:
@@ -471,7 +471,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
     seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
     
     if(print.plot) print(DimPlot(seuratObj, reduction = "tsne_adt"))
-    MarkStepRun(seuratObj, 'tSNE_ADT')
+    seuratObj <- MarkStepRun(seuratObj, 'tSNE_ADT')
   }
   
   #UMAP:
@@ -481,7 +481,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
     seuratObj[["umap_adt"]] <- RunUMAP(adt.dist, assay = assayName, reduction.key = "adtUMAP_")
    
     if(print.plot) print(DimPlot(seuratObj, reduction = "umap_adt"))
-    MarkStepRun(seuratObj, 'UMAP_ADT')
+    seuratObj <- MarkStepRun(seuratObj, 'UMAP_ADT')
   }
   
   
