@@ -448,26 +448,27 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
 	# Now, we rerun tSNE using our distance matrix defined only on ADT (protein) levels.
 	seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
 	seuratObj[["adt_snn"]] <- FindNeighbors(adt.dist)$snn
+	
+	seuratObj <- FindClusters(seuratObj, resolution = 0.1, graph.name = "adt_snn")
 	seuratObj <- FindClusters(seuratObj, resolution = 0.2, graph.name = "adt_snn")
-
-	clustering.table <- table(Idents(seuratObj), seuratObj$origClusterID)
-	print(clustering.table)
+	seuratObj <- FindClusters(seuratObj, resolution = 0.5, graph.name = "adt_snn")
+	seuratObj <- FindClusters(seuratObj, resolution = 1.0, graph.name = "adt_snn")
 
 	#Restore original state:
 	Idents(seuratObj) <- seuratObj[["origClusterID"]]
 	DefaultAssay(seuratObj) <- origAssay
 
 	#Compare new/old:
-	tsne_orig <- DimPlot(seuratObj, reduction = "tsne_adt", group.by = "origClusterID", combine = FALSE) + NoLegend()
+	tsne_orig <- DimPlot(seuratObj, reduction = "tsne_adt", group.by = "origClusterID", combine = FALSE)[[1]] + NoLegend()
 	tsne_orig <- tsne_orig  +
 	  labs(title = 'Clustering based on scRNA-seq')  + 
 	  theme(plot.title = element_text(hjust = 0.5))
-	tsne_orig <- LabelClusters(plot = tsne_orig, id = "origClusterID", size = 4)
+	tsne_orig <- LabelClusters(plot = tsne_orig, id = "origClusterID", size = 6)
 
-	tsne_adt <- DimPlot(seuratObj, reduction = "tsne_adt", pt.size = 0.5, combine = FALSE) + NoLegend()
+	tsne_adt <- DimPlot(seuratObj, reduction = "tsne", pt.size = 0.5, combine = FALSE)[[1]] + NoLegend()
 	tsne_adt <- tsne_adt  +
 	  labs(title = 'Clustering based on ADT signal') + theme(plot.title = element_text(hjust = 0.5))
-	tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 4)
+	tsne_adt <- LabelClusters(plot = tsne_adt, id = "ident", size = 6)
 
 	# Note: for this comparison, both the RNA and protein clustering are visualized on a tSNE generated using the ADT distance matrix.
 	print(patchwork::wrap_plots(list(tsne_orig, tsne_adt), ncol = 2))
