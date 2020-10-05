@@ -430,7 +430,7 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
   print(P2)
 }
 
-ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
+ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT', dist.method="euclidean"){
   origAssay <- DefaultAssay(seuratObj)
   DefaultAssay(seuratObj) <- assayName
   print(paste0('Processing ADT data, features: ', paste0(rownames(seuratObj), collapse = ',')))
@@ -440,7 +440,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
   print(DimPlot(seuratObj, reduction = "pca_adt"))
   
   adt.data <- GetAssayData(seuratObj, slot = "data")
-  adt.dist <- dist(t(adt.data))
+  adt.dist <- dist(t(adt.data), method = dist.method)
   
   # Before we recluster the data on ADT levels, we'll stash the original cluster IDs for later
   seuratObj[["origClusterID"]] <- Idents(seuratObj)
@@ -449,6 +449,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT'){
   seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
   seuratObj[["adt_snn"]] <- FindNeighbors(adt.dist)$snn
   
+  #Cluster with a few different resolutions
   seuratObj <- FindClusters(seuratObj, resolution = 0.1, graph.name = "adt_snn")
   seuratObj <- FindClusters(seuratObj, resolution = 0.2, graph.name = "adt_snn")
   seuratObj <- FindClusters(seuratObj, resolution = 0.5, graph.name = "adt_snn")
