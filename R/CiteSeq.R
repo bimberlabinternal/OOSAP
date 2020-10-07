@@ -441,7 +441,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   seuratObj[["origClusterID"]] <- Idents(seuratObj)
   
   #PCA:
-  if(!HasStepRun(seuratObj, 'PCA_ADT', forceReCalc = forceReCalc)){
+  if(!HasStepRun(seuratObj, 'PCA_ADT', forceReCalc = forceReCalc) || forceReCalc){
     print("Performing PCA on ADT")
     seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
     if(print.plot) print(DimPlot(seuratObj, reduction = "pca_adt"))
@@ -449,7 +449,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   }
   
   #SNN:
-  if(!HasStepRun(seuratObj, 'SNN_ADT', forceReCalc = forceReCalc)){
+  if(!HasStepRun(seuratObj, 'SNN_ADT', forceReCalc = forceReCalc) || forceReCalc){
     print("Calculating Distance Matrix")
     adt.data <- GetAssayData(seuratObj, slot = "data")
     adt.dist <- dist(t(adt.data), method = dist.method)
@@ -465,7 +465,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   }
 
   #tSNE:
-  if(!HasStepRun(seuratObj, 'tSNE_ADT', forceReCalc = forceReCalc)){
+  if(!HasStepRun(seuratObj, 'tSNE_ADT', forceReCalc = forceReCalc) || forceReCalc){
     # Now, we rerun tSNE using our distance matrix defined only on ADT (protein) levels.
     print("Performing tSNE on ADT")
     seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
@@ -475,7 +475,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   }
   
   #UMAP:
-  if(!HasStepRun(seuratObj, 'UMAP_ADT', forceReCalc = forceReCalc)){
+  if(!HasStepRun(seuratObj, 'UMAP_ADT', forceReCalc = forceReCalc) || forceReCalc){
     # Now, we rerun UMAP using our distance matrix defined only on ADT (protein) levels.
     print("Performing UMAP on ADT")
     seuratObj[["umap_adt"]] <- RunUMAP(adt.dist, assay = assayName, reduction.key = "adtUMAP_")
