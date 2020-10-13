@@ -430,12 +430,41 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
   print(P2)
 }
 
+
+#' @title ProcessCiteSeqData
+#'
+#' @description Processes Cite-seq counts by running PCA, tSNE, and UMAP
+#' @param seuratObj, A Seurat object.
+#' @param assayName The name of the assay to store the ADT data. default is 'ADT'
+#' @param dist.method A distance method to compute SNN matrix
+#' @param forceReCalc  Force recalculate the pipeline
+#' @param print.plot plotting bool
+#' @param features features to run pipeline on
+#' @return A modified Seurat object.
+#' @export
 ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT', 
                                dist.method="euclidean", forceReCalc=F,
-                               print.plot = T){
+                               print.plot = T, features = NULL,
+                               UMAP_NumNeib = 60L, UMAP_MinDist = 0.5, UMAP_Seed = 62636, 
+                               UMAP.NumEpoc = 1000, umap.method = 'umap-learn',
+                               perplexity = 50, maxTsneIter = 2000){
   origAssay <- DefaultAssay(seuratObj)
   DefaultAssay(seuratObj) <- assayName
-  print(paste0('Processing ADT data, features: ', paste0(rownames(seuratObj), collapse = ',')))
+  
+  if(is.null(features)) {
+    features = rownames(seuratObj)
+  } else {
+    if(length(features[(features %in% rownames(seuratObj))]) == 0){
+      stop("features not found in seurat object")
+    } else {
+      print("features not found in seurat object :")
+      print(length(features[!(features %in% rownames(seuratObj))]))
+      features = features[(features %in% rownames(seuratObj))]
+    }}
+  
+  
+  
+  print(paste0('Processing ADT data, features: ', paste0(features, collapse = ',')))
   
   # Before we recluster the data on ADT levels, we'll stash the original cluster IDs for later
   seuratObj[["origClusterID"]] <- Idents(seuratObj)
@@ -443,7 +472,7 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   #PCA:
   if(!HasStepRun(seuratObj, 'PCA_ADT', forceReCalc = forceReCalc) || forceReCalc){
     print("Performing PCA on ADT")
-    seuratObj <- RunPCA(seuratObj, features = rownames(seuratObj), reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
+    seuratObj <- RunPCA(seuratObj, features = features, reduction.name = "pca_adt", reduction.key = "pcaadt_", verbose = FALSE)
     if(print.plot) print(DimPlot(seuratObj, reduction = "pca_adt"))
     seuratObj <- MarkStepRun(seuratObj, 'PCA_ADT')
   }
@@ -451,9 +480,11 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   #SNN:
   if(!HasStepRun(seuratObj, 'SNN_ADT', forceReCalc = forceReCalc) || forceReCalc){
     print("Calculating Distance Matrix")
-    adt.data <- GetAssayData(seuratObj, slot = "data")
-    adt.dist <- dist(t(adt.data), method = dist.method)
-    seuratObj[["adt_snn"]]  <- FindNeighbors(adt.dist)$snn
+    # adt.data <- GetAssayData(seuratObj, slot = "data")
+    # adt.dist <- dist(t(adt.data), method = dist.method)
+    # seuratObj[["adt_snn"]]  <- FindNeighbors(adt.dist)$snn
+    
+    seuratObj <- FindNeighbors(seuratObj, reduction = "pca_adt", graph.name = "adt_snn")
     
     #Cluster with a few different resolutions
     seuratObj <- FindClusters(seuratObj, resolution = 0.1, graph.name = "adt_snn")
@@ -468,7 +499,12 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   if(!HasStepRun(seuratObj, 'tSNE_ADT', forceReCalc = forceReCalc) || forceReCalc){
     # Now, we rerun tSNE using our distance matrix defined only on ADT (protein) levels.
     print("Performing tSNE on ADT")
-    seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
+    # seuratObj[["tsne_adt"]] <- RunTSNE(adt.dist, assay = assayName, reduction.key = "adtTSNE_")
+    
+    seuratObj <- RunTSNE(object = seuratObj, reduction = "pca_adt", 
+                         reduction.name = "tsne_adt", reduction.key = "adtTSNE_", 
+                           dims = 1:ncol(seuratObj@reductions$pca_adt@cell.embeddings),
+                           check_duplicates = FALSE, perplexity = perplexity, max_iter = maxTsneIter)
     
     if(print.plot) print(DimPlot(seuratObj, reduction = "tsne_adt"))
     seuratObj <- MarkStepRun(seuratObj, 'tSNE_ADT')
@@ -478,8 +514,17 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   if(!HasStepRun(seuratObj, 'UMAP_ADT', forceReCalc = forceReCalc) || forceReCalc){
     # Now, we rerun UMAP using our distance matrix defined only on ADT (protein) levels.
     print("Performing UMAP on ADT")
-    seuratObj[["umap_adt"]] <- RunUMAP(adt.dist, assay = assayName, reduction.key = "adtUMAP_")
+    # seuratObj[["umap_adt"]] <- RunUMAP(adt.dist, assay = assayName, reduction.key = "adtUMAP_")
    
+    seuratObj <- RunUMAP(seuratObj,
+                           dims = 1:ncol(seuratObj@reductions$pca_adt@cell.embeddings),
+                           n.neighbors = UMAP_NumNeib,
+                           min.dist = UMAP_MinDist,
+                           metric = "correlation",
+                           umap.method = umap.method, reduction = "pca_adt",
+                           seed.use = UMAP_Seed, n.epochs = UMAP.NumEpoc, 
+                           reduction.name = "umap_adt", reduction.key = "adtUMAP_")
+    
     if(print.plot) print(DimPlot(seuratObj, reduction = "umap_adt"))
     seuratObj <- MarkStepRun(seuratObj, 'UMAP_ADT')
   }
@@ -510,3 +555,8 @@ ProcessCiteSeqData <- function(seuratObj, assayName = 'ADT',
   
   return(seuratObj)
 }
+
+
+
+
+
