@@ -1698,3 +1698,23 @@ PlotMarkerSet <- function(seuratObj, reductions, title, features) {
   }
 }
 
+#' @title ReduceSerObj_HTO
+#'
+#' @description Generate a labeled FeaturePlot for the provided markers
+#' @param so The seurat object
+#' @param removeHTOs default NULL for deep clean (keeps valid HTOS only) or give a vector of HTO names
+ReduceSerObj_HTO <- function(so, removeHTOs = NULL){
+  if(is.null(removeHTOs)){
+    print("removeHTOs is null, therefore, deep cleaning")
+    removeHTOs = c("Discordant", "Doublet", "ND")
+  }
+  if (sum(removeHTOs %in% names(table(so$HTO)))==0){
+    stop("removeHTOs defined not in seurat object ")
+  } else {
+    keepHTOs <- setdiff(names(table(so$HTO)), removeHTOs)
+  }
+  
+  print("Keept HTOs: ")
+  print(keepHTOs)
+  return(subset(so, HTO %in% keepHTOs))
+}
