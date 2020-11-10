@@ -11,7 +11,7 @@
 #' @importFrom dplyr %>% group_by summarise
 #' @export
 QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", dataset = "mmulatta_gene_ensembl", ensemblFilters = c('ensembl_gene_id'), version = NULL, ensemblMirror = NULL, extraAttrs = NULL) {
-    ensembl = useEnsembl(biomart=biomart, dataset=dataset, version = version, mirror = ensemblMirror)
+    ensembl = biomaRt::useEnsembl(biomart=biomart, dataset=dataset, version = version, mirror = ensemblMirror)
     homologAttrs <- c('ensembl_gene_id', 'ensembl_transcript_id', 'external_gene_name', 'hsapiens_homolog_ensembl_gene', 'hsapiens_homolog_associated_gene_name')
     if (!is.null(extraAttrs)) {
         homologAttrs <- unique(c(homologAttrs, extraAttrs))
@@ -21,8 +21,8 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
     tryCatch(expr = {
         ensemblIdsToQuery <- ensemblIds[grepl(ensemblIds, pattern = '^ENS')]
         if (length(ensemblIdsToQuery) > 0) {
-            homologs <- getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
-            homologs <- homologs %>% group_by(ensembl_gene_id) %>% summarise(
+            homologs <- biomaRt::getBM(attributes=homologAttrs, filters = ensemblFilters, values = ensemblIds, mart = ensembl)
+            homologs <- homologs %>% dplyr::group_by(ensembl_gene_id) %>% dplyr::summarise(
                 ensembl_transcript_id = paste(sort(unique(ensembl_transcript_id)), collapse=','),
                 external_gene_name = paste(sort(unique(external_gene_name)), collapse=','),
                 hsapiens_homolog_ensembl_gene = paste(sort(unique(hsapiens_homolog_ensembl_gene)), collapse=','),
@@ -36,7 +36,7 @@ QueryEnsemblSymbolAndHumanHomologs <- function(ensemblIds, biomart = "ensembl", 
             print('None of the input IDs started with ENS, skipping emsembl query')
         }
     }, error = function(e){
-        print(e)
+        print(paste0('Error: ', e))
         stop(paste0('Error querying ensembl, using genes: ', paste0(ensemblIds, collapse = ';')))
     })
 
