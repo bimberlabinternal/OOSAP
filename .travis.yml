@@ -51,6 +51,8 @@ addons:
       - ccache
       - libgit2-dev
       - python3-pip
+      - libfribidi-dev
+      - libharfbuzz-dev
 
 deploy:
   - provider: releases
