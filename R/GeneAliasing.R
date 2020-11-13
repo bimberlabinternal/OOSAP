@@ -1,6 +1,6 @@
 
 # Perform the actual query against STRINGdb
-.QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "10"){
+.QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "11"){
 	print('Querying STRINGdb')
   string_db <- STRINGdb::STRINGdb$new(version = stringDBVersion,
                             species = speciesId, 
@@ -15,10 +15,14 @@
 	## get all species aliases
   stringdb.alias <- string_db$get_aliases()
   stringdb.alias <- stringdb.alias %>%
-    group_by(STRING_id) %>% 
-    summarize(STRING.aliases = toString(sort(unique(alias))))
+		dplyr::group_by(STRING_id) %>%
+		dplyr::summarize(STRING.aliases = paste0(sort(unique(alias)), collapse = ','))
 
   stringdb.alias <- merge(inputIds.map, stringdb.alias, by = c("STRING_id"), all.x = F)
+
+	stringdb.alias <- stringdb.alias %>%
+		dplyr::group_by(InputTerm) %>%
+		dplyr::summarize(STRING_id = paste0(sort(unique(STRING_id)), collapse = ','), STRING.aliases = paste0(sort(unique(STRING.aliases)), collapse = ','))
 
 	print(paste0('Found ', sum(!is.na(stringdb.alias$STRING_id)), ' of ', length(inputIds)))
 

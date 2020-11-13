@@ -3,7 +3,7 @@
 
 dist: bionic
 language: r
-r: 3.6.3
+r: release
 
 # See: https://travis-ci.community/t/in-r-version-4-0-0-library-path-not-writable/9744/9
 bioc_required: false
@@ -21,7 +21,7 @@ os:
 
 # see: https://pjs-web.de/post/using-ccache-to-speed-up-r-package-checks-on-travis-ci/
 before_install:
-  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 -m pip install --user wheel setuptools && python3 -m pip install --user umap-learn
+  - chmod +x ./travis-config.sh && ./travis-config.sh && python3 -m pip install --user wheel setuptools && python3 -m pip install --user umap-learn colorama>=0.3.9
 
 # https://jef.works/blog/2019/02/17/automate-testing-of-your-R-package/
 r_build_args: --no-build-vignettes --no-manual
@@ -51,6 +51,8 @@ addons:
       - ccache
       - libgit2-dev
       - python3-pip
+      - libfribidi-dev
+      - libharfbuzz-dev
 
 deploy:
   - provider: releases

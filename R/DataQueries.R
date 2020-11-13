@@ -98,6 +98,18 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   hasHTO <- !all(is.na(rows[htoLabel]))
   if (hasHTO) {
     df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
+
+    #Allow for libraries that have a non-null HTO, but have only a single per library (which is effectively the same as not being hashed):
+    rows2 <- rows %>% group_by(BarcodePrefix) %>% summarise(Total = dplyr::n_distinct(HTO)) %>% filter(Total == 1)
+    if (nrow(rows2) > 0) {
+      df$HTO <- as.character(df$HTO)
+      for (bc in unique(rows2$BarcodePrefix)) {
+        r <- rows$HTO[rows$BarcodePrefix == bc]
+        df$HTO[df$BarcodePrefix == bc] <- r
+      }
+      df$HTO <- naturalsort::naturalfactor(df$HTO)
+    }
+
     names(df) <- c(htoLabel, 'BarcodePrefix', 'Barcode', 'SortOrder')
     df <- merge(df, rows, by = c(htoLabel, 'BarcodePrefix'), all.x = T)
   } else {

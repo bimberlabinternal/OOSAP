@@ -32,7 +32,7 @@ test_that("SingleR works as expected", {
     expect_equal(22, sum(seuratObj$SingleR_Labels == 'Unknown'))
 
     expect_equal(153, sum(seuratObj$SingleR_Labels_Fine == 'T_cell:CD8+_Central_memory'))
-    expect_equal(61, sum(seuratObj$SingleR_Labels_Fine == 'T_cell:CD8+_naive'))
+    expect_equal(60, sum(seuratObj$SingleR_Labels_Fine == 'T_cell:CD8+_naive'))
 
     expect_equal(ncol(seuratObj), nrow(read.table(results, sep = '\t', header = T)))
 

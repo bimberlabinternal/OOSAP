@@ -8,7 +8,7 @@ echo 'Running travis setup'
 
 mkdir $HOME/.R
 
-export R_BIOC_VERSION='3.10'
+export R_BIOC_VERSION='3.12'
 
 # Force python3:
 python3 -m pip install --upgrade pip
