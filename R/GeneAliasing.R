@@ -1,6 +1,6 @@
 
 # Perform the actual query against STRINGdb
-.QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "10"){
+.QuerySTRINGdb <- function(inputIds, speciesId, score_threshold = 0, stringDBVersion = "11"){
 	print('Querying STRINGdb')
   string_db <- STRINGdb::STRINGdb$new(version = stringDBVersion,
                             species = speciesId, 
