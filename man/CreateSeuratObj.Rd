@@ -9,7 +9,8 @@ CreateSeuratObj(
   project = NA,
   minFeatures = 25,
   minCells = 0,
-  mitoGenesPattern = "^MT-"
+  mitoGenesPattern = "^MT-",
+  gtfFile = NA
 )
 }
 \arguments{

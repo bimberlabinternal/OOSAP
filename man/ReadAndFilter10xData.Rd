@@ -9,7 +9,8 @@ ReadAndFilter10xData(
   datasetName,
   emptyDropNIters = 10000,
   storeGeneIds = TRUE,
-  emptyDropsLower = 100
+  emptyDropsLower = 100,
+  gtfFile = NA
 )
 }
 \arguments{

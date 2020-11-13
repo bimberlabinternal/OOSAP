@@ -10,7 +10,9 @@ RunSingleR(
   assay = NULL,
   resultTableFile = NULL,
   singlerSavePrefix = NULL,
-  minFraction = 0.01
+  minFraction = 0.01,
+  showHeatmap = TRUE,
+  maxCellsForHeatmap = 20000
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ RunSingleR(
 \item{singlerSavePrefix}{If provided, the SingleR}
 
 \item{minFraction}{If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown}
+
+\item{showHeatmap}{If true, heatmaps will be generated showing the SingleR calls}
+
+\item{maxCellsForHeatmap}{The heatmap will only be plotted if the total cells is below this number}
 }
 \value{
 The modified seurat object

@@ -8,13 +8,14 @@
 #' @param singlerSavePrefix If provided, the SingleR
 #' @param minFraction If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown
 #' @param showHeatmap If true, heatmaps will be generated showing the SingleR calls
+#' @param maxCellsForHeatmap The heatmap will only be plotted if the total cells is below this number
 #' @return The modified seurat object
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
 #' @export
 #' @importFrom scater logNormCounts
-RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL, minFraction = 0.01, showHeatmap = TRUE){
+RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL, minFraction = 0.01, showHeatmap = TRUE, maxCellsForHeatmap = 20000){
     if (is.null(seuratObj)){
         stop("Seurat object is required")
     }
@@ -64,7 +65,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.rds'))
     }
 
-    if (showHeatmap) {
+    if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
       print(SingleR::plotScoreHeatmap(pred.results))
     }
 
@@ -82,7 +83,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.fine.rds'))
     }
 
-    if (showHeatmap) {
+    if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
       print(SingleR::plotScoreHeatmap(pred.results))
     }
 
