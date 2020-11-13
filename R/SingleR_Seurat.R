@@ -43,7 +43,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 		genesPresent <- intersect(rownames(seuratObj@assays[[assay]]), rownames(ref))
 		ref <- ref[genesPresent,]
 
-    seuratObjSubset <- Seurat::DietSeurat(seuratObj, assays = c(assay), counts = T, data = F)
+    seuratObjSubset <- Seurat::DietSeurat(seuratObj, assays = c(assay), counts = T)
     seuratObjSubset <- subset(seuratObj, features = genesPresent)
 
   	Seurat::DefaultAssay(seuratObjSubset) <- assay
