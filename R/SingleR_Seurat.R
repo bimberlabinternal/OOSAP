@@ -7,13 +7,14 @@
 #' @param resultTableFile If provided, a table of results will be saved here
 #' @param singlerSavePrefix If provided, the SingleR
 #' @param minFraction If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown
+#' @param showHeatmap If true, heatmaps will be generated showing the SingleR calls
 #' @return The modified seurat object
 #' @keywords SingleR Classification
 #' @import Seurat
 #' @import SingleR
 #' @export
 #' @importFrom scater logNormCounts
-RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL, minFraction = 0.01){
+RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultTableFile = NULL, singlerSavePrefix = NULL, minFraction = 0.01, showHeatmap = TRUE){
     if (is.null(seuratObj)){
         stop("Seurat object is required")
     }
@@ -41,11 +42,14 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
 		#Subset genes:
 		genesPresent <- intersect(rownames(seuratObj@assays[[assay]]), rownames(ref))
 		ref <- ref[genesPresent,]
-		seuratObjSubset <- subset(seuratObj, features = genesPresent)
+
+    seuratObjSubset <- Seurat::DietSeurat(seuratObjSubset, assays = c(assay), counts = T, data = F)
+    seuratObjSubset <- subset(seuratObj, features = genesPresent)
+
   	Seurat::DefaultAssay(seuratObjSubset) <- assay
 		print(paste0('Total genes shared with reference data: ', length(genesPresent)))
 
-  #Convert to SingleCellExperiment
+    #Convert to SingleCellExperiment
     sce <- Seurat::as.SingleCellExperiment(seuratObjSubset, assay = assay)
     sce <- scater::logNormCounts(sce)
     rm(seuratObjSubset)
@@ -60,7 +64,9 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.rds'))
     }
 
-    print(SingleR::plotScoreHeatmap(pred.results))
+    if (showHeatmap) {
+      print(SingleR::plotScoreHeatmap(pred.results))
+    }
 
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
@@ -76,7 +82,9 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.singleR.fine.rds'))
     }
 
-    print(SingleR::plotScoreHeatmap(pred.results))
+    if (showHeatmap) {
+      print(SingleR::plotScoreHeatmap(pred.results))
+    }
 
     if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
         stop('Cell barcodes did not match for all results')
