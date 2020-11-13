@@ -121,7 +121,7 @@ test_that("Gene aliasing code works as expected", {
   testString <- TranslateToStringDb(ensemblIds = NULL, geneSymbols = expect_test1a_ensembl)
   expect_equal(as.character(testString$GeneSymbol), expect_test1a_ensembl)
   expect_true(all(is.na(testString$EnsemblId)))
-  expect_equal(testString$STRING_id, c('9606.ENSP00000355493','9606.ENSP00000351539','9606.ENSP00000271373','9606.ENSP00000356792','9606.ENSP00000356779','9606.ENSP00000385470','9606.ENSP00000361076','9606.ENSP00000356641','9606.ENSP00000354481'))
+  expect_equal(testString$STRING_id, c('9606.ENSP00000355493','9606.ENSP00000351539','9606.ENSP00000356820','9606.ENSP00000356792','9606.ENSP00000356780','9606.ENSP00000385470', NA,'9606.ENSP00000356641,9606.ENSP00000364858','9606.ENSP00000354481'))
   
   #DAVID
   davidEmail <- Sys.getenv('DAVID_EMAIL')
