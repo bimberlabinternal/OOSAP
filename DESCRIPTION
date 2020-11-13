@@ -70,6 +70,7 @@ Remotes:
     bioc::release/DropletUtils,
     bioc::release/DESeq2,
     bioc::release/MAST,
+    bioc::release/celldex,
     bioc::release/SingleR,
     bioc::release/SummarizedExperiment,
     bioc::release/RDAVIDWebService,

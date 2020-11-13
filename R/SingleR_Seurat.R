@@ -19,7 +19,7 @@ RunSingleR <- function(seuratObj = NULL, dataset = 'hpca', assay = NULL, resultT
     }
 
     if (dataset == 'hpca'){
-        ref <- SingleR::HumanPrimaryCellAtlasData()
+        ref <- celldex::HumanPrimaryCellAtlasData()
     } else {
         stop('hpca is currently the only supported reference dataset')
     }
