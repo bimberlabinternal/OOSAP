@@ -24,6 +24,10 @@ jobs:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      CC: ccache gcc
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CXX: ccache g++
+      USE_CCACHE: 1
 
     steps:
       - uses: actions/checkout@v2
@@ -35,11 +39,30 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
-      - name: Query dependencies
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install -yq ccache python3-pip && python3 -m pip install --upgrade pip
+
+      - name: Retrieve ccache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Setup Environment
+        run: chmod +x ./.github/prepareEnvironment.sh && ./.github/prepareEnvironment.sh
+
+      - name: Setup Bioconductor
         run: |
+          install.packages('devtools', 'remotes', dependencies=TRUE, ask = FALSE)
           if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager", dependencies=TRUE, ask = FALSE);
-          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE);cat(append = TRUE, file = "~/.Rprofile.site", "options(repos = BiocManager::repositories());")
-          install.packages('remotes', dependencies=TRUE, ask = FALSE)
+          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
+          cat(append = TRUE, file = "~/.Rprofile.site", "options(repos = BiocManager::repositories());")
+        shell: Rscript {0}
+
+      - name: Query R dependencies
+        run: |
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
@@ -62,7 +85,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          remotes::install_deps(dependencies = TRUE, upgrade = "always", dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE, upgrade = "always")
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 

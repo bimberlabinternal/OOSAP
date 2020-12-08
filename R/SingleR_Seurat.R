@@ -168,22 +168,30 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
 #' @description Create a Dimplot from a Seurat object with SingleR class labels
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
+#' @param datasets One or more datasets to use as a reference. Allowable values are: hpca, blueprint, dice, monaco, and immgen. See cellDex package for available datasets.
 #' @keywords Dimplot SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
+DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datasets = c('hpca')){
+  for (dataset in datasets) {
+    fn <- paste0(dataset, '.label')
+    if (!(fn %in% colnames(seuratObject@meta.data))) {
+      print(paste0('dataset not found: ', dataset))
+      next
+    }
     plots <- list(
-      DimPlot(seuratObject, group.by = "SingleR_Labels") + theme_bw() + ggtitle("SingleR Predicted Classification") + theme(legend.position="bottom"),
-      DimPlot(seuratObject, group.by = "SingleR_Labels_Fine") + theme_bw() + ggtitle("SingleR Predicted Classification (Fine)") + theme(legend.position="bottom")
+      DimPlot(seuratObject, group.by = fn) + theme_bw() + ggtitle(paste0('SingleR Classification: ', dataset)) + theme(legend.position="bottom"),
+      DimPlot(seuratObject, group.by = paste0(dataset, '.label.fine')) + theme_bw() + ggtitle(paste0('SingleR Classification, ', dataset, ' (Fine)')) + theme(legend.position="bottom")
     )
 
     if (plotIndividually){
-        plot(plots[[1]])
-        plot(plots[[2]])
+      print(plots[[1]])
+      print(plots[[2]])
     } else {
-        cowplot::plot_grid(plots[[1]], plots[[2]], ncol = 1)
+      print(cowplot::plot_grid(plots[[1]], plots[[2]], ncol = 1))
     }
+  }
 }
 
 
