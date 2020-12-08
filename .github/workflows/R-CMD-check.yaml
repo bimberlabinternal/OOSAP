@@ -63,7 +63,6 @@ jobs:
           if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager", dependencies=TRUE, ask = FALSE);
           BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
           cat(append = TRUE, file = "~/.Rprofile.site", "options(repos = BiocManager::repositories());")
-          getOption('repos')
         shell: Rscript {0}
 
       - name: Query R dependencies
@@ -90,7 +89,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          remotes::install_deps(dependencies = TRUE, upgrade = "always")
+          getOption('repos')
+          remotes::install_deps(dependencies = TRUE, upgrade = "always", repos = BiocManager::repositories())
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
 
