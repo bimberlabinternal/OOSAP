@@ -199,33 +199,40 @@ DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F, dataset
 #' @description Tabulate SingleR class labels from a Seurat object
 #' @param seuratObject a Seurat object, but if path given, path is prioritized.
 #' @param plotIndividually If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other
+#' @param datasets One or more datasets to use as a reference. Allowable values are: hpca, blueprint, dice, monaco, and immgen. See cellDex package for available datasets.
 #' @keywords Tabulate SingleR Classification 
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F){
-  plots <- list(
-    ggplot(reshape2::melt(table(seuratObject$SingleR_Labels)), aes(x=Var1, y = value, fill=Var1))  +
-      geom_bar(stat="identity", position="dodge", width = 0.7) + 
-      # scale_fill_manual(values=col_vector) +
-      theme_bw() + 
-      theme(legend.position="bottom",
-            legend.direction="horizontal",
-            legend.title = element_blank(),
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-      ggtitle("SingleR Predicted Classification:") +
-      ylab("Number of cells"),
+Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datasets = c('hpca')){
+  for (dataset in datasets) {
+    fn <- paste0(dataset, '.label')
+    if (!(fn %in% colnames(seuratObject@meta.data))) {
+      print(paste0('dataset not found: ', dataset))
+      next
+    }
 
-    ggplot(reshape2::melt(table(seuratObject$SingleR_Labels_Fine)), aes(x=Var1, y = value, fill=Var1))  +
-      geom_bar(stat="identity", position="dodge", width = 0.7) + 
-      # scale_fill_manual(values=col_vector) +
-      theme_bw() + 
-      theme(legend.position="bottom",
-            legend.direction="horizontal",
-            legend.title = element_blank(),
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-      ggtitle("SingleR Predicted Classification (Fine):") +
-      ylab("Number of cells")
+    plots <- list(
+      ggplot(reshape2::melt(table(seuratObject@meta.data[[fn]])), aes(x=Var1, y = value, fill=Var1))  +
+        geom_bar(stat="identity", position="dodge", width = 0.7) +
+        # scale_fill_manual(values=col_vector) +
+        theme_bw() +
+        theme(legend.position="bottom",
+              legend.direction="horizontal",
+              legend.title = element_blank(),
+              axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+        ggtitle(paste0("SingleR Classification:", dataset)) +
+        ylab("Number of cells"),
+
+      ggplot(reshape2::melt(table(seuratObject@meta.data[[paste0(dataset, '.label.fine')]])), aes(x=Var1, y = value, fill=Var1))  +
+        geom_bar(stat="identity", position="dodge", width = 0.7) +
+        theme_bw() +
+        theme(legend.position="bottom",
+              legend.direction="horizontal",
+              legend.title = element_blank(),
+              axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+        ggtitle(paste0("SingleR Classification (Fine):", dataset)) +
+        ylab("Number of cells")
     )
 
     if (plotIndividually){
