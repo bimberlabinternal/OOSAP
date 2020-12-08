@@ -59,7 +59,7 @@ jobs:
 
       - name: Setup Bioconductor
         run: |
-          install.packages('devtools', 'remotes', dependencies=TRUE, ask = FALSE)
+          install.packages(c('devtools', 'remotes'), dependencies=TRUE, ask = FALSE)
           if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager", dependencies=TRUE, ask = FALSE);
           BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
           cat(append = TRUE, file = "~/.Rprofile.site", "options(repos = BiocManager::repositories());")
