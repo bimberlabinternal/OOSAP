@@ -1479,21 +1479,32 @@ GetXYDataFromPlot <- function(plot, cellNames) {
 #' @description Can be used to highlight a set of cells from a seurat plot, such as overlaying specific clonotypes
 #' @param seuratObj The seurat object
 #' @param The plot object, such as the result from FeaturePlot()
-#' @param colorShapes A string or vector that is passed to geom_point()
+# '@param fieldName The name of the field on the seurat object holding cloneName
+# '@param colorField If provided, this field will be used
+# '@param dotColor
+# '@param pt.size
 #' @export
 #' @import ggplot2
-AddClonesToPlot <- function(seuratObj, plot, colorShapes = "black") {
-  cellNames <- colnames(seuratObj)[!is.na(seuratObj$CloneNames)]
+AddClonesToPlot <- function(seuratObj, plot, fieldName = 'CloneNames', colorField = NA, dotColor = NA, pt.size = 1) {
+  cellNames <- colnames(seuratObj)[!is.na(seuratObj[[fieldName]])]
   plot.data <- GetXYDataFromPlot(plot, cellNames)
-  plot.data$CloneName <- seuratObj$CloneNames[!is.na(seuratObj$CloneNames)]
+  plot.data$Clone <- seuratObj[[fieldName]][!is.na(seuratObj[[fieldName]])]
 
-  plot <- plot + geom_point(
-  mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName'),
-  color = colorShapes,
-  data = plot.data
-  )
+	sel <- !is.na(seuratObj[[fieldName]])
+	plot.data$CloneName <- naturalsort::naturalfactor(seuratObj[[fieldName]][sel])
+	if (!is.na(colorField)) {
+		plot.data$CloneColor <- naturalsort::naturalfactor(seuratObj[[colorField]][sel])
+	}
 
-  return(plot)
+	plot <- plot + geom_point(
+	mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName', color = 'CloneColor'),
+	data = plot.data,
+	size = pt.size,
+	inherit.aes = F,
+	color = dotColor
+	)
+
+	return(plot)
 }
 
 
@@ -1568,7 +1579,10 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
   # XCL1 = ENSMMUG00000060218
   # CCL4 = ENSMMUG00000008111
   # LOC100423131 = XCL1, ENSMMUG00000013779
-  PlotMarkerSeries(seuratObj, reductions, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B'), 'CD8 Activation Markers')
+	# LOC100430627 = CCL4, ENSMMUG00000008111
+	# LOC100426632 = C-C motif chemokine 4
+	# LOC100426537 = C-C motif chemokine 3-like
+	PlotMarkerSeries(seuratObj, reductions, c('IFNG', 'CD69', 'TNF', 'NFKBID', 'LTB', 'TNFRSF9', 'CCL4L1', 'NR4A3', 'TNFSF14', 'CD82', 'PIGT', 'IRF8', 'IRF4', 'RGCC', 'PD1', 'PDCD1', 'TNFAIP3', 'LOC100423131', 'LOC100430627', 'ENSMMUG00000013779', 'XCL1', 'ENSMMUG00000060218', 'CCL4', 'ENSMMUG00000008111', 'CCL3', 'PLEK', 'NR4A2', 'LOC100426537', 'LOC114673087', 'KLF10', 'GADD45B'), 'CD8 Activation Markers')
 
   PlotMarkerSeries(seuratObj, reductions, c('PRF1', 'GNLY', 'NKG7', 'GZMA','GZMB','GZMH','GZMK','GZMM'), 'Cytotoxicity')
 
