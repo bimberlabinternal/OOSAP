@@ -40,7 +40,11 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install -yq ccache python3-pip && python3 -m pip install --upgrade pip
+        run: |
+          sudo apt-get update && sudo apt-get install -yq ccache python3-pip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --user wheel setuptools
+          python3 -m pip install --user umap-learn
 
       - name: Retrieve ccache
         uses: actions/cache@v2
