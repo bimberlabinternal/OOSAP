@@ -163,5 +163,3 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
                                                      tSNE_perplexity = tSNE_perplexity, UMAP_MinDist = UMAP_MinDist, UMAP_NumNeib = UMAP_NumNeib, nfeatures = nfeatures)
   return(imputedSeuratObj)
 }
-
-
