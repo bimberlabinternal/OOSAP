@@ -4,12 +4,17 @@
 \alias{AddClonesToPlot}
 \title{AddClonesToPlot}
 \usage{
-AddClonesToPlot(seuratObj, plot, colorShapes = "black")
+AddClonesToPlot(
+  seuratObj,
+  plot,
+  fieldName = "CloneNames",
+  colorField = NA,
+  dotColor = NA,
+  pt.size = 1
+)
 }
 \arguments{
 \item{seuratObj}{The seurat object}
-
-\item{colorShapes}{A string or vector that is passed to geom_point()}
 
 \item{The}{plot object, such as the result from FeaturePlot()}
 }

@@ -1,0 +1,121 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+
+name: R Build and Checks
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }} / ${{ matrix.config.bioc }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-20.04, osversion: '20.04', r: 'devel', bioc: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", cont: "bioconductor/bioconductor_docker:devel"}
+          - {os: ubuntu-20.04, osversion: '20.04', r: 'release', bioc: '3.12', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", cont: "bioconductor/bioconductor_docker:RELEASE_3_12"}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      RSPM: ${{ matrix.config.rspm }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DAVID_EMAIL: ${{ secrets.DAVID_EMAIL }}
+      CC: ccache gcc
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CXX: ccache g++
+      USE_CCACHE: 1
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+
+      - uses: r-lib/actions/setup-pandoc@v1
+
+      - name: Install packages
+        run: |
+          sudo apt-get update && sudo apt-get install -yq ccache python3-pip libcurl4-openssl-dev openjdk-11-jdk libglpk-dev libhdf5-dev
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --user wheel setuptools
+          python3 -m pip install --user umap-learn
+
+      - name: Retrieve ccache
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Setup Environment
+        run: chmod +x ./.github/prepareEnvironment.sh && ./.github/prepareEnvironment.sh
+
+      - name: Setup Bioconductor
+        run: |
+          install.packages(c('devtools', 'remotes'), dependencies=TRUE, ask = FALSE)
+          if (!requireNamespace("BiocManager", quietly=TRUE))  install.packages("BiocManager", dependencies=TRUE, ask = FALSE);
+          BiocManager::install(version = "${{ matrix.config.bioc }}", ask = FALSE)
+          cat(append = TRUE, file = "~/.Rprofile", "options(repos = BiocManager::repositories());")
+        shell: Rscript {0}
+
+      - name: Query R dependencies
+        run: |
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+
+      - name: Cache R packages
+        if: runner.os != 'Windows'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-${{ matrix.config.bioc }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-${{ matrix.config.bioc }}-1-
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "{{ matrix.config.osversion }}"))')
+
+      - name: Install dependencies
+        run: |
+          getOption('repos')
+          remotes::install_deps(dependencies = TRUE, upgrade = "always", repos = BiocManager::repositories())
+          remotes::install_cran("rcmdcheck")
+        shell: Rscript {0}
+
+      - name: Session info
+        run: |
+          options(width = 100)
+          pkgs <- installed.packages()[, "Package"]
+          sessioninfo::session_info(pkgs, include_base = TRUE)
+        shell: Rscript {0}
+
+      - name: Check
+        env:
+          _R_CHECK_CRAN_INCOMING_: false
+        run: rcmdcheck::rcmdcheck(args = c("--no-manual"), error_on = "error", check_dir = "check")
+        shell: Rscript {0}
+
+      - name: Show testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check

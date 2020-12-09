@@ -6,7 +6,7 @@
 \usage{
 RunSingleR(
   seuratObj = NULL,
-  dataset = "hpca",
+  datasets = c("hpca", "blueprint", "dice", "monaco"),
   assay = NULL,
   resultTableFile = NULL,
   singlerSavePrefix = NULL,
@@ -18,13 +18,13 @@ RunSingleR(
 \arguments{
 \item{seuratObj}{A Seurat object}
 
-\item{dataset}{The dataset (see singleR docs) to use as a reference}
+\item{datasets}{One or more datasets to use as a reference. Allowable values are: hpca, blueprint, dice, monaco, and immgen. See cellDex package for available datasets.}
 
 \item{assay}{The assay in the seurat object to use}
 
 \item{resultTableFile}{If provided, a table of results will be saved here}
 
-\item{singlerSavePrefix}{If provided, the SingleR}
+\item{singlerSavePrefix}{If provided, the SingleR results will be saved to RDS here}
 
 \item{minFraction}{If provided, any labels present with fraction of this or fewer across cells will be converted to Unknown}
 
@@ -38,5 +38,3 @@ The modified seurat object
 \description{
 Compute SingleR classification on a Seurat object
 }
-\keyword{Classification}
-\keyword{SingleR}

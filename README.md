@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/bimberlabinternal/OOSAP.svg?branch=Dev)](https://travis-ci.com/bimberlabinternal/OOSAP)
+![R Build and Checks](https://github.com/bimberlabinternal/OOSAP/workflows/R%20Build%20and%20Checks/badge.svg)
 [![DOI](https://zenodo.org/badge/187915110.svg)](https://zenodo.org/badge/latestdoi/187915110)
 
 # OOSAP

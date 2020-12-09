@@ -4,12 +4,18 @@
 \alias{Tabulate_SingleRClassLabs}
 \title{Tabulate SingleR Class Labels}
 \usage{
-Tabulate_SingleRClassLabs(seuratObject, plotIndividually = F)
+Tabulate_SingleRClassLabs(
+  seuratObject,
+  plotIndividually = F,
+  datasets = c("hpca")
+)
 }
 \arguments{
 \item{seuratObject}{a Seurat object, but if path given, path is prioritized.}
 
 \item{plotIndividually}{If true, two separate plots will be printed.  Otherwise a single plot wil be printed with one above the other}
+
+\item{datasets}{One or more datasets to use as a reference. Allowable values are: hpca, blueprint, dice, monaco, and immgen. See cellDex package for available datasets.}
 }
 \description{
 Tabulate SingleR class labels from a Seurat object
