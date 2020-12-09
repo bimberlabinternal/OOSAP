@@ -392,7 +392,7 @@ AppendCiteSeq <- function(seuratObj, countMatrixDir, barcodePrefix = NULL, assay
   assayData <- GetAssayData(seuratObj, slot = "counts", assay = assayName)
   
   featuresToPlot <- rownames(assayData)
-  setSize <- 4
+  setSize <- 2
   steps <- ceiling(length(featuresToPlot) / setSize) - 1
   
   for (i in 0:steps) {
