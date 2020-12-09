@@ -2,7 +2,7 @@
 % Please edit documentation in R/Seurat_III.R
 \name{CreateSeuratObj}
 \alias{CreateSeuratObj}
-\title{Create a Seurat 3 object}
+\title{Wrapper around Seurat::CreateSeuratObject}
 \usage{
 CreateSeuratObj(
   seuratData = NA,

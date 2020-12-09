@@ -24,6 +24,7 @@ jobs:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DAVID_EMAIL: ${{ secrets.DAVID_EMAIL }}
       CC: ccache gcc
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CXX: ccache g++

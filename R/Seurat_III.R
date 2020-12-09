@@ -92,7 +92,7 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
   return(ret)
 }
 
-#' @title Create a Seurat 3 object
+#' @title Wrapper around Seurat::CreateSeuratObject
 #'
 #' @description Create Seurat object from count data (usually from Read10X()). This also sets pct.mito.
 #' @param seuratData, Seurat input data, usually from Read10X().
@@ -101,6 +101,7 @@ GetGeneIds <- function(seuratObj, geneNames, throwIfGenesNotFound = TRUE) {
 #' @param minCells, Include features detected in at least this many cells.
 #' @param mitoGenesPattern The expression to use when identfying mitochondrial genes
 #' @return A Seurat object with p.mito calculated.
+#' @export
 #' @keywords CreateSeuratObj
 #' @importFrom Matrix colSums
 CreateSeuratObj <- function(seuratData = NA, project = NA, minFeatures = 25, minCells = 0, mitoGenesPattern = "^MT-", gtfFile = NA){
