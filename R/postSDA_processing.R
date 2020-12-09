@@ -1,4 +1,3 @@
-
 #' @title RecreateSeuratObjFromSDAmatrix
 #' @param cellnames cell names
 #' @param recomposedMat recomposed matrix
@@ -105,21 +104,22 @@ RecreateSeuratObjFromSDAmatrix <- function(cellnames = NULL, recomposedMat = NUL
 #' @param saveFile If provided, the seurat object will be saved as RDS to this location
 #' @import Seurat
 #' @export
-RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch", 
-                               metaDF = NULL, spikeGenes = NULL, nfeatures = 2000, 
+
+RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
+                               metaDF = NULL, spikeGenes = NULL, nfeatures = 2000,
                                tSNE_perplexity = 100, UMAP_MinDist = 0.5, UMAP_NumNeib = 60L, saveFile = NULL) {
-  
-  
+
+
   if(! compRemoveSet %in% c("none", "qc", "batch")) {
     warning("compRemoveSet was not correctly parameterized: choose none, qc, or batch default to batch")
     compRemoveSet = "batch"
   }
-  
+
   SDAseuratObj$Barcode <- rownames(SDAseuratObj@meta.data)
-  
-  #combine SDAseuratObj metadata and raw seurat metadata 
+
+  #combine SDAseuratObj metadata and raw seurat metadata
   if(!is.null(metaDF)){
-    if(!"Barcode" %in% colnames(metaDF)) 
+    if(!"Barcode" %in% colnames(metaDF))
       metaDF$Barcode <- rownames(metaDF)
     if("Barcode" %in% colnames(metaDF)){
       metaDF <- merge(SDAseuratObj@meta.data, metaDF, by="Barcode", all = T, suffixes = c("SDA", "Seurat"))
@@ -133,7 +133,7 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
   } else {
     metaDF <- SDAseuratObj@meta.data
   }
-  
+
   #keep only passing componenets or all componenets
   if(compRemoveSet == "none") {
     compsToKeep <- 1:ncol(SDAseuratObj@reductions$SDA@cell.embeddings)
@@ -146,20 +146,18 @@ RecomposeSDAmatrix <- function(SDAseuratObj = NULL, compRemoveSet = "batch",
       }
     }
   }
-    
-    
-  
+
   #do dot product of cell embeddings and gene loadings to get approximate/imputed raw seurat matrix
   print("Performing dot product...")
   recomposedMat <-  t(SDAseuratObj@reductions$SDA@cell.embeddings[,compsToKeep] %*% t(SDAseuratObj@reductions$SDA@feature.loadings)[compsToKeep,])
   print("Finished dot product.")
-  
+
   if(saveFile=="" | is.null(saveFile)){ saveFile = "TempName" }
-  
+
   #create seurat object with imputed matrix and run standard seuart processes
   print("Starting RecreateSeuratObjFromSDAmatrix...")
-  imputedSeuratObj <- RecreateSeuratObjFromSDAmatrix(cellnames = colnames(recomposedMat), recomposedMat = recomposedMat,  metaDF = metaDF, 
-                                                     projectName = gsub(pattern = ".rds", replacement = "", (saveFile)), spikeGenes = spikeGenes, 
+  imputedSeuratObj <- RecreateSeuratObjFromSDAmatrix(cellnames = colnames(recomposedMat), recomposedMat = recomposedMat,  metaDF = metaDF,
+                                                     projectName = gsub(pattern = ".rds", replacement = "", (saveFile)), spikeGenes = spikeGenes,
                                                      tSNE_perplexity = tSNE_perplexity, UMAP_MinDist = UMAP_MinDist, UMAP_NumNeib = UMAP_NumNeib, nfeatures = nfeatures)
   return(imputedSeuratObj)
 }
