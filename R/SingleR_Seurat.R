@@ -204,7 +204,7 @@ DimPlot_SingleRClassLabs <- function(seuratObject, plotIndividually = F, dataset
 #' @export
 #' @import Seurat
 #' @importFrom cowplot plot_grid
-Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datasets = c('hpca')){
+Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datasets = c('hpca')) {
   for (dataset in datasets) {
     fn <- paste0(dataset, '.label')
     if (!(fn %in% colnames(seuratObject@meta.data))) {
@@ -224,7 +224,7 @@ Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datase
         ggtitle(paste0("SingleR Classification:", dataset)) +
         ylab("Number of cells"),
 
-      ggplot(reshape2::melt(table(seuratObject@meta.data[[paste0(dataset, '.label.fine')]])), aes(x=Var1, y = value, fill=Var1))  +
+      ggplot(reshape2::melt(table(seuratObject@meta.data[[paste0(dataset, '.label.fine')]])), aes(x=Var1, y = value, fill=Var1)) +
         geom_bar(stat="identity", position="dodge", width = 0.7) +
         theme_bw() +
         theme(legend.position="bottom",
@@ -235,14 +235,11 @@ Tabulate_SingleRClassLabs <- function(seuratObject, plotIndividually = F, datase
         ylab("Number of cells")
     )
 
-    if (plotIndividually){
+    if (plotIndividually) {
         plot(plots[[1]])
         plot(plots[[2]])
     } else {
         cowplot::plot_grid(plots[[1]], plots[[2]], ncol = 1)
     }
+  }
 }
-
-
-
-
