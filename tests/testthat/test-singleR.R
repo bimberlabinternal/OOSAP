@@ -30,7 +30,7 @@ test_that("SingleR works as expected", {
     }
 
     expect_equal(100, sum(seuratObj$hpca.label == 'NK_cell'))
-    expect_equal(1435, sum(seuratObj$dice.label == 'T_cells'))
+    expect_equal(1435, sum(seuratObj$hpca.label == 'T_cells'))
     expect_equal(0, sum(seuratObj$hpca.label == 'B_cell'))
     expect_equal(0, sum(seuratObj$hpca.label == 'Neutrophils'))
     expect_equal(22, sum(seuratObj$hpca.label == 'Unknown'))
