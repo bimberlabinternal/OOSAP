@@ -41,7 +41,7 @@ jobs:
 
       - name: Install packages
         run: |
-          sudo apt-get update && sudo apt-get install -yq ccache python3-pip libcurl4-openssl-dev openjdk-11-jdk
+          sudo apt-get update && sudo apt-get install -yq ccache python3-pip libcurl4-openssl-dev openjdk-11-jdk libglpk-dev libhdf5-dev
           python3 -m pip install --upgrade pip
           python3 -m pip install --user wheel setuptools
           python3 -m pip install --user umap-learn
