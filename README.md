@@ -31,11 +31,11 @@ devtools::install_github(repo = 'bimberlabinternal/OOSAP', ref = 'Dev', dependen
 ```
     
     
-Pre-packaged Docker images with all needed dependencies installed can be found on our [dockerhub repository](https://hub.docker.com/r/bimberlab/oosap): 
+Pre-packaged Docker images with all needed dependencies installed can be found on our [GitHub Packages repository](https://github.com/orgs/bimberlabinternal/packages/container/package/oosap): 
 
 ```
 
-docker pull bimberlab/oosap
+docker pull ghcr.io/bimberlabinternal/oosap:latest
 
 ```
 
@@ -43,7 +43,7 @@ docker pull bimberlab/oosap
 
 * New development should occur on a branch, and go through a Pull Request before merging into Dev.  [See here for information on the pull request workflow](https://guides.github.com/introduction/flow/).  Ideally PRs would be reviewed by another person.  For the PR, please review the set of changed files carefully to make sure you are only merging the changes you intend.   
 
-* New functions should have [Roxygen2 documentation](https://kbroman.org/pkg_primer/pages/docs.html).
+* New exported functions should have [Roxygen2 documentation](https://kbroman.org/pkg_primer/pages/docs.html).
 
 * As part of each PR, you should run 'devtools::document()' to update documentation and include these changes with your commits.
 
