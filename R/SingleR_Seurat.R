@@ -82,8 +82,13 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.', dataset, '.singleR.rds'))
       }
 
-      if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
-        print(SingleR::plotScoreHeatmap(pred.results))
+      if (showHeatmap) {
+        cells.use <- NULL
+        if (ncol(seuratObj) > maxCellsForHeatmap) {
+          cells.use <- sample(1:ncol(seuratObj), size = maxCellsForHeatmap)
+        }
+
+        print(SingleR::plotScoreHeatmap(pred.results, cells.use = cells.use))
       }
 
       if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
@@ -102,8 +107,13 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.', dataset, '.singleR.fine.rds'))
       }
 
-      if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
-        print(SingleR::plotScoreHeatmap(pred.results))
+      if (showHeatmap) {
+        cells.use <- NULL
+        if (ncol(seuratObj) > maxCellsForHeatmap) {
+          cells.use <- sample(1:ncol(seuratObj), size = maxCellsForHeatmap)
+        }
+
+        print(SingleR::plotScoreHeatmap(pred.results, cells.use = cells.use))
       }
 
       if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
