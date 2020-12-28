@@ -101,7 +101,7 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
       allFields <- c(allFields, fn)
       seuratObj[[fn]] <- toAdd
 
-      pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay)
+      pred.results <- suppressWarnings(SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay))
       pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
       if (!is.null(singlerSavePrefix)){
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.', dataset, '.singleR.fine.rds'))
