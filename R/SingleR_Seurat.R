@@ -142,7 +142,7 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
 
         print(paste0('Filtering ', label, ' below: ', minFraction))
         d <- table(Label = l)
-        print(kableExtra::kbl(d) %>% kableExtra::kable_styling())
+        print(kableExtra::kbl(d))
 
         d <- d / sum(d)
         toRemove <- names(d)[d < minFraction]
@@ -156,7 +156,7 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
         print('After filter:')
         l <- unlist(seuratObj[[label]])
         d <- table(Label = l)
-        print(kableExtra::kbl(d) %>% kableExtra::kable_styling())
+        print(kableExtra::kbl(d))
       }
     }
   }
