@@ -1,5 +1,4 @@
 #' @include LabKeySettings.R
-#' @include Seurat_III_Fixes.R
 #' @include Utils.R
 #' @import Seurat
 #' @import Rlabkey
