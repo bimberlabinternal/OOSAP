@@ -97,6 +97,12 @@ QueryAndApplyCdnaMetadata <- function(seuratObj,
   origBarcodes <- colnames(seuratObj)
   hasHTO <- !all(is.na(rows[htoLabel]))
   if (hasHTO) {
+    if (!('HTO' %in% names(seuratObj@meta.data))) {
+      print('Adding HTO columns to seurat object')
+      seuratObj$HTO <- c(NA)
+      seuratObj$HTO_Classification <- c(NA)
+    }
+
     df <- data.frame(HTO = as.character(seuratObj$HTO), BarcodePrefix = as.character(seuratObj$BarcodePrefix), Barcode = origBarcodes, SortOrder = 1:length(origBarcodes))
 
     #Allow for libraries that have a non-null HTO, but have only a single per library (which is effectively the same as not being hashed):

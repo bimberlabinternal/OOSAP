@@ -82,8 +82,13 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.', dataset, '.singleR.rds'))
       }
 
-      if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
-        print(SingleR::plotScoreHeatmap(pred.results))
+      if (showHeatmap) {
+        cells.use <- NULL
+        if (ncol(seuratObj) > maxCellsForHeatmap) {
+          cells.use <- sample(1:ncol(seuratObj), size = maxCellsForHeatmap)
+        }
+
+        print(SingleR::plotScoreHeatmap(pred.results, cells.use = cells.use))
       }
 
       if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
@@ -96,14 +101,19 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
       allFields <- c(allFields, fn)
       seuratObj[[fn]] <- toAdd
 
-      pred.results <- SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay)
+      pred.results <- suppressWarnings(SingleR::SingleR(test = sce, ref = ref, labels = ref$label.fine, method = 'single', assay.type.ref = refAssay))
       pred.results$labels[is.na(pred.results$labels)] <- 'Unknown'
       if (!is.null(singlerSavePrefix)){
         saveRDS(pred.results, file = paste0(singlerSavePrefix, '.', dataset, '.singleR.fine.rds'))
       }
 
-      if (showHeatmap && ncol(seuratObj) < maxCellsForHeatmap) {
-        print(SingleR::plotScoreHeatmap(pred.results))
+      if (showHeatmap) {
+        cells.use <- NULL
+        if (ncol(seuratObj) > maxCellsForHeatmap) {
+          cells.use <- sample(1:ncol(seuratObj), size = maxCellsForHeatmap)
+        }
+
+        print(SingleR::plotScoreHeatmap(pred.results, cells.use = cells.use))
       }
 
       if (sum(colnames(seuratObj) != rownames(pred.results)) > 0) {
@@ -132,7 +142,7 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
 
         print(paste0('Filtering ', label, ' below: ', minFraction))
         d <- table(Label = l)
-        print(kableExtra::kbl(d) %>% kableExtra::kable_styling())
+        print(kableExtra::kbl(d))
 
         d <- d / sum(d)
         toRemove <- names(d)[d < minFraction]
@@ -146,7 +156,7 @@ RunSingleR <- function(seuratObj = NULL, datasets = c('hpca', 'blueprint', 'dice
         print('After filter:')
         l <- unlist(seuratObj[[label]])
         d <- table(Label = l)
-        print(kableExtra::kbl(d) %>% kableExtra::kable_styling())
+        print(kableExtra::kbl(d))
       }
     }
   }
