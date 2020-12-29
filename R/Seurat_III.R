@@ -1603,7 +1603,7 @@ PlotImmuneMarkers <- function(seuratObj, reductions = c('tsne', 'umap')) {
   PlotMarkerSet(seuratObj, reductions, 'Signaling', c('HCST', 'TYROBP', 'SYK', 'ZAP70'))
 
   #LILR/KIR:
-  PlotMarkerSeries(seuratObj, reductions, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), )
+  PlotMarkerSeries(seuratObj, reductions, c('LILRA5','LILRA6','LILRB4','LILRB5','KIR2DL4','KIR3DX1', 'MAMU-KIR', 'KIR2DL4', 'KIR3DL2'), 'LILR/KIR')
 
   PlotMarkerSeries(seuratObj, reductions, c('FCGR1A','FCGR2A','FCGR2B','FCGR3'), 'FCGR')
 
