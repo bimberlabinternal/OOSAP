@@ -25,7 +25,8 @@ ProcessSeurat1(
   useSCTransform = F,
   mean.cutoff = c(0.0125, 3),
   dispersion.cutoff = c(0.5, Inf),
-  spikeGenes = NULL
+  spikeGenes = NULL,
+  excludedGenes = NULL
 )
 }
 \arguments{
@@ -70,6 +71,8 @@ ProcessSeurat1(
 \item{dispersion.cutoff}{Passed directly to FindVariableFeatures}
 
 \item{spikeGenes}{If provided these will be appended to the set of VariableFeatures}
+
+\item{excludedGenes}{If provided these will be removed from the set of VariableFeatures}
 }
 \value{
 A modified Seurat object.
