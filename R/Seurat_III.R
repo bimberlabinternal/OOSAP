@@ -1717,3 +1717,19 @@ PlotMarkerSet <- function(seuratObj, reductions, title, features) {
   }
 }
 
+#' @title ReduceSerObj_HTO
+#'
+#' @description Generate a labeled FeaturePlot for the provided markers
+#' @param so The seurat object
+#' @param htoToRemove A vector of HTO types to remove.
+ReduceSerObj_HTO <- function(so, htoToRemove = c("Discordant", "Doublet", "ND")){
+  if (sum(htoToRemove %in% so$HTO) == 0) {
+    print("The blacklist HTOs are not present in the seurat object, returning original object")
+    return(so)
+  } 
+	
+  keepHTOs <- setdiff(unique(so$HTO), removeHTOs)
+  print(paste0("HTOs to keep: ", paste0(keepHTOs, collapse = ',')))
+  
+  return(subset(so, HTO %in% keepHTOs))
+}
