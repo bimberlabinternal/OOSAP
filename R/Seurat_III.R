@@ -618,6 +618,7 @@ CheckDuplicatedCellNames <- function(object.list, stop = TRUE){
 #' @param dispersion.cutoff Passed directly to FindVariableFeatures
 #' @param mean.cutoff Passed directly to FindVariableFeatures
 #' @param spikeGenes If provided these will be appended to the set of VariableFeatures
+#' @param excludedGenes If provided these will be removed from the set of VariableFeatures
 #' @param printDefaultPlots If true, the default set of QC plots will be printed
 #' @param npcs Number of PCs to use for RunPCA()
 #' @param ccPcaResultFile If provided, the PCA results from cell cycle regression will be written here
@@ -630,7 +631,7 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
                             nVariableFeatures = 2000, printDefaultPlots = T,
                             npcs = 50, ccPcaResultFile = NULL, useSCTransform = F, 
                             mean.cutoff = c(0.0125, 3), dispersion.cutoff = c(0.5, Inf), 
-                            spikeGenes = NULL){
+                            spikeGenes = NULL, excludedGenes = NULL, verbose = FALSE){
 
 	if (!forceReCalc && HasStepRun(seuratObj, 'ProcessSeurat1', forceReCalc = forceReCalc)) {
     if (printDefaultPlots){
@@ -693,10 +694,31 @@ ProcessSeurat1 <- function(seuratObj, saveFile = NULL, doCellCycle = T, doCellFi
   }
   
   if (!all(is.null(spikeGenes))){
+		missing <- spikeGenes[!(spikeGenes %in% rownames(seuratObj))]
+		if (length(missing) > 0) {
+			print(paste0("The following ", length(missing)," spikeGenes were found not in the seurat object: ", paste0(missing, collapse = ", ")))
+			spikeGenes <- spikeGenes[(spikeGenes %in% rownames(seuratObj))]
+		}
+
     VariableFeatures(seuratObj) <- unique(c(VariableFeatures(seuratObj), spikeGenes))
   }
 
+	if (!all(is.null(excludedGenes))) {
+		missing <- excludedGenes[!(excludedGenes %in% rownames(seuratObj))]
+		if (length(missing) > 0) {
+			print(paste0("The following ", length(missing)," excludedGenes were not found in the seurat object: ", paste0(missing, collapse = ", ")))
+			excludedGenes <- excludedGenes[(excludedGenes %in% rownames(seuratObj))]
+		}
+
+		VariableFeatures(seuratObj) <- setdiff(VariableFeatures(seuratObj), excludedGenes)
+	}
+
   vg <- VariableFeatures(object = seuratObj)
+
+	if (verbose) {
+		print("Final Variable Genes:")
+		print(paste(gtools::mixedsort(vg), collapse = ", "))
+	}
   
   if (forceReCalc | !HasStepRun(seuratObj, 'RunPCA', forceReCalc = forceReCalc)) {
     seuratObj <- RunPCA(object = seuratObj, features = vg, verbose = F, npcs = npcs)
@@ -929,7 +951,7 @@ FindClustersAndDimRedux <- function(seuratObj, dimsToUse = NULL, saveFile = NULL
   if (forceReCalc | !HasStepRun(seuratObj, 'FindClusters', forceReCalc = forceReCalc)) {
     for (resolution in clusterResSet){
       seuratObj <- FindClusters(object = seuratObj, resolution = resolution)
-      seuratObj[[paste0("ClusterNames_", resolution)]] <- Idents(object = seuratObj, verbose = F)
+      seuratObj[[paste0("ClusterNames_", resolution)]] <- Idents(object = seuratObj)
       seuratObj <- MarkStepRun(seuratObj, 'FindClusters', saveFile)
     }
   }
