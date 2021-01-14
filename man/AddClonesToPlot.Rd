@@ -16,7 +16,7 @@ AddClonesToPlot(
 \arguments{
 \item{seuratObj}{The seurat object}
 
-\item{The}{plot object, such as the result from FeaturePlot()}
+\item{plot}{The plot object, such as the result from FeaturePlot()}
 }
 \description{
 Can be used to highlight a set of cells from a seurat plot, such as overlaying specific clonotypes
