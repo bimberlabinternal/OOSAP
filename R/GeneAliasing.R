@@ -82,7 +82,7 @@
 #' @param ensemblMirror Passed directly to biomaRt::useEnsembl
 #' @param biomart Passed directly to biomaRt::useEnsembl
 #' @importFrom biomaRt useEnsembl getBM
-#' @importFrom dplyr %>% group_by summarize mutate_all coalesce
+#' @importFrom dplyr %>% group_by summarize mutate coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
@@ -190,7 +190,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 	})
 
 	#Drop duplicates.  Note: could consider group_concat on variables?
-	ensemblResults <- ensemblResults %>% group_by_at(queryField) %>% mutate(total = dplyr::n())
+	ensemblResults <- ensemblResults %>% group_by_at(queryField) %>% dplyr::mutate(total = dplyr::n())
 	ensemblResults <- ensemblResults[ensemblResults$total == 1,]
 	ensemblResults <- ensemblResults[names(ensemblResults) != 'total']
 
@@ -206,7 +206,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 #' @param speciesId Species ID. see Stringdb reference for list of avialable species
 #' @param replaceUnmatched Logical. If TRUE, removes NA's and replaces with inputs
 #' @import STRINGdb 
-#' @importFrom dplyr %>% group_by summarize mutate_all coalesce
+#' @importFrom dplyr %>% group_by summarize mutate coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
@@ -258,7 +258,7 @@ TranslateToStringDb <- function(ensemblIds = NULL, geneSymbols = NULL, speciesId
 #' @param geneSymbols A vector of gene symbols
 #' @param email email account registered with DAVIDWebService 
 #' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
-#' @importFrom dplyr %>% group_by summarize mutate_all coalesce
+#' @importFrom dplyr %>% group_by summarize mutate coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames
@@ -313,7 +313,7 @@ TranslateToDAVID <- function(ensemblIds = NULL, geneSymbols = NULL, email){
 #' @importFrom biomaRt useEnsembl getBM
 #' @import STRINGdb
 #' @rawNamespace import(RDAVIDWebService, except = c('counts', 'cluster'))
-#' @importFrom dplyr %>% group_by summarize mutate_all coalesce
+#' @importFrom dplyr %>% group_by summarize mutate coalesce
 #' @importFrom BiocGenerics order
 #' @importFrom stringr str_match
 #' @importFrom stats setNames

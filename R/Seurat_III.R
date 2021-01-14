@@ -1478,7 +1478,7 @@ GetXYDataFromPlot <- function(plot, cellNames) {
 #' @title AddClonesToPlot
 #' @description Can be used to highlight a set of cells from a seurat plot, such as overlaying specific clonotypes
 #' @param seuratObj The seurat object
-#' @param The plot object, such as the result from FeaturePlot()
+#' @param plot The plot object, such as the result from FeaturePlot()
 # '@param fieldName The name of the field on the seurat object holding cloneName
 # '@param colorField If provided, this field will be used
 # '@param dotColor
@@ -1494,15 +1494,22 @@ AddClonesToPlot <- function(seuratObj, plot, fieldName = 'CloneNames', colorFiel
 	plot.data$CloneName <- naturalsort::naturalfactor(seuratObj[[fieldName]][sel])
 	if (!is.na(colorField)) {
 		plot.data$CloneColor <- naturalsort::naturalfactor(seuratObj[[colorField]][sel])
-	}
 
-	plot <- plot + geom_point(
-	mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName', color = 'CloneColor'),
-	data = plot.data,
-	size = pt.size,
-	inherit.aes = F,
-	color = dotColor
-	)
+		plot <- plot + geom_point(
+			mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName', color = 'CloneColor'),
+			data = plot.data,
+			size = pt.size,
+			inherit.aes = F
+		)
+	} else {
+		plot <- plot + geom_point(
+			mapping = aes_string(x = 'x', y = 'y', shape = 'CloneName'),
+			data = plot.data,
+			size = pt.size,
+			inherit.aes = F,
+			color = dotColor
+		)
+	}
 
 	return(plot)
 }
