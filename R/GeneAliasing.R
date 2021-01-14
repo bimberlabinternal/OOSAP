@@ -190,7 +190,7 @@ TranslateToEnsembl <- function(ensemblIds = NULL, geneSymbols = NULL, dataset = 
 	})
 
 	#Drop duplicates.  Note: could consider group_concat on variables?
-	ensemblResults <- ensemblResults %>% group_by_at(queryField) %>% dplyr::mutate(total = dplyr::n())
+	ensemblResults <- ensemblResults %>% dplyr::group_by_at(queryField) %>% dplyr::mutate(total = dplyr::n())
 	ensemblResults <- ensemblResults[ensemblResults$total == 1,]
 	ensemblResults <- ensemblResults[names(ensemblResults) != 'total']
 
